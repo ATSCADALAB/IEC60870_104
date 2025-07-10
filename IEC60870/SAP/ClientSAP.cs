@@ -1,4 +1,6 @@
 ﻿using IEC60870.Connections;
+using IEC60870.Enum;
+using IEC60870.IE;
 using IEC60870.Object;
 using System;
 using System.IO;
@@ -149,6 +151,40 @@ namespace IEC60870.SAP
             }
 
             _settings.MaxUnconfirmedIPdusReceived = maxNum;
+        }
+        public void SingleCommand(int commonAddress, int informationObjectAddress, IeSingleCommand singleCommand)
+        {
+            _connection?.SingleCommand(commonAddress, informationObjectAddress, singleCommand);
+        }
+
+        public void DoubleCommand(int commonAddress, CauseOfTransmission cot, int informationObjectAddress, IeDoubleCommand doubleCommand)
+        {
+            _connection?.DoubleCommand(commonAddress, cot, informationObjectAddress, doubleCommand);
+        }
+
+        public void Interrogation(int commonAddress, CauseOfTransmission cot, IeQualifierOfInterrogation qualifier)
+        {
+            _connection?.Interrogation(commonAddress, cot, qualifier);
+        }
+
+        public void TestCommand(int commonAddress)
+        {
+            _connection?.TestCommand(commonAddress);
+        }
+
+        public void SynchronizeClocks(int commonAddress, IeTime56 time)
+        {
+            _connection?.SynchronizeClocks(commonAddress, time);
+        }
+
+        public void CounterInterrogation(int commonAddress, CauseOfTransmission cot, IeQualifierOfCounterInterrogation qualifier)
+        {
+            _connection?.CounterInterrogation(commonAddress, cot, qualifier);
+        }
+
+        public void SetOriginatorAddress(int address)
+        {
+            _connection?.SetOriginatorAddress(address);
         }
     }
 }

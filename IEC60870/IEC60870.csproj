@@ -31,8 +31,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ATDriverInterface">
+      <HintPath>C:\Program Files\ATPro\ATDriverServer\ATDriverInterface.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -41,12 +46,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AddressParser.cs" />
+    <Compile Include="ATDriver.cs" />
+    <Compile Include="BlockReader.cs" />
+    <Compile Include="ClientAdapter.cs" />
     <Compile Include="Connections\Connection.cs" />
     <Compile Include="Connections\ConnectionEventListener.cs" />
     <Compile Include="Connections\ConnectionSettings.cs" />
+    <Compile Include="DataType.cs" />
+    <Compile Include="Designer\ctlChannelAddress.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Designer\ctlChannelAddress.Designer.cs">
+      <DependentUpon>ctlChannelAddress.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Designer\ctlDeviceDesign.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Designer\ctlDeviceDesign.Designer.cs">
+      <DependentUpon>ctlDeviceDesign.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Designer\ctlTagDesign.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Designer\ctlTagDesign.Designer.cs">
+      <DependentUpon>ctlTagDesign.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DeviceReader.cs" />
+    <Compile Include="DeviceSettings.cs" />
     <Compile Include="Enum\CauseOfTransmission.cs" />
     <Compile Include="Enum\Description.cs" />
     <Compile Include="Enum\TypeId.cs" />
+    <Compile Include="IEC60870Client.cs" />
     <Compile Include="IE\IeProtectionQuality.cs" />
     <Compile Include="IE\IeBinaryStateInformation.cs" />
     <Compile Include="IE\Base\IeAbstractQualifierOfCommand.cs" />
@@ -90,6 +121,7 @@
     <Compile Include="IE\IeTime16.cs" />
     <Compile Include="IE\IeTime56.cs" />
     <Compile Include="IE\IeValueWithTransientState.cs" />
+    <Compile Include="IOAddress.cs" />
     <Compile Include="Object\APdu.cs" />
     <Compile Include="Object\ASdu.cs" />
     <Compile Include="Object\InformationObject.cs" />

@@ -21,7 +21,7 @@ namespace TestApp
                 client.NewASdu += asdu =>
                 {
                     Console.WriteLine(asdu);
-                    client.SendASdu(asdu);
+                    client.TestCommand(1);
                 };
 
                 client.ConnectionClosed += Console.WriteLine;

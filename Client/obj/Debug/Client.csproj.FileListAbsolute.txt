@@ -1,0 +1,10 @@
+E:\ProjectForCustomers\2025\T07\IEC60870\Client\obj\Debug\Client.csproj.AssemblyReference.cache
+E:\ProjectForCustomers\2025\T07\IEC60870\Client\obj\Debug\Client.csproj.CoreCompileInputs.cache
+E:\ProjectForCustomers\2025\T07\IEC60870\Client\bin\Debug\Client.exe.config
+E:\ProjectForCustomers\2025\T07\IEC60870\Client\bin\Debug\Client.exe
+E:\ProjectForCustomers\2025\T07\IEC60870\Client\bin\Debug\Client.pdb
+E:\ProjectForCustomers\2025\T07\IEC60870\Client\bin\Debug\IEC60870.dll
+E:\ProjectForCustomers\2025\T07\IEC60870\Client\bin\Debug\IEC60870.pdb
+E:\ProjectForCustomers\2025\T07\IEC60870\Client\obj\Debug\Client.csproj.CopyComplete
+E:\ProjectForCustomers\2025\T07\IEC60870\Client\obj\Debug\Client.exe
+E:\ProjectForCustomers\2025\T07\IEC60870\Client\obj\Debug\Client.pdb
