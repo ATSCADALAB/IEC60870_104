@@ -56,7 +56,7 @@ namespace IEC60870Driver
                 clientAdapter.Client.SendInterrogation(commonAddress);
 
                 // Wait a bit for response
-                Thread.Sleep(100);
+                Thread.Sleep(1000);
 
                 // Get values from client buffer
                 for (int ioa = From; ioa <= To; ioa++)

@@ -2,6 +2,7 @@
 using System.Threading;
 using IEC60870.SAP;
 using IEC60870.Object;
+using IEC60870.Enum;
 
 namespace IEC60870Driver
 {
@@ -132,35 +133,75 @@ namespace IEC60870Driver
         public bool Read(int commonAddress, IOAddress ioAddress, out object value)
         {
             value = null;
-            if (!CheckConnection()) return false;
 
-            int errorCode;
+            if (!CheckConnection())
+            {
+                return false;
+            }
+
             for (int i = 0; i < MaxTryRead; i++)
             {
                 lock (this.keyLock)
                 {
                     try
                     {
-                        // Send interrogation command to get data
-                        Client.SendInterrogation(commonAddress, ioAddress.InformationObjectAddress);
+                        // Send General Interrogation (không gửi cho specific IOA)
+                        Client.SendInterrogation(commonAddress, 0);
 
-                        // Wait for response and get value
-                        if (Client.GetValue(ioAddress.InformationObjectAddress, out value))
+                        // Đợi response đầy đủ
+                        Thread.Sleep(2000); // Tăng lên 2 giây
+
+                        // Kiểm tra buffer nhiều lần
+                        for (int retry = 0; retry < 10; retry++)
+                        {
+                            if (Client.GetValue(ioAddress.InformationObjectAddress, out value))
+                            {
+                                return true;
+                            }
+                            Thread.Sleep(200); // Đợi thêm 200ms mỗi lần retry
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                }
+                Thread.Sleep(500); // Đợi trước khi thử lại
+            }
+
+            return false;
+        }
+        public bool ReadSmart(int commonAddress, int ioa, out object value, out TypeId detectedTypeId)
+        {
+            value = null;
+            detectedTypeId = default(TypeId);
+
+            if (!CheckConnection()) return false;
+
+            for (int i = 0; i < MaxTryRead; i++)
+            {
+                lock (this.keyLock)
+                {
+                    try
+                    {
+                        Client.SendInterrogation(commonAddress, 0);
+                        Thread.Sleep(2000);
+
+                        // ✅ ĐÚNG: out TypeId (không nullable)
+                        if (Client.GetValueSmart(ioa, out value, out detectedTypeId))
                         {
                             return true;
                         }
                     }
                     catch (Exception ex)
                     {
-                        // Log error or handle appropriately
-                        errorCode = -1;
+                        Console.WriteLine($"[ERROR] ReadSmart attempt {i + 1} failed: {ex.Message}");
                     }
                 }
-                Thread.Sleep(15);
+                Thread.Sleep(500);
             }
             return false;
         }
-
         public bool Write(int commonAddress, IOAddress ioAddress, string value)
         {
             if (!CheckConnection()) return false;

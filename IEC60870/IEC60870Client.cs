@@ -6,6 +6,7 @@ using IEC60870.Object;
 using IEC60870.Enum;
 using IEC60870.IE;
 using IEC60870.IE.Base;
+using System.Threading.Tasks;
 
 namespace IEC60870Driver
 {
@@ -18,7 +19,7 @@ namespace IEC60870Driver
         private readonly object lockObject = new object();
         private bool isConnected = false;
         private readonly AutoResetEvent responseReceived = new AutoResetEvent(false);
-
+        private readonly Dictionary<int, TypeId> ioaTypeMapping = new Dictionary<int, TypeId>();
         #endregion
 
         #region PROPERTIES
@@ -50,6 +51,17 @@ namespace IEC60870Driver
 
                 clientSAP = new ClientSAP(IpAddress, Port);
 
+                // THÊM: Set connection parameters
+                clientSAP.SetCotFieldLength(2);           // Cot field length = 2
+                clientSAP.SetCommonAddressFieldLength(2); // CA field length = 2  
+                clientSAP.SetIoaFieldLength(3);           // IOA field length = 3 for IOA 16385
+                clientSAP.SetOriginatorAddress(OriginatorAddress);
+
+                // Set timeouts
+                clientSAP.SetMaxTimeNoAckReceived(15000);
+                clientSAP.SetMaxTimeNoAckSent(10000);
+                clientSAP.SetMaxIdleTime(20000);
+
                 // Setup event handlers
                 clientSAP.NewASdu += OnNewASdu;
                 clientSAP.ConnectionClosed += OnConnectionClosed;
@@ -57,10 +69,9 @@ namespace IEC60870Driver
                 // Connect to server
                 clientSAP.Connect();
                 isConnected = true;
-
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 isConnected = false;
                 return false;
@@ -100,13 +111,79 @@ namespace IEC60870Driver
         private void OnConnectionClosed(Exception exception)
         {
             isConnected = false;
-            // Log connection closed
+            // Trigger reconnection sau một khoảng thời gian
+            Task.Delay(5000).ContinueWith(t => TryReconnect());
+        }
+        public bool GetValueSmart(int ioa, out object value, out TypeId detectedTypeId)
+        {
+            lock (dataBufferLock)
+            {
+                if (ioaTypeMapping.ContainsKey(ioa) && dataBuffer.ContainsKey(ioa))
+                {
+                    detectedTypeId = ioaTypeMapping[ioa];
+                    value = dataBuffer[ioa];
+                    return true;
+                }
+                else
+                {
+                    detectedTypeId = default(TypeId); // TypeId.M_SP_NA_1 (giá trị đầu tiên trong enum)
+                    value = null;
+                    return false;
+                }
+            }
+        }
+        private void TryReconnect()
+        {
+            if (!isConnected)
+            {
+                Connect();
+            }
         }
 
+        private readonly object dataBufferLock = new object(); // THÊM FIELD
+
+        //private void ProcessASdu(ASdu asdu)
+        //{
+        //    try
+        //    {
+        //        Console.WriteLine($"[DEBUG] Processing ASDU: {asdu.GetTypeIdentification()}, COT: {asdu.GetCauseOfTransmission()}");
+
+        //        var informationObjects = asdu.GetInformationObjects();
+
+        //        foreach (var informationObject in informationObjects)
+        //        {
+        //            var ioa = informationObject.GetInformationObjectAddress();
+        //            var elements = informationObject.GetInformationElements();
+
+        //            Console.WriteLine($"[DEBUG] Processing IOA: {ioa}");
+
+        //            if (elements != null && elements.Length > 0 && elements[0] != null && elements[0].Length > 0)
+        //            {
+        //                var element = elements[0][0];
+        //                var typeId = asdu.GetTypeIdentification(); // SỬA: GetTypeId() → GetTypeIdentification()
+
+        //                object extractedValue = ExtractValueSafely(element, typeId);
+        //                if (extractedValue != null)
+        //                {
+        //                    lock (dataBufferLock) // THÊM THREAD SAFETY
+        //                    {
+        //                        dataBuffer[ioa] = extractedValue;
+        //                        Console.WriteLine($"[DEBUG] Stored IOA {ioa}: {extractedValue}");
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"[ERROR] ProcessASdu failed: {ex.Message}");
+        //    }
+        //}
         private void ProcessASdu(ASdu asdu)
         {
             try
             {
+                var typeId = asdu.GetTypeIdentification();
                 var informationObjects = asdu.GetInformationObjects();
 
                 foreach (var informationObject in informationObjects)
@@ -116,75 +193,80 @@ namespace IEC60870Driver
 
                     if (elements != null && elements.Length > 0 && elements[0] != null && elements[0].Length > 0)
                     {
-                        var element = elements[0][0]; // First element of first array
-                        var typeId = asdu.GetTypeId();
-
-                        // Extract value based on type - using safe approach
+                        var element = elements[0][0];
                         object extractedValue = ExtractValueSafely(element, typeId);
+
                         if (extractedValue != null)
                         {
-                            dataBuffer[ioa] = extractedValue;
+                            lock (dataBufferLock)
+                            {
+                                dataBuffer[ioa] = extractedValue;
+                                ioaTypeMapping[ioa] = typeId; // ✅ LƯU MAPPING
+                            }
                         }
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log processing error
+                Console.WriteLine($"[ERROR] ProcessASdu failed: {ex.Message}");
             }
         }
-
         private object ExtractValueSafely(InformationElement element, TypeId typeId)
         {
             try
             {
-                // Use reflection or type checking to safely extract values
-                // This approach is safer and will work regardless of exact class names
 
                 switch (typeId)
                 {
                     case TypeId.M_SP_NA_1: // Single point information
-                        // Try to get boolean value from single point information
-                        if (element != null)
+                        if (element is IeSinglePointWithQuality singlePoint)
                         {
-                            var elementType = element.GetType();
-                            var isOnMethod = elementType.GetMethod("IsOn");
-                            if (isOnMethod != null)
-                                return (bool)isOnMethod.Invoke(element, null);
+                            var value = singlePoint.IsOn();
+                            return value;
                         }
                         break;
 
-                    case TypeId.M_ME_NA_1: // Measured value, normalized value
-                        if (element != null && element.GetType().Name.Contains("Normalized"))
+                    case TypeId.M_ME_NA_1: // Normalized value
+                        if (element is IeNormalizedValue normalizedValue)
                         {
-                            var elementType = element.GetType();
-                            var getValueMethod = elementType.GetMethod("GetValue");
-                            if (getValueMethod != null)
-                                return getValueMethod.Invoke(element, null);
+                            var value = normalizedValue.GetValue();
+                            return value;
                         }
                         break;
 
-                    case TypeId.M_ME_NC_1: // Measured value, short floating point
-                        if (element != null && element.GetType().Name.Contains("Float"))
+                    case TypeId.M_ME_NC_1: // Short Float - THÊM MỚI
+                        if (element is IeShortFloat shortFloat)
                         {
-                            var elementType = element.GetType();
-                            var getFloatMethod = elementType.GetMethod("GetFloat");
-                            if (getFloatMethod != null)
-                                return (float)getFloatMethod.Invoke(element, null);
+                            var value = shortFloat.GetValue();
+                            return value;
                         }
                         break;
 
-                    default:
-                        return element?.ToString();
+                    case TypeId.M_DP_NA_1: // Double point
+                        if (element is IeDoublePointWithQuality doublePoint)
+                        {
+                            var value = doublePoint.GetDoublePointInformation();
+                            return value;
+                        }
+                        break;
+
+                    case TypeId.M_ME_NB_1: // Scaled Value - THÊM MỚI
+                        if (element is IeScaledValue scaledValue)
+                        {
+                            var value = scaledValue.GetValue();
+
+                            return value;
+                        }
+                        break;
                 }
-            }
-            catch
-            {
-                // If extraction fails, return string representation
+
                 return element?.ToString();
             }
-
-            return null;
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
 
         #endregion
@@ -197,25 +279,18 @@ namespace IEC60870Driver
             {
                 if (!IsConnected) return;
 
-                // Create interrogation qualifier
+                // Use built-in method from ClientSAP
                 var qualifier = new IeQualifierOfInterrogation(20);
-
-                // Create and send interrogation command
-                var asdu = new ASdu(TypeId.C_IC_NA_1, false, CauseOfTransmission.ACTIVATION,
-                    false, false, OriginatorAddress, commonAddress,
-                    new[] { new InformationObject(ioa, new[] { new InformationElement[] { qualifier } }) });
-
-                clientSAP.SendASdu(asdu);
+                clientSAP.Interrogation(commonAddress, CauseOfTransmission.ACTIVATION, qualifier);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Log error
             }
         }
 
         public bool GetValue(int ioa, out object value)
         {
-            lock (lockObject)
+            lock (dataBufferLock) // THÊM THREAD SAFETY
             {
                 return dataBuffer.TryGetValue(ioa, out value);
             }

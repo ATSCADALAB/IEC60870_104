@@ -20,12 +20,10 @@ namespace IEC60870Driver
         {
             try
             {
-                // Format: "IP|Port|CommonAddress|OriginatorAddress|CotFieldLength|CAFieldLength|IOAFieldLength|MaxReadTimes|BlockSettings"
-                // Example: "127.0.0.1|2404|1|0|1|1|2|1|M_SP_NA_1-1-100/M_ME_NA_1-101-200"
                 var parts = deviceID.Split('|');
                 if (parts.Length < 7) return null;
 
-                return new DeviceSettings
+                var settings = new DeviceSettings
                 {
                     IpAddress = parts[0],
                     Port = int.Parse(parts[1]),
@@ -37,8 +35,10 @@ namespace IEC60870Driver
                     MaxReadTimes = parts.Length > 7 ? int.Parse(parts[7]) : 1,
                     BlockSettings = parts.Length > 8 ? parts[8] : ""
                 };
+
+                return settings;
             }
-            catch
+            catch (Exception ex)
             {
                 return null;
             }

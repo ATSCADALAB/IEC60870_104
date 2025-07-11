@@ -1,169 +1,68 @@
 ﻿using System;
-using System.Threading;
-using IEC60870.Enum;
-using IEC60870.IE;
-using IEC60870.IE.Base;
-using IEC60870.Object;
-using IEC60870.SAP;
+using ATDriver_Server;
+using IEC60870Driver;
 
-namespace TestApp
+class OptimalWriteUsage
 {
-    internal class Program
+    static void Main()
     {
-        private static bool readCommandWorked = false;
-        private static bool generalInterrogationWorked = false;
+        var driver = new ATDriver();
 
-        private static void Main()
+        try
         {
-            Console.WriteLine("Testing Read Command Support for IOA 16385");
-            Console.WriteLine("==========================================");
+            driver.DeviceID = "192.168.1.51|2404|1|0|2|2|3";
 
-            try
+            Console.WriteLine("Optimal Write Performance Test");
+            Console.WriteLine("============================");
+
+            while (true)
             {
-                var client = new ClientSAP("192.168.1.39", 2404);
+                Console.Write("\nEnter value (0 or 1, 'q' to quit): ");
+                string input = Console.ReadLine();
 
-                client.SetIoaFieldLength(3);
-                client.SetCotFieldLength(2);
-                client.SetCommonAddressFieldLength(2);
+                if (input?.ToLower() == "q") break;
 
-                client.NewASdu += asdu =>
+                if (input == "0" || input == "1")
                 {
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Received: {asdu.GetTypeIdentification()}");
+                    Console.WriteLine($"Writing {input} to IOA 24577...");
 
-                    // Kiểm tra response cho Read Command
-                    if (asdu.GetCauseOfTransmission() == CauseOfTransmission.REQUEST &&
-                        asdu.GetTypeIdentification() != TypeId.C_RD_NA_1)
+                    var startTime = DateTime.Now;
+
+                    var sendPack = new SendPack()
                     {
-                        var ios = asdu.GetInformationObjects();
-                        if (ios != null)
-                        {
-                            foreach (var io in ios)
-                            {
-                                if (io.GetInformationObjectAddress() == 16385)
-                                {
-                                    Console.WriteLine("✓ READ COMMAND WORKED!");
-                                    Console.WriteLine($"   Value: {GetValueFromIO(io)}");
-                                    readCommandWorked = true;
-                                    return;
-                                }
-                            }
-                        }
-                    }
+                        ChannelAddress = driver.ChannelAddress,
+                        DeviceID = driver.DeviceID,
+                        TagAddress = "24577",
+                        TagType = "Bool",  // ✅ XÁC ĐỊNH RÕ - NHANH NHẤT
+                        Value = input
+                    };
 
-                    // Kiểm tra response cho General Interrogation
-                    if (asdu.GetCauseOfTransmission() == CauseOfTransmission.INTERROGATED_BY_STATION)
+                    string result = driver.Write(sendPack);
+
+                    var duration = DateTime.Now - startTime;
+
+                    if (result == "Good")
                     {
-                        var ios = asdu.GetInformationObjects();
-                        if (ios != null)
-                        {
-                            foreach (var io in ios)
-                            {
-                                if (io.GetInformationObjectAddress() == 16385)
-                                {
-                                    Console.WriteLine("✓ GENERAL INTERROGATION WORKED!");
-                                    Console.WriteLine($"   Value: {GetValueFromIO(io)}");
-                                    generalInterrogationWorked = true;
-                                    return;
-                                }
-                            }
-                        }
+                        Console.WriteLine($"✅ SUCCESS in {duration.TotalMilliseconds:F0}ms");
                     }
-
-                    // Kiểm tra negative response
-                    if (asdu.IsNegativeConfirm())
+                    else
                     {
-                        Console.WriteLine("✗ NEGATIVE CONFIRM - Command rejected");
+                        Console.WriteLine($"❌ FAILED in {duration.TotalMilliseconds:F0}ms");
                     }
-                };
-
-                client.ConnectionClosed += e =>
-                {
-                    Console.WriteLine($"Connection closed: {e?.Message ?? "Normal"}");
-                };
-
-                Console.WriteLine("Connecting...");
-                client.Connect();
-                Console.WriteLine("Connected!\n");
-
-                Thread.Sleep(1000);
-
-                // TEST 1: Read Command
-                Console.WriteLine("TEST 1: Sending Read Command for IOA 16385...");
-                SendReadCommand(client, 1, 16385);
-
-                Thread.Sleep(5000); // Đợi 5 giây
-
-                if (!readCommandWorked)
-                {
-                    Console.WriteLine("✗ Read Command failed or not supported\n");
-
-                    // TEST 2: General Interrogation
-                    Console.WriteLine("TEST 2: Sending General Interrogation...");
-                    SendGeneralInterrogation(client, 1);
-
-                    Thread.Sleep(10000); // Đợi 10 giây
-                }
-
-                // Kết quả
-                Console.WriteLine("\n" + new string('=', 50));
-                Console.WriteLine("RESULTS:");
-                Console.WriteLine($"Read Command Support: {(readCommandWorked ? "YES ✓" : "NO ✗")}");
-                Console.WriteLine($"General Interrogation: {(generalInterrogationWorked ? "YES ✓" : "NO ✗")}");
-
-                if (readCommandWorked)
-                {
-                    Console.WriteLine("\n→ Device supports Read Command! You can read specific IOAs.");
-                }
-                else if (generalInterrogationWorked)
-                {
-                    Console.WriteLine("\n→ Device only supports General Interrogation.");
-                    Console.WriteLine("  You need to filter results to get specific IOA values.");
                 }
                 else
                 {
-                    Console.WriteLine("\n→ Neither method worked. Check connection/configuration.");
+                    Console.WriteLine("Invalid input!");
                 }
             }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error: {e.Message}");
-            }
-
-            Console.WriteLine("\nPress any key to exit...");
-            Console.ReadKey();
         }
-
-        static string GetValueFromIO(InformationObject io)
+        catch (Exception ex)
         {
-            var elements = io.GetInformationElements();
-            if (elements != null && elements.Length > 0 && elements[0].Length > 0)
-            {
-                return elements[0][0].ToString();
-            }
-            return "Unknown";
+            Console.WriteLine($"Error: {ex.Message}");
         }
-
-        static void SendReadCommand(ClientSAP client, int commonAddress, int informationObjectAddress)
+        finally
         {
-            var ios = new InformationObject[]
-            {
-                new InformationObject(informationObjectAddress, new InformationElement[][] { })
-            };
-            var asdu = new ASdu(TypeId.C_RD_NA_1, false,
-                CauseOfTransmission.REQUEST, false, false, 0, commonAddress, ios);
-            client.SendASdu(asdu);
-        }
-
-        static void SendGeneralInterrogation(ClientSAP client, int commonAddress)
-        {
-            var qualifier = new IeQualifierOfInterrogation(20);
-            var ios = new InformationObject[]
-            {
-                new InformationObject(0, new[] { new InformationElement[] { qualifier } })
-            };
-            var asdu = new ASdu(TypeId.C_IC_NA_1, false,
-                CauseOfTransmission.ACTIVATION, false, false, 0, commonAddress, ios);
-            client.SendASdu(asdu);
+            driver.Dispose();
         }
     }
 }
