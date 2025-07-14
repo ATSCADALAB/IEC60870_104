@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System;
+using System.Windows.Forms;
 
 namespace IEC60870Driver
 {
@@ -8,10 +9,25 @@ namespace IEC60870Driver
 
         #region PROPERTIES
 
-        public string LifeTime
+        public uint LifeTime
         {
-            get => this.txtLifetime.Text.Trim();
-            set => this.txtLifetime.Text = value;
+            get
+            {
+                if (rbPermanent.Checked) return 0;
+                return (uint)nudLifetime.Value;
+            }
+            set
+            {
+                if (value == 0)
+                {
+                    rbPermanent.Checked = true;
+                }
+                else
+                {
+                    rbCustom.Checked = true;
+                    nudLifetime.Value = Math.Min(value, nudLifetime.Maximum);
+                }
+            }
         }
 
         #endregion
@@ -21,38 +37,75 @@ namespace IEC60870Driver
             InitializeComponent();
             this.driver = driver;
 
+            // Initialize controls
+            nudLifetime.Minimum = 60;  // 1 minute minimum
+            nudLifetime.Maximum = 86400; // 24 hours maximum
+            nudLifetime.Value = 3600; // 1 hour default
+
+            // Event handlers
             KeyPress += (sender, e) => CheckKey(e.KeyChar);
             btnOK.Click += (sender, e) => UpdateChannel();
+            rbPermanent.CheckedChanged += RadioButton_CheckedChanged;
+            rbCustom.CheckedChanged += RadioButton_CheckedChanged;
+
+            // Initialize with current value
+            if (!string.IsNullOrEmpty(driver.ChannelAddress))
+            {
+                if (uint.TryParse(driver.ChannelAddress, out uint current))
+                {
+                    LifeTime = current;
+                }
+            }
+
+            UpdateControls();
+        }
+
+        private void RadioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            UpdateControls();
+        }
+
+        private void UpdateControls()
+        {
+            nudLifetime.Enabled = rbCustom.Checked;
+            lblSeconds.Enabled = rbCustom.Checked;
+
+            if (rbPermanent.Checked)
+            {
+                lblDescription.Text = "Connection will be kept alive permanently until manually disconnected.";
+            }
+            else
+            {
+                lblDescription.Text = $"Connection will be refreshed every {nudLifetime.Value} seconds to ensure reliability.";
+            }
         }
 
         private void CheckKey(char keyChar)
         {
-            if (keyChar == (char)13)
+            if (keyChar == (char)13) // Enter
             {
                 UpdateChannel();
             }
-            else if (keyChar == (char)27)
+            else if (keyChar == (char)27) // Escape
             {
-                Parent.Dispose();
+                Parent?.Dispose();
             }
         }
 
         private void UpdateChannel()
         {
-            if (!CheckChannelPropertis()) return;
-            this.driver.ChannelAddress = LifeTime;
-            Parent.Dispose();
-        }
-
-        private bool CheckChannelPropertis()
-        {
-            if (!uint.TryParse(LifeTime, out _))
+            try
             {
-                MessageBox.Show($"Connection lifetime value must be an integer greater than or equal to 0.", "ATSCADA", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
+                driver.ChannelAddress = LifeTime.ToString();
+                MessageBox.Show($"Channel settings updated successfully.\nConnection lifetime: {(LifeTime == 0 ? "Permanent" : $"{LifeTime} seconds")}",
+                    "IEC60870 Driver", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Parent?.Dispose();
             }
-
-            return true;
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error updating channel settings: {ex.Message}",
+                    "IEC60870 Driver", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

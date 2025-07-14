@@ -2,15 +2,36 @@
 {
     partial class ctlDeviceDesign
     {
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
+        private System.Windows.Forms.Label lblDeviceName;
+        private System.Windows.Forms.TextBox txtDeviceName;
+        private System.Windows.Forms.GroupBox gbConnection;
+        private System.Windows.Forms.Label lblIpAddress;
+        private System.Windows.Forms.TextBox txtIpAddress;
+        private System.Windows.Forms.Label lblPort;
+        private System.Windows.Forms.NumericUpDown nudPort;
+        private System.Windows.Forms.GroupBox gbProtocol;
+        private System.Windows.Forms.Label lblCommonAddress;
+        private System.Windows.Forms.NumericUpDown nudCommonAddress;
+        private System.Windows.Forms.Label lblOriginatorAddress;
+        private System.Windows.Forms.NumericUpDown nudOriginatorAddress;
+        private System.Windows.Forms.Label lblCotFieldLength;
+        private System.Windows.Forms.ComboBox cbxCotFieldLength;
+        private System.Windows.Forms.Label lblCaFieldLength;
+        private System.Windows.Forms.ComboBox cbxCaFieldLength;
+        private System.Windows.Forms.Label lblIoaFieldLength;
+        private System.Windows.Forms.ComboBox cbxIoaFieldLength;
+        private System.Windows.Forms.GroupBox gbAdvanced;
+        private System.Windows.Forms.Label lblMaxReadTimes;
+        private System.Windows.Forms.NumericUpDown nudMaxReadTimes;
+        private System.Windows.Forms.Label lblBlockSettings;
+        private System.Windows.Forms.ComboBox cbxBlockSettings;
+        private System.Windows.Forms.Label lblDescription;
+        private System.Windows.Forms.TextBox txtDescription;
+        private System.Windows.Forms.Button btnOk;
+        private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Button btnTest;
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -20,166 +41,390 @@
             base.Dispose(disposing);
         }
 
-        #region Component Designer generated code
-
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
+            this.lblDeviceName = new System.Windows.Forms.Label();
             this.txtDeviceName = new System.Windows.Forms.TextBox();
-            this.txtDeviceID = new System.Windows.Forms.TextBox();
+            this.gbConnection = new System.Windows.Forms.GroupBox();
+            this.lblIpAddress = new System.Windows.Forms.Label();
+            this.txtIpAddress = new System.Windows.Forms.TextBox();
+            this.lblPort = new System.Windows.Forms.Label();
+            this.nudPort = new System.Windows.Forms.NumericUpDown();
+            this.gbProtocol = new System.Windows.Forms.GroupBox();
+            this.lblCommonAddress = new System.Windows.Forms.Label();
+            this.nudCommonAddress = new System.Windows.Forms.NumericUpDown();
+            this.lblOriginatorAddress = new System.Windows.Forms.Label();
+            this.nudOriginatorAddress = new System.Windows.Forms.NumericUpDown();
+            this.lblCotFieldLength = new System.Windows.Forms.Label();
+            this.cbxCotFieldLength = new System.Windows.Forms.ComboBox();
+            this.lblCaFieldLength = new System.Windows.Forms.Label();
+            this.cbxCaFieldLength = new System.Windows.Forms.ComboBox();
+            this.lblIoaFieldLength = new System.Windows.Forms.Label();
+            this.cbxIoaFieldLength = new System.Windows.Forms.ComboBox();
+            this.gbAdvanced = new System.Windows.Forms.GroupBox();
+            this.lblMaxReadTimes = new System.Windows.Forms.Label();
+            this.nudMaxReadTimes = new System.Windows.Forms.NumericUpDown();
+            this.lblBlockSettings = new System.Windows.Forms.Label();
+            this.cbxBlockSettings = new System.Windows.Forms.ComboBox();
+            this.lblDescription = new System.Windows.Forms.Label();
             this.txtDescription = new System.Windows.Forms.TextBox();
             this.btnOk = new System.Windows.Forms.Button();
-            this.btnCheck = new System.Windows.Forms.Button();
-            this.lblDeviceName = new System.Windows.Forms.Label();
-            this.lblDeviceID = new System.Windows.Forms.Label();
-            this.lblDescription = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.lblFormat = new System.Windows.Forms.Label();
-            this.lblExample = new System.Windows.Forms.Label();
-            this.groupBox1.SuspendLayout();
+            this.btnCancel = new System.Windows.Forms.Button();
+            this.btnTest = new System.Windows.Forms.Button();
+
+            this.gbConnection.SuspendLayout();
+            this.gbProtocol.SuspendLayout();
+            this.gbAdvanced.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudPort)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCommonAddress)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudOriginatorAddress)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudMaxReadTimes)).BeginInit();
             this.SuspendLayout();
+
             // 
             // lblDeviceName
             // 
             this.lblDeviceName.AutoSize = true;
-            this.lblDeviceName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDeviceName.Location = new System.Drawing.Point(12, 14);
+            this.lblDeviceName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.lblDeviceName.Location = new System.Drawing.Point(12, 15);
             this.lblDeviceName.Name = "lblDeviceName";
             this.lblDeviceName.Size = new System.Drawing.Size(84, 13);
             this.lblDeviceName.TabIndex = 0;
             this.lblDeviceName.Text = "Device Name:";
+
             // 
             // txtDeviceName
             // 
-            this.txtDeviceName.Location = new System.Drawing.Point(12, 35);
+            this.txtDeviceName.Location = new System.Drawing.Point(15, 35);
             this.txtDeviceName.Name = "txtDeviceName";
-            this.txtDeviceName.Size = new System.Drawing.Size(300, 20);
+            this.txtDeviceName.Size = new System.Drawing.Size(250, 20);
             this.txtDeviceName.TabIndex = 1;
+
             // 
-            // lblDeviceID
+            // gbConnection
             // 
-            this.lblDeviceID.AutoSize = true;
-            this.lblDeviceID.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDeviceID.Location = new System.Drawing.Point(12, 70);
-            this.lblDeviceID.Name = "lblDeviceID";
-            this.lblDeviceID.Size = new System.Drawing.Size(70, 13);
-            this.lblDeviceID.TabIndex = 2;
-            this.lblDeviceID.Text = "Device ID:";
+            this.gbConnection.Controls.Add(this.lblIpAddress);
+            this.gbConnection.Controls.Add(this.txtIpAddress);
+            this.gbConnection.Controls.Add(this.lblPort);
+            this.gbConnection.Controls.Add(this.nudPort);
+            this.gbConnection.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.gbConnection.Location = new System.Drawing.Point(15, 70);
+            this.gbConnection.Name = "gbConnection";
+            this.gbConnection.Size = new System.Drawing.Size(380, 80);
+            this.gbConnection.TabIndex = 2;
+            this.gbConnection.TabStop = false;
+            this.gbConnection.Text = "Connection Settings";
+
             // 
-            // txtDeviceID
+            // lblIpAddress
             // 
-            this.txtDeviceID.Location = new System.Drawing.Point(12, 91);
-            this.txtDeviceID.Name = "txtDeviceID";
-            this.txtDeviceID.Size = new System.Drawing.Size(300, 20);
-            this.txtDeviceID.TabIndex = 3;
+            this.lblIpAddress.AutoSize = true;
+            this.lblIpAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblIpAddress.Location = new System.Drawing.Point(15, 25);
+            this.lblIpAddress.Name = "lblIpAddress";
+            this.lblIpAddress.Size = new System.Drawing.Size(61, 13);
+            this.lblIpAddress.TabIndex = 0;
+            this.lblIpAddress.Text = "IP Address:";
+
             // 
-            // btnCheck
+            // txtIpAddress
             // 
-            this.btnCheck.Location = new System.Drawing.Point(318, 90);
-            this.btnCheck.Name = "btnCheck";
-            this.btnCheck.Size = new System.Drawing.Size(60, 23);
-            this.btnCheck.TabIndex = 4;
-            this.btnCheck.Text = "Check";
-            this.btnCheck.UseVisualStyleBackColor = true;
+            this.txtIpAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.txtIpAddress.Location = new System.Drawing.Point(15, 45);
+            this.txtIpAddress.Name = "txtIpAddress";
+            this.txtIpAddress.Size = new System.Drawing.Size(150, 20);
+            this.txtIpAddress.TabIndex = 1;
+
             // 
-            // groupBox1
+            // lblPort
             // 
-            this.groupBox1.Controls.Add(this.lblExample);
-            this.groupBox1.Controls.Add(this.lblFormat);
-            this.groupBox1.Location = new System.Drawing.Point(12, 125);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(366, 80);
-            this.groupBox1.TabIndex = 5;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Device ID Format";
+            this.lblPort.AutoSize = true;
+            this.lblPort.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblPort.Location = new System.Drawing.Point(200, 25);
+            this.lblPort.Name = "lblPort";
+            this.lblPort.Size = new System.Drawing.Size(29, 13);
+            this.lblPort.TabIndex = 2;
+            this.lblPort.Text = "Port:";
+
             // 
-            // lblFormat
+            // nudPort
             // 
-            this.lblFormat.AutoSize = true;
-            this.lblFormat.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFormat.Location = new System.Drawing.Point(6, 20);
-            this.lblFormat.Name = "lblFormat";
-            this.lblFormat.Size = new System.Drawing.Size(343, 13);
-            this.lblFormat.TabIndex = 0;
-            this.lblFormat.Text = "IP|Port|CommonAddr|OriginatorAddr|CotLen|CALen|IOALen";
+            this.nudPort.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.nudPort.Location = new System.Drawing.Point(200, 45);
+            this.nudPort.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
+            this.nudPort.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.nudPort.Name = "nudPort";
+            this.nudPort.Size = new System.Drawing.Size(80, 20);
+            this.nudPort.TabIndex = 3;
+            this.nudPort.Value = new decimal(new int[] { 2404, 0, 0, 0 });
+
             // 
-            // lblExample
+            // gbProtocol
             // 
-            this.lblExample.AutoSize = true;
-            this.lblExample.Font = new System.Drawing.Font("Consolas", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblExample.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.lblExample.Location = new System.Drawing.Point(6, 40);
-            this.lblExample.Name = "lblExample";
-            this.lblExample.Size = new System.Drawing.Size(259, 26);
-            this.lblExample.TabIndex = 1;
-            this.lblExample.Text = "Example: 192.168.1.100|2404|1|0|1|1|2\r\nWith Blocks: ...2|1|M_SP_NA_1-1-100";
+            this.gbProtocol.Controls.Add(this.lblCommonAddress);
+            this.gbProtocol.Controls.Add(this.nudCommonAddress);
+            this.gbProtocol.Controls.Add(this.lblOriginatorAddress);
+            this.gbProtocol.Controls.Add(this.nudOriginatorAddress);
+            this.gbProtocol.Controls.Add(this.lblCotFieldLength);
+            this.gbProtocol.Controls.Add(this.cbxCotFieldLength);
+            this.gbProtocol.Controls.Add(this.lblCaFieldLength);
+            this.gbProtocol.Controls.Add(this.cbxCaFieldLength);
+            this.gbProtocol.Controls.Add(this.lblIoaFieldLength);
+            this.gbProtocol.Controls.Add(this.cbxIoaFieldLength);
+            this.gbProtocol.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.gbProtocol.Location = new System.Drawing.Point(15, 160);
+            this.gbProtocol.Name = "gbProtocol";
+            this.gbProtocol.Size = new System.Drawing.Size(380, 120);
+            this.gbProtocol.TabIndex = 3;
+            this.gbProtocol.TabStop = false;
+            this.gbProtocol.Text = "Protocol Settings";
+
+            // 
+            // lblCommonAddress
+            // 
+            this.lblCommonAddress.AutoSize = true;
+            this.lblCommonAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblCommonAddress.Location = new System.Drawing.Point(15, 25);
+            this.lblCommonAddress.Name = "lblCommonAddress";
+            this.lblCommonAddress.Size = new System.Drawing.Size(91, 13);
+            this.lblCommonAddress.TabIndex = 0;
+            this.lblCommonAddress.Text = "Common Address:";
+
+            // 
+            // nudCommonAddress
+            // 
+            this.nudCommonAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.nudCommonAddress.Location = new System.Drawing.Point(15, 45);
+            this.nudCommonAddress.Name = "nudCommonAddress";
+            this.nudCommonAddress.Size = new System.Drawing.Size(80, 20);
+            this.nudCommonAddress.TabIndex = 1;
+
+            // 
+            // lblOriginatorAddress
+            // 
+            this.lblOriginatorAddress.AutoSize = true;
+            this.lblOriginatorAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblOriginatorAddress.Location = new System.Drawing.Point(130, 25);
+            this.lblOriginatorAddress.Name = "lblOriginatorAddress";
+            this.lblOriginatorAddress.Size = new System.Drawing.Size(96, 13);
+            this.lblOriginatorAddress.TabIndex = 2;
+            this.lblOriginatorAddress.Text = "Originator Address:";
+
+            // 
+            // nudOriginatorAddress
+            // 
+            this.nudOriginatorAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.nudOriginatorAddress.Location = new System.Drawing.Point(130, 45);
+            this.nudOriginatorAddress.Name = "nudOriginatorAddress";
+            this.nudOriginatorAddress.Size = new System.Drawing.Size(80, 20);
+            this.nudOriginatorAddress.TabIndex = 3;
+
+            // 
+            // lblCotFieldLength
+            // 
+            this.lblCotFieldLength.AutoSize = true;
+            this.lblCotFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblCotFieldLength.Location = new System.Drawing.Point(15, 75);
+            this.lblCotFieldLength.Name = "lblCotFieldLength";
+            this.lblCotFieldLength.Size = new System.Drawing.Size(85, 13);
+            this.lblCotFieldLength.TabIndex = 4;
+            this.lblCotFieldLength.Text = "COT Field Length:";
+
+            // 
+            // cbxCotFieldLength
+            // 
+            this.cbxCotFieldLength.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxCotFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.cbxCotFieldLength.FormattingEnabled = true;
+            this.cbxCotFieldLength.Location = new System.Drawing.Point(15, 92);
+            this.cbxCotFieldLength.Name = "cbxCotFieldLength";
+            this.cbxCotFieldLength.Size = new System.Drawing.Size(60, 21);
+            this.cbxCotFieldLength.TabIndex = 5;
+
+            // 
+            // lblCaFieldLength
+            // 
+            this.lblCaFieldLength.AutoSize = true;
+            this.lblCaFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblCaFieldLength.Location = new System.Drawing.Point(130, 75);
+            this.lblCaFieldLength.Name = "lblCaFieldLength";
+            this.lblCaFieldLength.Size = new System.Drawing.Size(80, 13);
+            this.lblCaFieldLength.TabIndex = 6;
+            this.lblCaFieldLength.Text = "CA Field Length:";
+
+            // 
+            // cbxCaFieldLength
+            // 
+            this.cbxCaFieldLength.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxCaFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.cbxCaFieldLength.FormattingEnabled = true;
+            this.cbxCaFieldLength.Location = new System.Drawing.Point(130, 92);
+            this.cbxCaFieldLength.Name = "cbxCaFieldLength";
+            this.cbxCaFieldLength.Size = new System.Drawing.Size(60, 21);
+            this.cbxCaFieldLength.TabIndex = 7;
+
+            // 
+            // lblIoaFieldLength
+            // 
+            this.lblIoaFieldLength.AutoSize = true;
+            this.lblIoaFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblIoaFieldLength.Location = new System.Drawing.Point(245, 75);
+            this.lblIoaFieldLength.Name = "lblIoaFieldLength";
+            this.lblIoaFieldLength.Size = new System.Drawing.Size(83, 13);
+            this.lblIoaFieldLength.TabIndex = 8;
+            this.lblIoaFieldLength.Text = "IOA Field Length:";
+
+            // 
+            // cbxIoaFieldLength
+            // 
+            this.cbxIoaFieldLength.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbxIoaFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.cbxIoaFieldLength.FormattingEnabled = true;
+            this.cbxIoaFieldLength.Location = new System.Drawing.Point(245, 92);
+            this.cbxIoaFieldLength.Name = "cbxIoaFieldLength";
+            this.cbxIoaFieldLength.Size = new System.Drawing.Size(60, 21);
+            this.cbxIoaFieldLength.TabIndex = 9;
+
+            // 
+            // gbAdvanced
+            // 
+            this.gbAdvanced.Controls.Add(this.lblMaxReadTimes);
+            this.gbAdvanced.Controls.Add(this.nudMaxReadTimes);
+            this.gbAdvanced.Controls.Add(this.lblBlockSettings);
+            this.gbAdvanced.Controls.Add(this.cbxBlockSettings);
+            this.gbAdvanced.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.gbAdvanced.Location = new System.Drawing.Point(15, 290);
+            this.gbAdvanced.Name = "gbAdvanced";
+            this.gbAdvanced.Size = new System.Drawing.Size(380, 100);
+            this.gbAdvanced.TabIndex = 4;
+            this.gbAdvanced.TabStop = false;
+            this.gbAdvanced.Text = "Advanced Settings";
+
+            // 
+            // lblMaxReadTimes
+            // 
+            this.lblMaxReadTimes.AutoSize = true;
+            this.lblMaxReadTimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblMaxReadTimes.Location = new System.Drawing.Point(15, 25);
+            this.lblMaxReadTimes.Name = "lblMaxReadTimes";
+            this.lblMaxReadTimes.Size = new System.Drawing.Size(83, 13);
+            this.lblMaxReadTimes.TabIndex = 0;
+            this.lblMaxReadTimes.Text = "Max Read Times:";
+
+            // 
+            // nudMaxReadTimes
+            // 
+            this.nudMaxReadTimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.nudMaxReadTimes.Location = new System.Drawing.Point(15, 45);
+            this.nudMaxReadTimes.Name = "nudMaxReadTimes";
+            this.nudMaxReadTimes.Size = new System.Drawing.Size(80, 20);
+            this.nudMaxReadTimes.TabIndex = 1;
+
+            // 
+            // lblBlockSettings
+            // 
+            this.lblBlockSettings.AutoSize = true;
+            this.lblBlockSettings.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblBlockSettings.Location = new System.Drawing.Point(130, 25);
+            this.lblBlockSettings.Name = "lblBlockSettings";
+            this.lblBlockSettings.Size = new System.Drawing.Size(75, 13);
+            this.lblBlockSettings.TabIndex = 2;
+            this.lblBlockSettings.Text = "Block Settings:";
+
+            // 
+            // cbxBlockSettings
+            // 
+            this.cbxBlockSettings.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.cbxBlockSettings.FormattingEnabled = true;
+            this.cbxBlockSettings.Location = new System.Drawing.Point(130, 45);
+            this.cbxBlockSettings.Name = "cbxBlockSettings";
+            this.cbxBlockSettings.Size = new System.Drawing.Size(240, 21);
+            this.cbxBlockSettings.TabIndex = 3;
+
             // 
             // lblDescription
             // 
             this.lblDescription.AutoSize = true;
-            this.lblDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblDescription.Location = new System.Drawing.Point(12, 220);
+            this.lblDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.lblDescription.Location = new System.Drawing.Point(15, 405);
             this.lblDescription.Name = "lblDescription";
             this.lblDescription.Size = new System.Drawing.Size(75, 13);
-            this.lblDescription.TabIndex = 6;
+            this.lblDescription.TabIndex = 5;
             this.lblDescription.Text = "Description:";
+
             // 
             // txtDescription
             // 
-            this.txtDescription.Location = new System.Drawing.Point(12, 241);
+            this.txtDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.txtDescription.Location = new System.Drawing.Point(15, 425);
             this.txtDescription.Multiline = true;
             this.txtDescription.Name = "txtDescription";
             this.txtDescription.ReadOnly = true;
             this.txtDescription.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtDescription.Size = new System.Drawing.Size(366, 60);
-            this.txtDescription.TabIndex = 7;
+            this.txtDescription.Size = new System.Drawing.Size(380, 80);
+            this.txtDescription.TabIndex = 6;
+
+            // 
+            // btnTest
+            // 
+            this.btnTest.Location = new System.Drawing.Point(280, 35);
+            this.btnTest.Name = "btnTest";
+            this.btnTest.Size = new System.Drawing.Size(60, 23);
+            this.btnTest.TabIndex = 7;
+            this.btnTest.Text = "Test";
+            this.btnTest.UseVisualStyleBackColor = true;
+
             // 
             // btnOk
             // 
             this.btnOk.Enabled = false;
-            this.btnOk.Location = new System.Drawing.Point(303, 315);
+            this.btnOk.Location = new System.Drawing.Point(240, 520);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(75, 23);
             this.btnOk.TabIndex = 8;
             this.btnOk.Text = "OK";
             this.btnOk.UseVisualStyleBackColor = true;
+
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.Location = new System.Drawing.Point(320, 520);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.TabIndex = 9;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            //this.btnCancel.Click += new System.EventHandler((s, e) => Parent?.Dispose());
+
             // 
             // ctlDeviceDesign
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
+            this.Controls.Add(this.btnTest);
             this.Controls.Add(this.txtDescription);
             this.Controls.Add(this.lblDescription);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.btnCheck);
-            this.Controls.Add(this.txtDeviceID);
-            this.Controls.Add(this.lblDeviceID);
+            this.Controls.Add(this.gbAdvanced);
+            this.Controls.Add(this.gbProtocol);
+            this.Controls.Add(this.gbConnection);
             this.Controls.Add(this.txtDeviceName);
             this.Controls.Add(this.lblDeviceName);
             this.Name = "ctlDeviceDesign";
-            this.Size = new System.Drawing.Size(390, 350);
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            this.Size = new System.Drawing.Size(410, 560);
+            this.gbConnection.ResumeLayout(false);
+            this.gbConnection.PerformLayout();
+            this.gbProtocol.ResumeLayout(false);
+            this.gbProtocol.PerformLayout();
+            this.gbAdvanced.ResumeLayout(false);
+            this.gbAdvanced.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudPort)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudCommonAddress)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudOriginatorAddress)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nudMaxReadTimes)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
         }
-
-        #endregion
-
-        private System.Windows.Forms.TextBox txtDeviceName;
-        private System.Windows.Forms.TextBox txtDeviceID;
-        private System.Windows.Forms.TextBox txtDescription;
-        private System.Windows.Forms.Button btnOk;
-        private System.Windows.Forms.Button btnCheck;
-        private System.Windows.Forms.Label lblDeviceName;
-        private System.Windows.Forms.Label lblDeviceID;
-        private System.Windows.Forms.Label lblDescription;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Label lblExample;
-        private System.Windows.Forms.Label lblFormat;
     }
 }
