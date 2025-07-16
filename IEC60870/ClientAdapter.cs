@@ -149,7 +149,7 @@ namespace IEC60870Driver
                         Client.SendInterrogation(commonAddress, 0);
 
                         // Đợi response đầy đủ
-                        Thread.Sleep(2000); // Tăng lên 2 giây
+                        Thread.Sleep(500); // Tăng lên 2 giây
 
                         // Kiểm tra buffer nhiều lần
                         for (int retry = 0; retry < 10; retry++)
@@ -173,34 +173,71 @@ namespace IEC60870Driver
         }
         public bool ReadSmart(int commonAddress, int ioa, out object value, out TypeId detectedTypeId)
         {
+            //value = null;
+            //detectedTypeId = default(TypeId);
+
+            //if (!CheckConnection()) return false;
+
+            //for (int i = 0; i < MaxTryRead; i++)
+            //{
+            //    lock (this.keyLock)
+            //    {
+            //        try
+            //        {
+            //            Client.SendInterrogation(commonAddress, 0);
+            //            Thread.Sleep(2000);
+
+            //            // ✅ ĐÚNG: out TypeId (không nullable)
+            //            if (Client.GetValueSmart(ioa, out value, out detectedTypeId))
+            //            {
+            //                return true;
+            //            }
+            //        }
+            //        catch (Exception ex)
+            //        {
+            //            Console.WriteLine($"[ERROR] ReadSmart attempt {i + 1} failed: {ex.Message}");
+            //        }
+            //    }
+            //    Thread.Sleep(500);
+            //}
+            //return false;
             value = null;
-            detectedTypeId = default(TypeId);
-
-            if (!CheckConnection()) return false;
-
-            for (int i = 0; i < MaxTryRead; i++)
+    detectedTypeId = default(TypeId);
+    
+    if (!CheckConnection()) return false;
+    
+    for (int i = 0; i < MaxTryRead; i++)
+    {
+        lock (this.keyLock)
+        {
+            try
             {
-                lock (this.keyLock)
+                // Gửi interrogation
+                Client.SendInterrogation(commonAddress, 0);
+                
+                // ✅ POLLING: Check mỗi 100ms thay vì sleep 2000ms
+                for (int poll = 0; poll < 20; poll++) // Max 2 seconds (20 * 100ms)
                 {
-                    try
+                    Thread.Sleep(100);
+                    
+                    if (Client.GetValueSmart(ioa, out value, out detectedTypeId))
                     {
-                        Client.SendInterrogation(commonAddress, 0);
-                        Thread.Sleep(2000);
-
-                        // ✅ ĐÚNG: out TypeId (không nullable)
-                        if (Client.GetValueSmart(ioa, out value, out detectedTypeId))
-                        {
-                            return true;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"[ERROR] ReadSmart attempt {i + 1} failed: {ex.Message}");
+                        Console.WriteLine($"[DEBUG] Data received after {(poll + 1) * 100}ms");
+                        return true;
                     }
                 }
-                Thread.Sleep(500);
+                
+                Console.WriteLine("[DEBUG] No data received after 2000ms polling");
             }
-            return false;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] ReadSmart polling failed: {ex.Message}");
+            }
+        }
+        Thread.Sleep(100);
+    }
+    
+    return false;
         }
         public bool Write(int commonAddress, IOAddress ioAddress, string value)
         {
