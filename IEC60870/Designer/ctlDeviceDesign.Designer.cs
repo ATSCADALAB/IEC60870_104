@@ -21,11 +21,6 @@
         private System.Windows.Forms.ComboBox cbxCaFieldLength;
         private System.Windows.Forms.Label lblIoaFieldLength;
         private System.Windows.Forms.ComboBox cbxIoaFieldLength;
-        private System.Windows.Forms.GroupBox gbAdvanced;
-        private System.Windows.Forms.Label lblMaxReadTimes;
-        private System.Windows.Forms.NumericUpDown nudMaxReadTimes;
-        private System.Windows.Forms.Label lblBlockSettings;
-        private System.Windows.Forms.ComboBox cbxBlockSettings;
         private System.Windows.Forms.Label lblDescription;
         private System.Windows.Forms.TextBox txtDescription;
         private System.Windows.Forms.Button btnOk;
@@ -61,11 +56,6 @@
             this.cbxCaFieldLength = new System.Windows.Forms.ComboBox();
             this.lblIoaFieldLength = new System.Windows.Forms.Label();
             this.cbxIoaFieldLength = new System.Windows.Forms.ComboBox();
-            this.gbAdvanced = new System.Windows.Forms.GroupBox();
-            this.lblMaxReadTimes = new System.Windows.Forms.Label();
-            this.nudMaxReadTimes = new System.Windows.Forms.NumericUpDown();
-            this.lblBlockSettings = new System.Windows.Forms.Label();
-            this.cbxBlockSettings = new System.Windows.Forms.ComboBox();
             this.lblDescription = new System.Windows.Forms.Label();
             this.txtDescription = new System.Windows.Forms.TextBox();
             this.btnOk = new System.Windows.Forms.Button();
@@ -74,11 +64,9 @@
 
             this.gbConnection.SuspendLayout();
             this.gbProtocol.SuspendLayout();
-            this.gbAdvanced.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudPort)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCommonAddress)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudOriginatorAddress)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudMaxReadTimes)).BeginInit();
             this.SuspendLayout();
 
             // 
@@ -101,6 +89,16 @@
             this.txtDeviceName.TabIndex = 1;
 
             // 
+            // btnTest
+            // 
+            this.btnTest.Location = new System.Drawing.Point(280, 35);
+            this.btnTest.Name = "btnTest";
+            this.btnTest.Size = new System.Drawing.Size(60, 23);
+            this.btnTest.TabIndex = 2;
+            this.btnTest.Text = "Test";
+            this.btnTest.UseVisualStyleBackColor = true;
+
+            // 
             // gbConnection
             // 
             this.gbConnection.Controls.Add(this.lblIpAddress);
@@ -110,8 +108,8 @@
             this.gbConnection.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
             this.gbConnection.Location = new System.Drawing.Point(15, 70);
             this.gbConnection.Name = "gbConnection";
-            this.gbConnection.Size = new System.Drawing.Size(380, 80);
-            this.gbConnection.TabIndex = 2;
+            this.gbConnection.Size = new System.Drawing.Size(350, 80);
+            this.gbConnection.TabIndex = 3;
             this.gbConnection.TabStop = false;
             this.gbConnection.Text = "Connection Settings";
 
@@ -174,8 +172,8 @@
             this.gbProtocol.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
             this.gbProtocol.Location = new System.Drawing.Point(15, 160);
             this.gbProtocol.Name = "gbProtocol";
-            this.gbProtocol.Size = new System.Drawing.Size(380, 120);
-            this.gbProtocol.TabIndex = 3;
+            this.gbProtocol.Size = new System.Drawing.Size(350, 150);
+            this.gbProtocol.TabIndex = 4;
             this.gbProtocol.TabStop = false;
             this.gbProtocol.Text = "Protocol Settings";
 
@@ -195,16 +193,18 @@
             // 
             this.nudCommonAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.nudCommonAddress.Location = new System.Drawing.Point(15, 45);
+            this.nudCommonAddress.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
             this.nudCommonAddress.Name = "nudCommonAddress";
             this.nudCommonAddress.Size = new System.Drawing.Size(80, 20);
             this.nudCommonAddress.TabIndex = 1;
+            this.nudCommonAddress.Value = new decimal(new int[] { 1, 0, 0, 0 });
 
             // 
             // lblOriginatorAddress
             // 
             this.lblOriginatorAddress.AutoSize = true;
             this.lblOriginatorAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.lblOriginatorAddress.Location = new System.Drawing.Point(130, 25);
+            this.lblOriginatorAddress.Location = new System.Drawing.Point(180, 25);
             this.lblOriginatorAddress.Name = "lblOriginatorAddress";
             this.lblOriginatorAddress.Size = new System.Drawing.Size(96, 13);
             this.lblOriginatorAddress.TabIndex = 2;
@@ -214,7 +214,8 @@
             // nudOriginatorAddress
             // 
             this.nudOriginatorAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.nudOriginatorAddress.Location = new System.Drawing.Point(130, 45);
+            this.nudOriginatorAddress.Location = new System.Drawing.Point(180, 45);
+            this.nudOriginatorAddress.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
             this.nudOriginatorAddress.Name = "nudOriginatorAddress";
             this.nudOriginatorAddress.Size = new System.Drawing.Size(80, 20);
             this.nudOriginatorAddress.TabIndex = 3;
@@ -236,9 +237,9 @@
             this.cbxCotFieldLength.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbxCotFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.cbxCotFieldLength.FormattingEnabled = true;
-            this.cbxCotFieldLength.Location = new System.Drawing.Point(15, 92);
+            this.cbxCotFieldLength.Location = new System.Drawing.Point(15, 95);
             this.cbxCotFieldLength.Name = "cbxCotFieldLength";
-            this.cbxCotFieldLength.Size = new System.Drawing.Size(60, 21);
+            this.cbxCotFieldLength.Size = new System.Drawing.Size(80, 21);
             this.cbxCotFieldLength.TabIndex = 5;
 
             // 
@@ -246,7 +247,7 @@
             // 
             this.lblCaFieldLength.AutoSize = true;
             this.lblCaFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.lblCaFieldLength.Location = new System.Drawing.Point(130, 75);
+            this.lblCaFieldLength.Location = new System.Drawing.Point(120, 75);
             this.lblCaFieldLength.Name = "lblCaFieldLength";
             this.lblCaFieldLength.Size = new System.Drawing.Size(80, 13);
             this.lblCaFieldLength.TabIndex = 6;
@@ -258,9 +259,9 @@
             this.cbxCaFieldLength.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbxCaFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.cbxCaFieldLength.FormattingEnabled = true;
-            this.cbxCaFieldLength.Location = new System.Drawing.Point(130, 92);
+            this.cbxCaFieldLength.Location = new System.Drawing.Point(120, 95);
             this.cbxCaFieldLength.Name = "cbxCaFieldLength";
-            this.cbxCaFieldLength.Size = new System.Drawing.Size(60, 21);
+            this.cbxCaFieldLength.Size = new System.Drawing.Size(80, 21);
             this.cbxCaFieldLength.TabIndex = 7;
 
             // 
@@ -268,7 +269,7 @@
             // 
             this.lblIoaFieldLength.AutoSize = true;
             this.lblIoaFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.lblIoaFieldLength.Location = new System.Drawing.Point(245, 75);
+            this.lblIoaFieldLength.Location = new System.Drawing.Point(15, 125);
             this.lblIoaFieldLength.Name = "lblIoaFieldLength";
             this.lblIoaFieldLength.Size = new System.Drawing.Size(83, 13);
             this.lblIoaFieldLength.TabIndex = 8;
@@ -280,73 +281,17 @@
             this.cbxIoaFieldLength.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbxIoaFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.cbxIoaFieldLength.FormattingEnabled = true;
-            this.cbxIoaFieldLength.Location = new System.Drawing.Point(245, 92);
+            this.cbxIoaFieldLength.Location = new System.Drawing.Point(120, 122);
             this.cbxIoaFieldLength.Name = "cbxIoaFieldLength";
-            this.cbxIoaFieldLength.Size = new System.Drawing.Size(60, 21);
+            this.cbxIoaFieldLength.Size = new System.Drawing.Size(150, 21);
             this.cbxIoaFieldLength.TabIndex = 9;
-
-            // 
-            // gbAdvanced
-            // 
-            this.gbAdvanced.Controls.Add(this.lblMaxReadTimes);
-            this.gbAdvanced.Controls.Add(this.nudMaxReadTimes);
-            this.gbAdvanced.Controls.Add(this.lblBlockSettings);
-            this.gbAdvanced.Controls.Add(this.cbxBlockSettings);
-            this.gbAdvanced.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
-            this.gbAdvanced.Location = new System.Drawing.Point(15, 290);
-            this.gbAdvanced.Name = "gbAdvanced";
-            this.gbAdvanced.Size = new System.Drawing.Size(380, 100);
-            this.gbAdvanced.TabIndex = 4;
-            this.gbAdvanced.TabStop = false;
-            this.gbAdvanced.Text = "Advanced Settings";
-
-            // 
-            // lblMaxReadTimes
-            // 
-            this.lblMaxReadTimes.AutoSize = true;
-            this.lblMaxReadTimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.lblMaxReadTimes.Location = new System.Drawing.Point(15, 25);
-            this.lblMaxReadTimes.Name = "lblMaxReadTimes";
-            this.lblMaxReadTimes.Size = new System.Drawing.Size(83, 13);
-            this.lblMaxReadTimes.TabIndex = 0;
-            this.lblMaxReadTimes.Text = "Max Read Times:";
-
-            // 
-            // nudMaxReadTimes
-            // 
-            this.nudMaxReadTimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.nudMaxReadTimes.Location = new System.Drawing.Point(15, 45);
-            this.nudMaxReadTimes.Name = "nudMaxReadTimes";
-            this.nudMaxReadTimes.Size = new System.Drawing.Size(80, 20);
-            this.nudMaxReadTimes.TabIndex = 1;
-
-            // 
-            // lblBlockSettings
-            // 
-            this.lblBlockSettings.AutoSize = true;
-            this.lblBlockSettings.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.lblBlockSettings.Location = new System.Drawing.Point(130, 25);
-            this.lblBlockSettings.Name = "lblBlockSettings";
-            this.lblBlockSettings.Size = new System.Drawing.Size(75, 13);
-            this.lblBlockSettings.TabIndex = 2;
-            this.lblBlockSettings.Text = "Block Settings:";
-
-            // 
-            // cbxBlockSettings
-            // 
-            this.cbxBlockSettings.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.cbxBlockSettings.FormattingEnabled = true;
-            this.cbxBlockSettings.Location = new System.Drawing.Point(130, 45);
-            this.cbxBlockSettings.Name = "cbxBlockSettings";
-            this.cbxBlockSettings.Size = new System.Drawing.Size(240, 21);
-            this.cbxBlockSettings.TabIndex = 3;
 
             // 
             // lblDescription
             // 
             this.lblDescription.AutoSize = true;
             this.lblDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
-            this.lblDescription.Location = new System.Drawing.Point(15, 405);
+            this.lblDescription.Location = new System.Drawing.Point(15, 325);
             this.lblDescription.Name = "lblDescription";
             this.lblDescription.Size = new System.Drawing.Size(75, 13);
             this.lblDescription.TabIndex = 5;
@@ -356,45 +301,34 @@
             // txtDescription
             // 
             this.txtDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.txtDescription.Location = new System.Drawing.Point(15, 425);
+            this.txtDescription.Location = new System.Drawing.Point(15, 345);
             this.txtDescription.Multiline = true;
             this.txtDescription.Name = "txtDescription";
             this.txtDescription.ReadOnly = true;
             this.txtDescription.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtDescription.Size = new System.Drawing.Size(380, 80);
+            this.txtDescription.Size = new System.Drawing.Size(350, 80);
             this.txtDescription.TabIndex = 6;
-
-            // 
-            // btnTest
-            // 
-            this.btnTest.Location = new System.Drawing.Point(280, 35);
-            this.btnTest.Name = "btnTest";
-            this.btnTest.Size = new System.Drawing.Size(60, 23);
-            this.btnTest.TabIndex = 7;
-            this.btnTest.Text = "Test";
-            this.btnTest.UseVisualStyleBackColor = true;
 
             // 
             // btnOk
             // 
             this.btnOk.Enabled = false;
-            this.btnOk.Location = new System.Drawing.Point(240, 520);
+            this.btnOk.Location = new System.Drawing.Point(210, 440);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(75, 23);
-            this.btnOk.TabIndex = 8;
+            this.btnOk.TabIndex = 7;
             this.btnOk.Text = "OK";
             this.btnOk.UseVisualStyleBackColor = true;
 
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(320, 520);
+            this.btnCancel.Location = new System.Drawing.Point(290, 440);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 9;
+            this.btnCancel.TabIndex = 8;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            //this.btnCancel.Click += new System.EventHandler((s, e) => Parent?.Dispose());
 
             // 
             // ctlDeviceDesign
@@ -403,26 +337,22 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
-            this.Controls.Add(this.btnTest);
             this.Controls.Add(this.txtDescription);
             this.Controls.Add(this.lblDescription);
-            this.Controls.Add(this.gbAdvanced);
             this.Controls.Add(this.gbProtocol);
             this.Controls.Add(this.gbConnection);
+            this.Controls.Add(this.btnTest);
             this.Controls.Add(this.txtDeviceName);
             this.Controls.Add(this.lblDeviceName);
             this.Name = "ctlDeviceDesign";
-            this.Size = new System.Drawing.Size(410, 560);
+            this.Size = new System.Drawing.Size(380, 480);
             this.gbConnection.ResumeLayout(false);
             this.gbConnection.PerformLayout();
             this.gbProtocol.ResumeLayout(false);
             this.gbProtocol.PerformLayout();
-            this.gbAdvanced.ResumeLayout(false);
-            this.gbAdvanced.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudPort)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCommonAddress)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudOriginatorAddress)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nudMaxReadTimes)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
         }

@@ -34,6 +34,7 @@
             this.gbConnectionSettings.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudLifetime)).BeginInit();
             this.SuspendLayout();
+
             // 
             // gbConnectionSettings
             // 
@@ -48,6 +49,7 @@
             this.gbConnectionSettings.TabIndex = 0;
             this.gbConnectionSettings.TabStop = false;
             this.gbConnectionSettings.Text = "Connection Lifetime Settings";
+
             // 
             // rbPermanent
             // 
@@ -59,6 +61,7 @@
             this.rbPermanent.TabIndex = 0;
             this.rbPermanent.Text = "Keep connection alive";
             this.rbPermanent.UseVisualStyleBackColor = true;
+
             // 
             // rbCustom
             // 
@@ -67,32 +70,35 @@
             this.rbCustom.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.rbCustom.Location = new System.Drawing.Point(15, 48);
             this.rbCustom.Name = "rbCustom";
-            this.rbCustom.Size = new System.Drawing.Size(112, 17);
+            this.rbCustom.Size = new System.Drawing.Size(95, 17);
             this.rbCustom.TabIndex = 1;
             this.rbCustom.TabStop = true;
             this.rbCustom.Text = "Refresh every";
             this.rbCustom.UseVisualStyleBackColor = true;
+
             // 
             // nudLifetime
             // 
             this.nudLifetime.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.nudLifetime.Location = new System.Drawing.Point(133, 47);
+            this.nudLifetime.Location = new System.Drawing.Point(116, 47);
             this.nudLifetime.Maximum = new decimal(new int[] { 86400, 0, 0, 0 });
             this.nudLifetime.Minimum = new decimal(new int[] { 60, 0, 0, 0 });
             this.nudLifetime.Name = "nudLifetime";
             this.nudLifetime.Size = new System.Drawing.Size(80, 20);
             this.nudLifetime.TabIndex = 2;
             this.nudLifetime.Value = new decimal(new int[] { 3600, 0, 0, 0 });
+
             // 
             // lblSeconds
             // 
             this.lblSeconds.AutoSize = true;
             this.lblSeconds.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.lblSeconds.Location = new System.Drawing.Point(219, 49);
+            this.lblSeconds.Location = new System.Drawing.Point(202, 49);
             this.lblSeconds.Name = "lblSeconds";
             this.lblSeconds.Size = new System.Drawing.Size(47, 13);
             this.lblSeconds.TabIndex = 3;
             this.lblSeconds.Text = "seconds";
+
             // 
             // lblDescription
             // 
@@ -103,6 +109,7 @@
             this.lblDescription.Size = new System.Drawing.Size(320, 40);
             this.lblDescription.TabIndex = 1;
             this.lblDescription.Text = "Description will be updated based on selection.";
+
             // 
             // btnOK
             // 
@@ -112,6 +119,7 @@
             this.btnOK.TabIndex = 2;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = true;
+
             // 
             // btnCancel
             // 
@@ -121,7 +129,7 @@
             this.btnCancel.TabIndex = 3;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-            //this.btnCancel.Click += new System.EventHandler((s, e) => Parent?.Dispose());
+
             // 
             // ctlChannelAddress
             // 

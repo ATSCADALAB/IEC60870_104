@@ -38,13 +38,14 @@ namespace IEC60870Driver
             this.driver = driver;
 
             // Initialize controls
-            nudLifetime.Minimum = 60;  // 1 minute minimum
-            nudLifetime.Maximum = 86400; // 24 hours maximum
-            nudLifetime.Value = 3600; // 1 hour default
+            nudLifetime.Minimum = 60;     // 1 minute minimum
+            nudLifetime.Maximum = 86400;  // 24 hours maximum
+            nudLifetime.Value = 3600;     // 1 hour default
 
             // Event handlers
             KeyPress += (sender, e) => CheckKey(e.KeyChar);
             btnOK.Click += (sender, e) => UpdateChannel();
+            btnCancel.Click += (sender, e) => Parent?.Dispose();
             rbPermanent.CheckedChanged += RadioButton_CheckedChanged;
             rbCustom.CheckedChanged += RadioButton_CheckedChanged;
 

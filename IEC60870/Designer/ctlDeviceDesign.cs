@@ -43,19 +43,26 @@ namespace IEC60870Driver
 
             btnOk.Click += (sender, e) => UpdateDevice();
             btnTest.Click += (sender, e) => TestConnection();
+            btnCancel.Click += (sender, e) => Parent?.Dispose();
 
             // Add validation events
             txtDeviceName.TextChanged += ValidateInputs;
             txtIpAddress.TextChanged += ValidateInputs;
             nudPort.ValueChanged += ValidateInputs;
             nudCommonAddress.ValueChanged += ValidateInputs;
+            nudOriginatorAddress.ValueChanged += ValidateInputs;
+            cbxCotFieldLength.SelectedIndexChanged += ValidateInputs;
+            cbxCaFieldLength.SelectedIndexChanged += ValidateInputs;
+            cbxIoaFieldLength.SelectedIndexChanged += ValidateInputs;
         }
 
         private void InitializeControls()
         {
-            // Initialize default values
-            txtIpAddress.Text = "192.168.1.100";
+            // ✅ BASIC CONNECTION
+            txtIpAddress.Text = "192.168.1.63";
             nudPort.Value = 2404;
+
+            // ✅ PROTOCOL SETTINGS
             nudCommonAddress.Minimum = 0;
             nudCommonAddress.Maximum = 65535;
             nudCommonAddress.Value = 1;
@@ -64,39 +71,39 @@ namespace IEC60870Driver
             nudOriginatorAddress.Maximum = 255;
             nudOriginatorAddress.Value = 0;
 
-            // COT Field Length dropdown
+            // ✅ COT Field Length - COMBOBOX
             cbxCotFieldLength.Items.Clear();
-            cbxCotFieldLength.Items.AddRange(new object[] { 1, 2 });
-            cbxCotFieldLength.SelectedItem = 1;
-
-            // Common Address Field Length dropdown
-            cbxCaFieldLength.Items.Clear();
-            cbxCaFieldLength.Items.AddRange(new object[] { 1, 2 });
-            cbxCaFieldLength.SelectedItem = 1;
-
-            // IOA Field Length dropdown
-            cbxIoaFieldLength.Items.Clear();
-            cbxIoaFieldLength.Items.AddRange(new object[] { 1, 2, 3 });
-            cbxIoaFieldLength.SelectedItem = 2;
-
-            // Max Read Times
-            nudMaxReadTimes.Minimum = 1;
-            nudMaxReadTimes.Maximum = 100;
-            nudMaxReadTimes.Value = 1;
-
-            // Block settings examples
-            cbxBlockSettings.Items.Clear();
-            cbxBlockSettings.Items.AddRange(new object[]
-            {
-                "",
-                "M_SP_NA_1-1-100",
-                "M_ME_NC_1-1-50",
-                "M_SP_NA_1-1-100/M_ME_NC_1-101-200",
-                "M_DP_NA_1-1-20/M_ME_NA_1-101-150/C_SC_NA_1-1001-1050",
-                "M_SP_NA_1-1-500/M_ME_NC_1-1001-1100/C_SC_NA_1-2001-2100"
+            cbxCotFieldLength.Items.AddRange(new object[] {
+                new { Text = "1 byte", Value = 1 },
+                new { Text = "2 bytes", Value = 2 }
             });
-            cbxBlockSettings.SelectedIndex = 0;
-            cbxBlockSettings.DropDownStyle = ComboBoxStyle.DropDown; // Allow custom input
+            cbxCotFieldLength.DisplayMember = "Text";
+            cbxCotFieldLength.ValueMember = "Value";
+            cbxCotFieldLength.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbxCotFieldLength.SelectedIndex = 1; // Default: 2 bytes
+
+            // ✅ CA Field Length - COMBOBOX  
+            cbxCaFieldLength.Items.Clear();
+            cbxCaFieldLength.Items.AddRange(new object[] {
+                new { Text = "1 byte", Value = 1 },
+                new { Text = "2 bytes", Value = 2 }
+            });
+            cbxCaFieldLength.DisplayMember = "Text";
+            cbxCaFieldLength.ValueMember = "Value";
+            cbxCaFieldLength.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbxCaFieldLength.SelectedIndex = 1; // Default: 2 bytes
+
+            // ✅ IOA Field Length - COMBOBOX
+            cbxIoaFieldLength.Items.Clear();
+            cbxIoaFieldLength.Items.AddRange(new object[] {
+                new { Text = "1 byte (1-255)", Value = 1 },
+                new { Text = "2 bytes (1-65535)", Value = 2 },
+                new { Text = "3 bytes (1-16777215)", Value = 3 }
+            });
+            cbxIoaFieldLength.DisplayMember = "Text";
+            cbxIoaFieldLength.ValueMember = "Value";
+            cbxIoaFieldLength.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbxIoaFieldLength.SelectedIndex = 2; // Default: 3 bytes
         }
 
         private void Init()
@@ -117,17 +124,24 @@ namespace IEC60870Driver
             {
                 IsValid = !string.IsNullOrWhiteSpace(DeviceName) &&
                          !string.IsNullOrWhiteSpace(txtIpAddress.Text) &&
-                         System.Net.IPAddress.TryParse(txtIpAddress.Text, out _);
+                         System.Net.IPAddress.TryParse(txtIpAddress.Text, out _) &&
+                         cbxCotFieldLength.SelectedItem != null &&
+                         cbxCaFieldLength.SelectedItem != null &&
+                         cbxIoaFieldLength.SelectedItem != null;
 
                 btnOk.Enabled = IsValid;
                 btnTest.Enabled = IsValid;
 
                 if (IsValid)
                 {
-                    var deviceSettings = DeviceSettings.Initialize(DeviceID);
-                    Description = deviceSettings != null ?
-                        deviceSettings.GetDetailedDescription() :
-                        "Invalid configuration";
+                    Description = $"IEC60870-5-104 Device:\n" +
+                                 $"• IP: {txtIpAddress.Text}:{nudPort.Value}\n" +
+                                 $"• Common Address: {nudCommonAddress.Value}\n" +
+                                 $"• Originator Address: {nudOriginatorAddress.Value}\n" +
+                                 $"• COT Length: {GetSelectedValue(cbxCotFieldLength)} bytes\n" +
+                                 $"• CA Length: {GetSelectedValue(cbxCaFieldLength)} bytes\n" +
+                                 $"• IOA Length: {GetSelectedValue(cbxIoaFieldLength)} bytes\n" +
+                                 $"• Max IOA Range: 1 - {GetMaxIOARange()}";
                 }
                 else
                 {
@@ -143,6 +157,29 @@ namespace IEC60870Driver
             }
         }
 
+        private int GetSelectedValue(ComboBox comboBox)
+        {
+            if (comboBox.SelectedItem != null)
+            {
+                var item = comboBox.SelectedItem;
+                var valueProperty = item.GetType().GetProperty("Value");
+                return (int)valueProperty.GetValue(item);
+            }
+            return 1;
+        }
+
+        private int GetMaxIOARange()
+        {
+            int ioaLength = GetSelectedValue(cbxIoaFieldLength);
+            switch (ioaLength)
+            {
+                case 1: return 255;
+                case 2: return 65535;
+                case 3: return 16777215;
+                default: return 255;
+            }
+        }
+
         private string GenerateDeviceID()
         {
             try
@@ -153,14 +190,12 @@ namespace IEC60870Driver
                     nudPort.Value.ToString(),
                     nudCommonAddress.Value.ToString(),
                     nudOriginatorAddress.Value.ToString(),
-                    cbxCotFieldLength.SelectedItem?.ToString() ?? "1",
-                    cbxCaFieldLength.SelectedItem?.ToString() ?? "1",
-                    cbxIoaFieldLength.SelectedItem?.ToString() ?? "2",
-                    nudMaxReadTimes.Value.ToString(),
-                    cbxBlockSettings.Text.Trim()
+                    GetSelectedValue(cbxCotFieldLength).ToString(),
+                    GetSelectedValue(cbxCaFieldLength).ToString(),
+                    GetSelectedValue(cbxIoaFieldLength).ToString()
                 };
 
-                return string.Join("|", parts.Take(string.IsNullOrWhiteSpace(parts[8]) ? 8 : 9));
+                return string.Join("|", parts);
             }
             catch
             {
@@ -181,17 +216,27 @@ namespace IEC60870Driver
                 nudPort.Value = int.Parse(parts[1]);
                 nudCommonAddress.Value = int.Parse(parts[2]);
                 nudOriginatorAddress.Value = int.Parse(parts[3]);
-                cbxCotFieldLength.SelectedItem = int.Parse(parts[4]);
-                cbxCaFieldLength.SelectedItem = int.Parse(parts[5]);
-                cbxIoaFieldLength.SelectedItem = int.Parse(parts[6]);
 
-                if (parts.Length > 7)
-                    nudMaxReadTimes.Value = int.Parse(parts[7]);
-
-                if (parts.Length > 8)
-                    cbxBlockSettings.Text = parts[8];
+                // Set combobox selections
+                SetComboBoxValue(cbxCotFieldLength, int.Parse(parts[4]));
+                SetComboBoxValue(cbxCaFieldLength, int.Parse(parts[5]));
+                SetComboBoxValue(cbxIoaFieldLength, int.Parse(parts[6]));
             }
             catch { }
+        }
+
+        private void SetComboBoxValue(ComboBox comboBox, int value)
+        {
+            for (int i = 0; i < comboBox.Items.Count; i++)
+            {
+                var item = comboBox.Items[i];
+                var valueProperty = item.GetType().GetProperty("Value");
+                if ((int)valueProperty.GetValue(item) == value)
+                {
+                    comboBox.SelectedIndex = i;
+                    break;
+                }
+            }
         }
 
         private void CheckKey(char keyChar)
@@ -293,19 +338,6 @@ namespace IEC60870Driver
                     "IEC60870 Driver", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtIpAddress.Focus();
                 return false;
-            }
-
-            // Validate block settings if provided
-            if (!string.IsNullOrWhiteSpace(cbxBlockSettings.Text))
-            {
-                var validationError = DeviceSettings.ValidateBlockSettings(cbxBlockSettings.Text);
-                if (validationError != null)
-                {
-                    MessageBox.Show($"Block settings error: {validationError}",
-                        "IEC60870 Driver", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    cbxBlockSettings.Focus();
-                    return false;
-                }
             }
 
             return true;
