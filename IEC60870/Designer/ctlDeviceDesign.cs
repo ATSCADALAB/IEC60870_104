@@ -42,7 +42,6 @@ namespace IEC60870Driver
             KeyPress += (sender, e) => CheckKey(e.KeyChar);
 
             btnOk.Click += (sender, e) => UpdateDevice();
-            btnTest.Click += (sender, e) => TestConnection();
             btnCancel.Click += (sender, e) => Parent?.Dispose();
 
             // Add validation events
@@ -130,7 +129,6 @@ namespace IEC60870Driver
                          cbxIoaFieldLength.SelectedItem != null;
 
                 btnOk.Enabled = IsValid;
-                btnTest.Enabled = IsValid;
 
                 if (IsValid)
                 {
@@ -153,7 +151,6 @@ namespace IEC60870Driver
                 Description = $"Validation error: {ex.Message}";
                 IsValid = false;
                 btnOk.Enabled = false;
-                btnTest.Enabled = false;
             }
         }
 
@@ -284,9 +281,6 @@ namespace IEC60870Driver
                         "IEC60870 Driver", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-
-                btnTest.Enabled = false;
-                btnTest.Text = "Testing...";
                 Application.DoEvents();
 
                 // Test connection logic here
@@ -317,8 +311,6 @@ namespace IEC60870Driver
             }
             finally
             {
-                btnTest.Enabled = true;
-                btnTest.Text = "Test";
             }
         }
 

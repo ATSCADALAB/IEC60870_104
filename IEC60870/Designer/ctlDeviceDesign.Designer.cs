@@ -25,7 +25,6 @@
         private System.Windows.Forms.TextBox txtDescription;
         private System.Windows.Forms.Button btnOk;
         private System.Windows.Forms.Button btnCancel;
-        private System.Windows.Forms.Button btnTest;
 
         protected override void Dispose(bool disposing)
         {
@@ -60,15 +59,12 @@
             this.txtDescription = new System.Windows.Forms.TextBox();
             this.btnOk = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.btnTest = new System.Windows.Forms.Button();
-
             this.gbConnection.SuspendLayout();
-            this.gbProtocol.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudPort)).BeginInit();
+            this.gbProtocol.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudCommonAddress)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudOriginatorAddress)).BeginInit();
             this.SuspendLayout();
-
             // 
             // lblDeviceName
             // 
@@ -76,10 +72,9 @@
             this.lblDeviceName.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
             this.lblDeviceName.Location = new System.Drawing.Point(12, 15);
             this.lblDeviceName.Name = "lblDeviceName";
-            this.lblDeviceName.Size = new System.Drawing.Size(84, 13);
+            this.lblDeviceName.Size = new System.Drawing.Size(87, 13);
             this.lblDeviceName.TabIndex = 0;
             this.lblDeviceName.Text = "Device Name:";
-
             // 
             // txtDeviceName
             // 
@@ -87,17 +82,6 @@
             this.txtDeviceName.Name = "txtDeviceName";
             this.txtDeviceName.Size = new System.Drawing.Size(250, 20);
             this.txtDeviceName.TabIndex = 1;
-
-            // 
-            // btnTest
-            // 
-            this.btnTest.Location = new System.Drawing.Point(280, 35);
-            this.btnTest.Name = "btnTest";
-            this.btnTest.Size = new System.Drawing.Size(60, 23);
-            this.btnTest.TabIndex = 2;
-            this.btnTest.Text = "Test";
-            this.btnTest.UseVisualStyleBackColor = true;
-
             // 
             // gbConnection
             // 
@@ -112,7 +96,6 @@
             this.gbConnection.TabIndex = 3;
             this.gbConnection.TabStop = false;
             this.gbConnection.Text = "Connection Settings";
-
             // 
             // lblIpAddress
             // 
@@ -123,7 +106,6 @@
             this.lblIpAddress.Size = new System.Drawing.Size(61, 13);
             this.lblIpAddress.TabIndex = 0;
             this.lblIpAddress.Text = "IP Address:";
-
             // 
             // txtIpAddress
             // 
@@ -132,7 +114,6 @@
             this.txtIpAddress.Name = "txtIpAddress";
             this.txtIpAddress.Size = new System.Drawing.Size(150, 20);
             this.txtIpAddress.TabIndex = 1;
-
             // 
             // lblPort
             // 
@@ -143,19 +124,29 @@
             this.lblPort.Size = new System.Drawing.Size(29, 13);
             this.lblPort.TabIndex = 2;
             this.lblPort.Text = "Port:";
-
             // 
             // nudPort
             // 
             this.nudPort.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.nudPort.Location = new System.Drawing.Point(200, 45);
-            this.nudPort.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
-            this.nudPort.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            this.nudPort.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
+            this.nudPort.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             this.nudPort.Name = "nudPort";
             this.nudPort.Size = new System.Drawing.Size(80, 20);
             this.nudPort.TabIndex = 3;
-            this.nudPort.Value = new decimal(new int[] { 2404, 0, 0, 0 });
-
+            this.nudPort.Value = new decimal(new int[] {
+            2404,
+            0,
+            0,
+            0});
             // 
             // gbProtocol
             // 
@@ -176,7 +167,6 @@
             this.gbProtocol.TabIndex = 4;
             this.gbProtocol.TabStop = false;
             this.gbProtocol.Text = "Protocol Settings";
-
             // 
             // lblCommonAddress
             // 
@@ -184,21 +174,27 @@
             this.lblCommonAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.lblCommonAddress.Location = new System.Drawing.Point(15, 25);
             this.lblCommonAddress.Name = "lblCommonAddress";
-            this.lblCommonAddress.Size = new System.Drawing.Size(91, 13);
+            this.lblCommonAddress.Size = new System.Drawing.Size(92, 13);
             this.lblCommonAddress.TabIndex = 0;
             this.lblCommonAddress.Text = "Common Address:";
-
             // 
             // nudCommonAddress
             // 
             this.nudCommonAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.nudCommonAddress.Location = new System.Drawing.Point(15, 45);
-            this.nudCommonAddress.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
+            this.nudCommonAddress.Maximum = new decimal(new int[] {
+            65535,
+            0,
+            0,
+            0});
             this.nudCommonAddress.Name = "nudCommonAddress";
             this.nudCommonAddress.Size = new System.Drawing.Size(80, 20);
             this.nudCommonAddress.TabIndex = 1;
-            this.nudCommonAddress.Value = new decimal(new int[] { 1, 0, 0, 0 });
-
+            this.nudCommonAddress.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
             // 
             // lblOriginatorAddress
             // 
@@ -209,17 +205,19 @@
             this.lblOriginatorAddress.Size = new System.Drawing.Size(96, 13);
             this.lblOriginatorAddress.TabIndex = 2;
             this.lblOriginatorAddress.Text = "Originator Address:";
-
             // 
             // nudOriginatorAddress
             // 
             this.nudOriginatorAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.nudOriginatorAddress.Location = new System.Drawing.Point(180, 45);
-            this.nudOriginatorAddress.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
+            this.nudOriginatorAddress.Maximum = new decimal(new int[] {
+            255,
+            0,
+            0,
+            0});
             this.nudOriginatorAddress.Name = "nudOriginatorAddress";
             this.nudOriginatorAddress.Size = new System.Drawing.Size(80, 20);
             this.nudOriginatorAddress.TabIndex = 3;
-
             // 
             // lblCotFieldLength
             // 
@@ -227,10 +225,9 @@
             this.lblCotFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.lblCotFieldLength.Location = new System.Drawing.Point(15, 75);
             this.lblCotFieldLength.Name = "lblCotFieldLength";
-            this.lblCotFieldLength.Size = new System.Drawing.Size(85, 13);
+            this.lblCotFieldLength.Size = new System.Drawing.Size(93, 13);
             this.lblCotFieldLength.TabIndex = 4;
             this.lblCotFieldLength.Text = "COT Field Length:";
-
             // 
             // cbxCotFieldLength
             // 
@@ -241,7 +238,6 @@
             this.cbxCotFieldLength.Name = "cbxCotFieldLength";
             this.cbxCotFieldLength.Size = new System.Drawing.Size(80, 21);
             this.cbxCotFieldLength.TabIndex = 5;
-
             // 
             // lblCaFieldLength
             // 
@@ -249,10 +245,9 @@
             this.lblCaFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.lblCaFieldLength.Location = new System.Drawing.Point(120, 75);
             this.lblCaFieldLength.Name = "lblCaFieldLength";
-            this.lblCaFieldLength.Size = new System.Drawing.Size(80, 13);
+            this.lblCaFieldLength.Size = new System.Drawing.Size(85, 13);
             this.lblCaFieldLength.TabIndex = 6;
             this.lblCaFieldLength.Text = "CA Field Length:";
-
             // 
             // cbxCaFieldLength
             // 
@@ -263,7 +258,6 @@
             this.cbxCaFieldLength.Name = "cbxCaFieldLength";
             this.cbxCaFieldLength.Size = new System.Drawing.Size(80, 21);
             this.cbxCaFieldLength.TabIndex = 7;
-
             // 
             // lblIoaFieldLength
             // 
@@ -271,10 +265,9 @@
             this.lblIoaFieldLength.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.lblIoaFieldLength.Location = new System.Drawing.Point(15, 125);
             this.lblIoaFieldLength.Name = "lblIoaFieldLength";
-            this.lblIoaFieldLength.Size = new System.Drawing.Size(83, 13);
+            this.lblIoaFieldLength.Size = new System.Drawing.Size(89, 13);
             this.lblIoaFieldLength.TabIndex = 8;
             this.lblIoaFieldLength.Text = "IOA Field Length:";
-
             // 
             // cbxIoaFieldLength
             // 
@@ -285,7 +278,6 @@
             this.cbxIoaFieldLength.Name = "cbxIoaFieldLength";
             this.cbxIoaFieldLength.Size = new System.Drawing.Size(150, 21);
             this.cbxIoaFieldLength.TabIndex = 9;
-
             // 
             // lblDescription
             // 
@@ -296,7 +288,6 @@
             this.lblDescription.Size = new System.Drawing.Size(75, 13);
             this.lblDescription.TabIndex = 5;
             this.lblDescription.Text = "Description:";
-
             // 
             // txtDescription
             // 
@@ -308,7 +299,6 @@
             this.txtDescription.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtDescription.Size = new System.Drawing.Size(350, 80);
             this.txtDescription.TabIndex = 6;
-
             // 
             // btnOk
             // 
@@ -319,7 +309,6 @@
             this.btnOk.TabIndex = 7;
             this.btnOk.Text = "OK";
             this.btnOk.UseVisualStyleBackColor = true;
-
             // 
             // btnCancel
             // 
@@ -329,7 +318,6 @@
             this.btnCancel.TabIndex = 8;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
-
             // 
             // ctlDeviceDesign
             // 
@@ -341,20 +329,20 @@
             this.Controls.Add(this.lblDescription);
             this.Controls.Add(this.gbProtocol);
             this.Controls.Add(this.gbConnection);
-            this.Controls.Add(this.btnTest);
             this.Controls.Add(this.txtDeviceName);
             this.Controls.Add(this.lblDeviceName);
             this.Name = "ctlDeviceDesign";
             this.Size = new System.Drawing.Size(380, 480);
             this.gbConnection.ResumeLayout(false);
             this.gbConnection.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudPort)).EndInit();
             this.gbProtocol.ResumeLayout(false);
             this.gbProtocol.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nudPort)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudCommonAddress)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudOriginatorAddress)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
     }
 }
