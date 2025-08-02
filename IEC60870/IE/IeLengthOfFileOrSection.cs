@@ -33,7 +33,7 @@ namespace IEC60870.IE
 
         public override string ToString()
         {
-            return "Length of file or section: " + value;
+            return value.ToString();
         }
     }
 }

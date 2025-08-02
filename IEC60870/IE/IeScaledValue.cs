@@ -14,7 +14,7 @@ namespace IEC60870.IE
 
         public override string ToString()
         {
-            return "Scaled value: " + Value;
+            return Value.ToString();
         }
     }
 }

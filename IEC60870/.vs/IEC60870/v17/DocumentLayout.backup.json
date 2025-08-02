@@ -1,7 +1,35 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC60870\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{D9DE1C1F-141B-49E6-BC11-8C53EA99AD75}|..\\IEC104Server\\IEC104Server.csproj|e:\\projectforcustomers\\2025\\t07\\iec60870\\iec104server\\forms\\mainform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D9DE1C1F-141B-49E6-BC11-8C53EA99AD75}|..\\IEC104Server\\IEC104Server.csproj|e:\\projectforcustomers\\2025\\t07\\iec60870\\iec104server\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D9DE1C1F-141B-49E6-BC11-8C53EA99AD75}|..\\IEC104Server\\IEC104Server.csproj|e:\\projectforcustomers\\2025\\t07\\iec60870\\iec104server\\services\\iec60870serverservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{435DA506-48D9-4716-AB04-8C01562D3716}|..\\IECServerProcess\\IECServerProcess.csproj|e:\\projectforcustomers\\2025\\t07\\iec60870\\iecserverprocess\\iecserverprocess.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D9DE1C1F-141B-49E6-BC11-8C53EA99AD75}|..\\IEC104Server\\IEC104Server.csproj|e:\\projectforcustomers\\2025\\t07\\iec60870\\iec104server\\forms\\serverconfigform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D9DE1C1F-141B-49E6-BC11-8C53EA99AD75}|..\\IEC104Server\\IEC104Server.csproj|e:\\projectforcustomers\\2025\\t07\\iec60870\\iec104server\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D9DE1C1F-141B-49E6-BC11-8C53EA99AD75}|..\\IEC104Server\\IEC104Server.csproj|e:\\projectforcustomers\\2025\\t07\\iec60870\\iec104server\\forms\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D9DE1C1F-141B-49E6-BC11-8C53EA99AD75}|..\\IEC104Server\\IEC104Server.csproj|e:\\projectforcustomers\\2025\\t07\\iec60870\\iec104server\\forms\\serverconfigform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D9DE1C1F-141B-49E6-BC11-8C53EA99AD75}|..\\IEC104Server\\IEC104Server.csproj|e:\\projectforcustomers\\2025\\t07\\iec60870\\iec104server\\forms\\serverconfigform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +37,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 21,
           "Children": [
             {
               "$type": "Bookmark",
@@ -65,11 +93,121 @@
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "IECServerProcess.cs",
+              "DocumentMoniker": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IECServerProcess\\IECServerProcess.cs",
+              "RelativeDocumentMoniker": "..\\IECServerProcess\\IECServerProcess.cs",
+              "ToolTip": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IECServerProcess\\IECServerProcess.cs",
+              "RelativeToolTip": "..\\IECServerProcess\\IECServerProcess.cs",
+              "ViewState": "AgIAAFYAAAAAAAAAAAAuwBIAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-02T03:25:17.66Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "IEC60870ServerService.cs",
+              "DocumentMoniker": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Services\\IEC60870ServerService.cs",
+              "RelativeDocumentMoniker": "..\\IEC104Server\\Services\\IEC60870ServerService.cs",
+              "ToolTip": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Services\\IEC60870ServerService.cs",
+              "RelativeToolTip": "..\\IEC104Server\\Services\\IEC60870ServerService.cs",
+              "ViewState": "AgIAAI8AAAAAAAAAAAAcwJgAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-01T09:29:13.838Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Program.cs",
+              "DocumentMoniker": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Program.cs",
+              "RelativeDocumentMoniker": "..\\IEC104Server\\Program.cs",
+              "ToolTip": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Program.cs",
+              "RelativeToolTip": "..\\IEC104Server\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwA8AAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-01T06:56:25.174Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MainForm.cs",
+              "DocumentMoniker": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Forms\\MainForm.cs",
+              "RelativeDocumentMoniker": "..\\IEC104Server\\Forms\\MainForm.cs",
+              "ToolTip": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Forms\\MainForm.cs",
+              "RelativeToolTip": "..\\IEC104Server\\Forms\\MainForm.cs",
+              "ViewState": "AgIAABUBAAAAAAAAAAAcwB8BAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-01T06:49:41.829Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ServerConfigForm.cs",
+              "DocumentMoniker": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Forms\\ServerConfigForm.cs",
+              "RelativeDocumentMoniker": "..\\IEC104Server\\Forms\\ServerConfigForm.cs",
+              "ToolTip": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Forms\\ServerConfigForm.cs",
+              "RelativeToolTip": "..\\IEC104Server\\Forms\\ServerConfigForm.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAIwCAAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-01T06:49:08.873Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ServerConfigForm.Designer.cs",
+              "DocumentMoniker": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Forms\\ServerConfigForm.Designer.cs",
+              "RelativeDocumentMoniker": "..\\IEC104Server\\Forms\\ServerConfigForm.Designer.cs",
+              "ToolTip": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Forms\\ServerConfigForm.Designer.cs",
+              "RelativeToolTip": "..\\IEC104Server\\Forms\\ServerConfigForm.Designer.cs",
+              "ViewState": "AgIAAGEBAAAAAAAAAAAmwGsBAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-01T06:48:55.703Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ServerConfigForm.cs [Design]",
+              "DocumentMoniker": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Forms\\ServerConfigForm.cs",
+              "RelativeDocumentMoniker": "..\\IEC104Server\\Forms\\ServerConfigForm.cs",
+              "ToolTip": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Forms\\ServerConfigForm.cs [Design]",
+              "RelativeToolTip": "..\\IEC104Server\\Forms\\ServerConfigForm.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-01T06:48:48.941Z",
+              "EditorCaption": " [Design]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MainForm.Designer.cs",
+              "DocumentMoniker": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Forms\\MainForm.Designer.cs",
+              "RelativeDocumentMoniker": "..\\IEC104Server\\Forms\\MainForm.Designer.cs",
+              "ToolTip": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Forms\\MainForm.Designer.cs",
+              "RelativeToolTip": "..\\IEC104Server\\Forms\\MainForm.Designer.cs",
+              "ViewState": "AgIAAG0BAAAAAAAAAAAMwHQBAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-01T06:45:30.493Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "MainForm.cs [Design]",
+              "DocumentMoniker": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Forms\\MainForm.cs",
+              "RelativeDocumentMoniker": "..\\IEC104Server\\Forms\\MainForm.cs",
+              "ToolTip": "E:\\ProjectForCustomers\\2025\\T07\\IEC60870\\IEC104Server\\Forms\\MainForm.cs [Design]",
+              "RelativeToolTip": "..\\IEC104Server\\Forms\\MainForm.cs [Design]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-01T06:45:28.772Z",
+              "EditorCaption": " [Design]"
             }
           ]
         }

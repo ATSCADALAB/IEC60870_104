@@ -39,7 +39,7 @@ namespace IEC60870.IE
 
         public override string ToString()
         {
-            return "Short float value: " + value;
+            return value.ToString();
         }
     }
 }

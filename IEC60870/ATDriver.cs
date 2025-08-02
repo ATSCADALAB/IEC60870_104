@@ -275,27 +275,52 @@ namespace IEC60870Driver
 
         public string Write(SendPack sendPack)
         {
+            //try
+            //{
+            //    if (this.currentReader is null || !this.currentReader.ConnectionStatus)
+            //        return WriteBad;
+
+            //    // ✅ THÊM: Kiểm tra nếu TagAddress là IOA number
+            //    if (int.TryParse(sendPack.TagAddress, out int ioa))
+            //    {
+            //        Console.WriteLine($"[DEBUG] Using smart write for IOA: {sendPack.TagAddress}");
+
+            //        // Smart write với auto-detect TypeId
+            //        return WriteSmartIOA(ioa, sendPack.Value, sendPack.TagType);
+            //    }
+
+            //    // ✅ GIỮ NGUYÊN: Cách cũ cho format "TypeId:IOA"
+            //    if (!GetIOAddress(sendPack.TagAddress, sendPack.TagType, out IOAddress address))
+            //        return WriteBad;
+
+            //    var deviceReader = this.deviceReaders.FirstOrDefault(x => x.DeviceID == DeviceID);
+            //    return deviceReader is null ? WriteBad :
+            //           deviceReader.Write(address, sendPack.Value.Trim()) ? WriteGood : WriteBad;
+            //}
+            //catch
+            //{
+            //    return WriteBad;
+            //}
             try
             {
                 if (this.currentReader is null || !this.currentReader.ConnectionStatus)
                     return WriteBad;
 
-                // ✅ THÊM: Kiểm tra nếu TagAddress là IOA number
                 if (int.TryParse(sendPack.TagAddress, out int ioa))
                 {
                     Console.WriteLine($"[DEBUG] Using smart write for IOA: {sendPack.TagAddress}");
-
-                    // Smart write với auto-detect TypeId
                     return WriteSmartIOA(ioa, sendPack.Value, sendPack.TagType);
                 }
 
-                // ✅ GIỮ NGUYÊN: Cách cũ cho format "TypeId:IOA"
                 if (!GetIOAddress(sendPack.TagAddress, sendPack.TagType, out IOAddress address))
                     return WriteBad;
 
                 var deviceReader = this.deviceReaders.FirstOrDefault(x => x.DeviceID == DeviceID);
-                return deviceReader is null ? WriteBad :
-                       deviceReader.Write(address, sendPack.Value.Trim()) ? WriteGood : WriteBad;
+                if (deviceReader is null) return WriteBad;
+
+                // Sửa lại: Trả về giá trị đã ghi thay vì WriteGood
+                bool success = deviceReader.Write(address, sendPack.Value.Trim());
+                return success ? sendPack.Value.Trim() : WriteBad;  // ✅ Trả về giá trị thực tế
             }
             catch
             {
@@ -304,23 +329,46 @@ namespace IEC60870Driver
         }
 
         // SỬA WriteSmartIOA() - VERSION TỐI ƯU
+        //private string WriteSmartIOA(int ioa, string value, string hintType)
+        //{
+        //    try
+        //    {
+        //        // ✅ SỬ DỤNG HINT TYPE TRỰC TIẾP - KHÔNG ĐỌC TRƯỚC
+        //        string targetTagType = hintType ?? GuessTypeFromValue(value);
+
+        //        // Map sang write command TypeId
+        //        var typeId = GetTypeIdFromDataType(targetTagType, true);
+        //        var address = new IOAddress(ioa, typeId, GetDataTypeEnum(targetTagType));
+
+        //        Console.WriteLine($"[DEBUG] Writing IOA {ioa} as {typeId}: {value}");
+
+        //        // Execute write ngay lập tức
+        //        var deviceReader = this.deviceReaders.FirstOrDefault(x => x.DeviceID == DeviceID);
+        //        return deviceReader is null ? WriteBad :
+        //               deviceReader.Write(address, value.Trim()) ? WriteGood : WriteBad;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"[ERROR] WriteSmartIOA failed: {ex.Message}");
+        //        return WriteBad;
+        //    }
+        //}
         private string WriteSmartIOA(int ioa, string value, string hintType)
         {
             try
             {
-                // ✅ SỬ DỤNG HINT TYPE TRỰC TIẾP - KHÔNG ĐỌC TRƯỚC
                 string targetTagType = hintType ?? GuessTypeFromValue(value);
-
-                // Map sang write command TypeId
                 var typeId = GetTypeIdFromDataType(targetTagType, true);
                 var address = new IOAddress(ioa, typeId, GetDataTypeEnum(targetTagType));
 
                 Console.WriteLine($"[DEBUG] Writing IOA {ioa} as {typeId}: {value}");
 
-                // Execute write ngay lập tức
                 var deviceReader = this.deviceReaders.FirstOrDefault(x => x.DeviceID == DeviceID);
-                return deviceReader is null ? WriteBad :
-                       deviceReader.Write(address, value.Trim()) ? WriteGood : WriteBad;
+                if (deviceReader is null) return WriteBad;
+
+                // Sửa lại: Nếu ghi thành công thì trả về giá trị đã ghi
+                bool writeSuccess = deviceReader.Write(address, value.Trim());
+                return writeSuccess ? value.Trim() : WriteBad;  // ✅ Trả về giá trị thực tế
             }
             catch (Exception ex)
             {
@@ -328,7 +376,6 @@ namespace IEC60870Driver
                 return WriteBad;
             }
         }
-
         // ✅ IMPROVE GuessTypeFromValue
         private string GuessTypeFromValue(string value)
         {

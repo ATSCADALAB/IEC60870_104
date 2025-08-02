@@ -40,7 +40,7 @@ namespace IEC60870.IE
 
         public override string ToString()
         {
-            return "File segment of length: " + length;
+            return length.ToString();
         }
     }
 }

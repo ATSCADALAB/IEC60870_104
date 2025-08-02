@@ -32,7 +32,7 @@ namespace IEC60870.IE
 
         public override string ToString()
         {
-            return "Name of file: " + value;
+            return value.ToString();
         }
     }
 }

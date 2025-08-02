@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace IEC60870Driver
 {
@@ -11,7 +14,9 @@ namespace IEC60870Driver
         private readonly ATDriver driver;
         private readonly List<BlockReader> blockReaders;
         private ClientAdapter clientAdapter;
-
+        private DateTime lastPingTest = DateTime.MinValue;
+        private bool lastPingResult = false;
+        private readonly object pingLock = new object();
         #endregion
 
         #region PROPERTIES
@@ -53,8 +58,104 @@ namespace IEC60870Driver
 
         public bool CheckConnection()
         {
-            ConnectionStatus = this.clientAdapter != null && this.clientAdapter.CheckConnection();
-            return ConnectionStatus;
+            if (Settings == null) return false;
+
+            lock (pingLock)
+            {
+                // Cache ping result trong 10 giây để tránh ping quá thường xuyên
+                if (DateTime.Now - lastPingTest < TimeSpan.FromSeconds(10))
+                {
+                    ConnectionStatus = lastPingResult && this.clientAdapter?.CheckConnection() == true;
+                    return ConnectionStatus;
+                }
+
+                // ✅ BƯỚC 1: Test ping trước
+                lastPingTest = DateTime.Now;
+                lastPingResult = PingDevice(Settings.IpAddress);
+
+                if (!lastPingResult)
+                {
+                    Console.WriteLine($"[WARNING] Device {DeviceName} ({Settings.IpAddress}) not reachable via ping");
+                    ConnectionStatus = false;
+                    return false;
+                }
+
+                // ✅ BƯỚC 2: Nếu ping OK, kiểm tra IEC60870 connection
+                bool iecConnection = this.clientAdapter?.CheckConnection() == true;
+
+                if (!iecConnection && lastPingResult)
+                {
+                    Console.WriteLine($"[INFO] Device {DeviceName} ping OK but IEC60870 failed. Attempting reconnect...");
+                    // Ping OK nhưng IEC60870 fail → reconnect
+                    Task.Run(() => ReconnectDevice());
+                }
+
+                ConnectionStatus = lastPingResult && iecConnection;
+                return ConnectionStatus;
+            }
+        }
+        private void ReconnectDevice()
+        {
+            try
+            {
+                Console.WriteLine($"[INFO] Reconnecting device {DeviceName}...");
+
+                // Đợi một chút để tránh reconnect quá nhanh
+                Thread.Sleep(1000);
+
+                // Force reconnect ClientAdapter
+                if (this.clientAdapter != null)
+                {
+                    this.clientAdapter.Reconnect();
+
+                    // Test lại sau khi reconnect
+                    Thread.Sleep(2000);
+                    bool reconnectSuccess = this.clientAdapter.CheckConnection();
+
+                    if (reconnectSuccess)
+                    {
+                        Console.WriteLine($"[SUCCESS] Device {DeviceName} reconnected successfully");
+                        ConnectionStatus = true;
+                        // Reset cache để test ngay lần tới
+                        lastPingTest = DateTime.MinValue;
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[ERROR] Device {DeviceName} reconnect failed");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] Device reconnect exception: {ex.Message}");
+            }
+        }
+        private bool PingDevice(string ipAddress, int timeoutMs = 3000)
+        {
+            try
+            {
+                using (var ping = new Ping())
+                {
+                    var reply = ping.Send(ipAddress, timeoutMs);
+                    bool success = reply.Status == IPStatus.Success;
+
+                    if (success)
+                    {
+                        Console.WriteLine($"[PING] {ipAddress} - OK ({reply.RoundtripTime}ms)");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[PING] {ipAddress} - FAILED ({reply.Status})");
+                    }
+
+                    return success;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[PING] {ipAddress} - ERROR: {ex.Message}");
+                return false;
+            }
         }
 
         /// <summary>
@@ -98,8 +199,10 @@ namespace IEC60870Driver
                 }
             }
 
-            // Neu khong co trong buffer, doc truc tiep tu Device 
-            if (!ConnectionStatus) return false;
+            if (!CheckConnection())
+            {
+                return false;
+            }
 
             return this.clientAdapter.Read(Settings.CommonAddress, ioAddress, out object objValue) &&
                    ConvertValue(objValue, ioAddress.DataType, out value);
@@ -110,7 +213,11 @@ namespace IEC60870Driver
         /// </summary>
         public bool Write(IOAddress ioAddress, string value)
         {
-            if (!ConnectionStatus) return false;
+            if (!CheckConnection())
+            {
+                return false;
+            }
+
             return this.clientAdapter.Write(Settings.CommonAddress, ioAddress, value);
         }
 

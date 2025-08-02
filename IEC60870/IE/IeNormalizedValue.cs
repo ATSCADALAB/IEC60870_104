@@ -37,7 +37,7 @@ namespace IEC60870.IE
 
         public override string ToString()
         {
-            return "Normalized value: " + (double) Value / 32768;
+            return ((double)Value / 32768).ToString();
         }
     }
 }

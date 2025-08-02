@@ -31,7 +31,7 @@ namespace IEC60870.IE
 
         public override string ToString()
         {
-            return "Name of section: " + value;
+            return value.ToString();
         }
     }
 }
