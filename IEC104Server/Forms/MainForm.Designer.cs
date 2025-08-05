@@ -116,7 +116,7 @@
             this.configureServerToolStripMenuItem.Name = "configureServerToolStripMenuItem";
             this.configureServerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.configureServerToolStripMenuItem.Text = "Configure Server...";
-            //this.configureServerToolStripMenuItem.Click += new System.EventHandler(this.configureServerToolStripMenuItem_Click);
+            this.configureServerToolStripMenuItem.Click += new System.EventHandler(this.configureServerToolStripMenuItem_Click);
             // 
             // helpToolStripMenuItem
             // 

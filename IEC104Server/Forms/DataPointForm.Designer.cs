@@ -25,9 +25,9 @@ namespace IEC60870ServerWinForm.Forms
             this.lblType = new System.Windows.Forms.Label();
             this.cmbDataType = new System.Windows.Forms.ComboBox();
             this.lblValue = new System.Windows.Forms.Label();
-            this.txtValue = new System.Windows.Forms.TextBox();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.TagName = new ATSCADAWebApp.ToolExtensions.TagCollection.SmartTagComboBox();
             this.SuspendLayout();
             // 
             // lblIOA
@@ -35,9 +35,9 @@ namespace IEC60870ServerWinForm.Forms
             this.lblIOA.AutoSize = true;
             this.lblIOA.Location = new System.Drawing.Point(12, 15);
             this.lblIOA.Name = "lblIOA";
-            this.lblIOA.Size = new System.Drawing.Size(107, 13);
+            this.lblIOA.Size = new System.Drawing.Size(106, 13);
             this.lblIOA.TabIndex = 0;
-            this.lblIOA.Text = "Information Address (IOA):";
+            this.lblIOA.Text = "Information Address :";
             // 
             // txtIOA
             // 
@@ -67,7 +67,7 @@ namespace IEC60870ServerWinForm.Forms
             this.lblType.AutoSize = true;
             this.lblType.Location = new System.Drawing.Point(12, 67);
             this.lblType.Name = "lblType";
-            this.lblType.Size = new System.Drawing.Size(62, 13);
+            this.lblType.Size = new System.Drawing.Size(60, 13);
             this.lblType.TabIndex = 4;
             this.lblType.Text = "Data Type:";
             // 
@@ -85,16 +85,9 @@ namespace IEC60870ServerWinForm.Forms
             this.lblValue.AutoSize = true;
             this.lblValue.Location = new System.Drawing.Point(12, 94);
             this.lblValue.Name = "lblValue";
-            this.lblValue.Size = new System.Drawing.Size(64, 13);
+            this.lblValue.Size = new System.Drawing.Size(59, 13);
             this.lblValue.TabIndex = 6;
-            this.lblValue.Text = "Initial Value:";
-            // 
-            // txtValue
-            // 
-            this.txtValue.Location = new System.Drawing.Point(125, 91);
-            this.txtValue.Name = "txtValue";
-            this.txtValue.Size = new System.Drawing.Size(147, 20);
-            this.txtValue.TabIndex = 4;
+            this.lblValue.Text = "Tag Value:";
             // 
             // btnOK
             // 
@@ -116,6 +109,15 @@ namespace IEC60870ServerWinForm.Forms
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
+            // TagName
+            // 
+            this.TagName.InRuntime = false;
+            this.TagName.Location = new System.Drawing.Point(125, 94);
+            this.TagName.Name = "TagName";
+            this.TagName.Size = new System.Drawing.Size(147, 21);
+            this.TagName.TabIndex = 7;
+            this.TagName.TagName = "";
+            // 
             // DataPointForm
             // 
             this.AcceptButton = this.btnOK;
@@ -123,9 +125,9 @@ namespace IEC60870ServerWinForm.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(284, 163);
+            this.Controls.Add(this.TagName);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
-            this.Controls.Add(this.txtValue);
             this.Controls.Add(this.lblValue);
             this.Controls.Add(this.cmbDataType);
             this.Controls.Add(this.lblType);
@@ -142,6 +144,7 @@ namespace IEC60870ServerWinForm.Forms
             this.Load += new System.EventHandler(this.DataPointForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
+
         }
 
         #endregion
@@ -153,8 +156,8 @@ namespace IEC60870ServerWinForm.Forms
         private System.Windows.Forms.Label lblType;
         private System.Windows.Forms.ComboBox cmbDataType;
         private System.Windows.Forms.Label lblValue;
-        private System.Windows.Forms.TextBox txtValue;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
+        private ATSCADAWebApp.ToolExtensions.TagCollection.SmartTagComboBox TagName;
     }
 }
