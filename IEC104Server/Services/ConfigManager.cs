@@ -77,24 +77,7 @@ namespace IEC60870ServerWinForm.Services
 
         #region Data Points
 
-        public List<DataPoint> LoadDataPoints()
-        {
-            try
-            {
-                if (File.Exists(_dataPointsPath))
-                {
-                    var json = File.ReadAllText(_dataPointsPath);
-                    return JsonConvert.DeserializeObject<List<DataPoint>>(json) ?? new List<DataPoint>();
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Load data points error: {ex.Message}");
-            }
-
-            // Return default examples
-            return CreateDefaultDataPoints();
-        }
+        
 
         public void SaveDataPoints(List<DataPoint> dataPoints)
         {
@@ -108,38 +91,6 @@ namespace IEC60870ServerWinForm.Services
                 System.Diagnostics.Debug.WriteLine($"Save data points error: {ex.Message}");
             }
         }
-
-        private List<DataPoint> CreateDefaultDataPoints()
-        {
-            return new List<DataPoint>
-            {
-                new DataPoint
-                {
-                    IOA = 1001,
-                    Name = "High Level Sensor",
-                    Type = DataType.Bool,
-                    DataTagName = "AT-TMSDevice.HighLevel",
-                    Description = "Water tank high level sensor"
-                },
-                new DataPoint
-                {
-                    IOA = 1002,
-                    Name = "Temperature",
-                    Type = DataType.Float,
-                    DataTagName = "AT-TMSDevice.Temperature",
-                    Description = "Tank temperature"
-                },
-                new DataPoint
-                {
-                    IOA = 1003,
-                    Name = "Flow Counter",
-                    Type = DataType.Counter,
-                    DataTagName = "AT-TMSDevice.FlowCounter",
-                    Description = "Cumulative flow"
-                }
-            };
-        }
-
         #endregion
     }
 }
