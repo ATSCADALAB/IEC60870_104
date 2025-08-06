@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using IEC104Server.Models;
 using IEC60870ServerWinForm.Models;
 using IEC60870ServerWinForm.Services;
 
@@ -51,7 +52,7 @@ namespace IEC60870ServerWinForm.Forms
                         TypeId = dp.GetTypeIdDisplayName(),
                         Value = dp.Value ?? "",
                         ConvertedValue = dp.ConvertedValue?.ToString() ?? "",
-                        IsValid = dp.IsValid ? "✅" : "❌",
+                        IsValid = dp.IsValid ? "" : "❌",
                         LastUpdated = dp.LastUpdated.ToString("HH:mm:ss"),
                         Status = GetTagStatus(dp)
                     })
@@ -220,7 +221,7 @@ namespace IEC60870ServerWinForm.Forms
                         TypeId = dp.GetTypeIdDisplayName(),
                         Value = dp.Value ?? "",
                         ConvertedValue = dp.ConvertedValue?.ToString() ?? "",
-                        IsValid = dp.IsValid ? "✅" : "❌",
+                        IsValid = dp.IsValid ? "" : "❌",
                         LastUpdated = dp.LastUpdated.ToString("HH:mm:ss"),
                         Status = GetTagStatus(dp)
                     })
@@ -270,7 +271,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ THÊM MỚI: Double-click để xem chi tiết tag
+        ///  THÊM MỚI: Double-click để xem chi tiết tag
         /// </summary>
         private void DgvTags_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -294,7 +295,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ THÊM MỚI: Hiển thị chi tiết tag trong dialog
+        ///  THÊM MỚI: Hiển thị chi tiết tag trong dialog
         /// </summary>
         private void ShowTagDetails(string tagPath)
         {
@@ -347,7 +348,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ THÊM MỚI: Context menu cho DataGridView
+        ///  THÊM MỚI: Context menu cho DataGridView
         /// </summary>
         private void SetupContextMenu()
         {
@@ -391,7 +392,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ THÊM MỚI: Test single tag
+        ///  THÊM MỚI: Test single tag
         /// </summary>
         private void TestSingleTag(string tagPath)
         {
@@ -424,7 +425,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ THÊM MỚI: Refresh single tag
+        ///  THÊM MỚI: Refresh single tag
         /// </summary>
         private void RefreshSingleTag(string tagPath)
         {
@@ -468,11 +469,11 @@ namespace IEC60870ServerWinForm.Forms
         {
             base.OnLoad(e);
 
-            // ✅ Setup additional features
+            //  Setup additional features
             SetupContextMenu();
             dgvTags.CellDoubleClick += DgvTags_CellDoubleClick;
 
-            // ✅ Load initial data
+            //  Load initial data
             LoadTagData();
         }
     }

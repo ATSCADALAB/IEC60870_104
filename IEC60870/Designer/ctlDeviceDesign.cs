@@ -57,11 +57,11 @@ namespace IEC60870Driver
 
         private void InitializeControls()
         {
-            // ✅ BASIC CONNECTION
+            //  BASIC CONNECTION
             txtIpAddress.Text = "192.168.1.63";
             nudPort.Value = 2404;
 
-            // ✅ PROTOCOL SETTINGS
+            //  PROTOCOL SETTINGS
             nudCommonAddress.Minimum = 0;
             nudCommonAddress.Maximum = 65535;
             nudCommonAddress.Value = 1;
@@ -70,7 +70,7 @@ namespace IEC60870Driver
             nudOriginatorAddress.Maximum = 255;
             nudOriginatorAddress.Value = 0;
 
-            // ✅ COT Field Length - COMBOBOX
+            //  COT Field Length - COMBOBOX
             cbxCotFieldLength.Items.Clear();
             cbxCotFieldLength.Items.AddRange(new object[] {
                 new { Text = "1 byte", Value = 1 },
@@ -81,7 +81,7 @@ namespace IEC60870Driver
             cbxCotFieldLength.DropDownStyle = ComboBoxStyle.DropDownList;
             cbxCotFieldLength.SelectedIndex = 1; // Default: 2 bytes
 
-            // ✅ CA Field Length - COMBOBOX  
+            //  CA Field Length - COMBOBOX  
             cbxCaFieldLength.Items.Clear();
             cbxCaFieldLength.Items.AddRange(new object[] {
                 new { Text = "1 byte", Value = 1 },
@@ -92,7 +92,7 @@ namespace IEC60870Driver
             cbxCaFieldLength.DropDownStyle = ComboBoxStyle.DropDownList;
             cbxCaFieldLength.SelectedIndex = 1; // Default: 2 bytes
 
-            // ✅ IOA Field Length - COMBOBOX
+            //  IOA Field Length - COMBOBOX
             cbxIoaFieldLength.Items.Clear();
             cbxIoaFieldLength.Items.AddRange(new object[] {
                 new { Text = "1 byte (1-255)", Value = 1 },

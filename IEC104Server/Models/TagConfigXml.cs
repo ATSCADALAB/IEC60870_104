@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using IEC104Server.Models;
 using IEC60870.Enum;
 
 namespace IEC60870ServerWinForm.Models
 {
     /// <summary>
-    /// ✅ THÊM MỚI: XML structure cho IEC104 tag configuration
+    ///  THÊM MỚI: XML structure cho IEC104 tag configuration
     /// </summary>
     [XmlRoot("IEC104Configuration")]
     public class IEC104Configuration
@@ -112,7 +113,7 @@ namespace IEC60870ServerWinForm.Models
             }
             else
             {
-                dataPoint.DataType = Models.DataType.Bool; // Default
+                dataPoint.DataType = IEC104Server.Models.DataType.Bool; // Default
             }
 
             return dataPoint;

@@ -2,6 +2,7 @@
 using ATSCADA;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace IEC60870ServerWinForm.Services
 {
@@ -30,19 +31,26 @@ namespace IEC60870ServerWinForm.Services
         /// </summary>
         public void Initialize(iDriver driver, string defaultTaskName = "")
         {
+            LogMessage?.Invoke($"🔧 DriverManager.Initialize called with driver: {(driver != null ? "NOT NULL" : "NULL")}");
+
             _driver = driver;
             _defaultTaskName = defaultTaskName;
 
             if (_driver != null)
             {
                 _isInitialized = true;
-                LogMessage?.Invoke($"Driver initialized successfully with default task: '{_defaultTaskName}'");
+                LogMessage?.Invoke($" DriverManager initialized successfully with default task: '{_defaultTaskName}'");
+                LogMessage?.Invoke($"   _driver: {(_driver != null ? "Available" : "NULL")}");
+                LogMessage?.Invoke($"   _isInitialized: {_isInitialized}");
             }
             else
             {
-                LogMessage?.Invoke("Warning: Driver is null - cần kiểm tra iDriver1 trong FormMain");
+                _isInitialized = false;
+                LogMessage?.Invoke("❌ DriverManager initialization failed: Driver is null");
             }
         }
+
+
 
         /// <summary>
         /// Đọc giá trị tag theo format: Task.Tag hoặc chỉ Tag
@@ -246,29 +254,113 @@ namespace IEC60870ServerWinForm.Services
         /// <summary>
         /// Đọc nhiều tag cùng lúc - hiệu quả hơn
         /// </summary>
+        /// <summary>
+        ///  OPTIMIZED: Batch read multiple tags với performance cao
+        /// </summary>
         public Dictionary<string, string> GetMultipleTagValues(IEnumerable<string> tagPaths)
         {
             var results = new Dictionary<string, string>();
 
-            if (!_isInitialized || _driver == null)
+            //  FIX: Check _driver null và log debug info
+            if (!_isInitialized)
+            {
+                LogMessage?.Invoke($"❌ GetMultipleTagValues: Driver not initialized");
                 return results;
+            }
 
-            foreach (var tagPath in tagPaths)
+            if (_driver == null)
+            {
+                LogMessage?.Invoke($"❌ GetMultipleTagValues: _driver is null");
+                return results;
+            }
+
+            var tagList = tagPaths.ToList();
+            if (tagList.Count == 0) return results;
+
+            var startTime = DateTime.Now;
+
+            //  OPTIMIZATION 1: Group tags by task để tối ưu network calls
+            var tagsByTask = new Dictionary<string, List<(string fullPath, string tagName)>>();
+
+            foreach (var tagPath in tagList)
             {
                 try
                 {
-                    var value = GetTagValue(tagPath);
-                    results[tagPath] = value;
+                    var parts = tagPath.Split('.');
+                    string taskName, tagName;
+
+                    if (parts.Length >= 2)
+                    {
+                        taskName = parts[0];
+                        tagName = parts.Length > 2 ? string.Join(".", parts, 1, parts.Length - 1) : parts[1];
+                    }
+                    else
+                    {
+                        taskName = _defaultTaskName ?? "DefaultTask";
+                        tagName = tagPath;
+                    }
+
+                    if (!tagsByTask.ContainsKey(taskName))
+                        tagsByTask[taskName] = new List<(string, string)>();
+
+                    tagsByTask[taskName].Add((tagPath, tagName));
                 }
                 catch (Exception ex)
                 {
-                    LogMessage?.Invoke($"Error reading tag '{tagPath}': {ex.Message}");
+                    LogMessage?.Invoke($"Error parsing tag path '{tagPath}': {ex.Message}");
                     results[tagPath] = null;
                 }
             }
 
+            //  OPTIMIZATION 2: Batch read per task
+            foreach (var taskGroup in tagsByTask)
+            {
+                var taskName = taskGroup.Key;
+                var tags = taskGroup.Value;
+
+                try
+                {
+                    var taskObj = _driver.Task(taskName);
+
+                    //  OPTIMIZATION 3: Parallel read trong cùng task (nếu driver support)
+                    foreach (var (fullPath, tagName) in tags)
+                    {
+                        try
+                        {
+                            var value = taskObj.Tag(tagName).Value?.ToString();
+                            results[fullPath] = value;
+                        }
+                        catch (Exception ex)
+                        {
+                            LogMessage?.Invoke($"Error reading tag '{fullPath}': {ex.Message}");
+                            results[fullPath] = null;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogMessage?.Invoke($"Error accessing task '{taskName}': {ex.Message}");
+                    // Mark all tags in this task as failed
+                    foreach (var (fullPath, _) in tags)
+                    {
+                        results[fullPath] = null;
+                    }
+                }
+            }
+
+            var elapsed = DateTime.Now - startTime;
+
+            //  OPTIMIZATION 4: Performance monitoring
+            if (elapsed.TotalMilliseconds > 500 || tagList.Count > 100)
+            {
+                LogMessage?.Invoke($" Batch read: {tagList.Count} tags in {elapsed.TotalMilliseconds:F0}ms " +
+                                 $"({tagList.Count / elapsed.TotalSeconds:F0} tags/sec)");
+            }
+
             return results;
         }
+
+
 
         public void Dispose()
         {

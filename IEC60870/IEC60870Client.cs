@@ -201,7 +201,7 @@ namespace IEC60870Driver
                             lock (dataBufferLock)
                             {
                                 dataBuffer[ioa] = extractedValue;
-                                ioaTypeMapping[ioa] = typeId; // ✅ LƯU MAPPING
+                                ioaTypeMapping[ioa] = typeId; //  LƯU MAPPING
                             }
                         }
                     }

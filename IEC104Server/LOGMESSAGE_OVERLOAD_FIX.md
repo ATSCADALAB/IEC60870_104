@@ -9,18 +9,18 @@
 - Events `OnLogMessage` chỉ truyền 1 parameter: `Action<string>`
 - Compiler không thể match delegate signature
 
-## ✅ **Giải pháp đã triển khai:**
+##  **Giải pháp đã triển khai:**
 
 ### **1. Method Overloading**
 
-**✅ Tạo overload method để tương thích:**
+** Tạo overload method để tương thích:**
 ```csharp
 /// <summary>
-/// ✅ TỐI ƯU: Log message với level để chỉ log những thứ cần thiết
+///  TỐI ƯU: Log message với level để chỉ log những thứ cần thiết
 /// </summary>
 private void LogMessage(string message, bool isImportant = true)
 {
-    // ✅ Chỉ log những thứ quan trọng hoặc lỗi
+    //  Chỉ log những thứ quan trọng hoặc lỗi
     if (!isImportant && !IsImportantMessage(message))
     {
         return; // Skip routine messages
@@ -29,7 +29,7 @@ private void LogMessage(string message, bool isImportant = true)
 }
 
 /// <summary>
-/// ✅ THÊM MỚI: Overload để tương thích với events (1 parameter)
+///  THÊM MỚI: Overload để tương thích với events (1 parameter)
 /// </summary>
 private void LogMessage(string message)
 {
@@ -39,7 +39,7 @@ private void LogMessage(string message)
 
 ### **2. Event Subscription**
 
-**✅ Events hoạt động bình thường:**
+** Events hoạt động bình thường:**
 ```csharp
 // Setup events
 _driverManager.LogMessage += LogMessage; // Uses overload (1 parameter)
@@ -48,17 +48,17 @@ _serverService.OnLogMessage += LogMessage; // Uses overload (1 parameter)
 
 ### **3. Method Usage**
 
-**✅ Flexible usage:**
+** Flexible usage:**
 ```csharp
-// ✅ From events (1 parameter) - always important
-LogMessage("🚀 Server started"); // → LogMessage(message, true)
+//  From events (1 parameter) - always important
+LogMessage(" Server started"); // → LogMessage(message, true)
 
-// ✅ Internal calls (2 parameters) - configurable
+//  Internal calls (2 parameters) - configurable
 LogMessage("📈 SCADA Scan: 100 Good", false); // Routine, may skip
 LogMessage("❌ Connection failed", true);      // Important, always log
 
-// ✅ Helper methods
-LogImportant("✅ Configuration saved");  // → LogMessage(message, true)
+//  Helper methods
+LogImportant(" Configuration saved");  // → LogMessage(message, true)
 LogRoutine("📤 Sent 100 data points");   // → LogMessage(message, false)
 ```
 
@@ -66,20 +66,20 @@ LogRoutine("📤 Sent 100 data points");   // → LogMessage(message, false)
 
 ### **Method Signatures:**
 ```csharp
-// ✅ Main method (2 parameters)
+//  Main method (2 parameters)
 private void LogMessage(string message, bool isImportant = true)
 
-// ✅ Overload for events (1 parameter)  
+//  Overload for events (1 parameter)  
 private void LogMessage(string message)
 
-// ✅ Helper methods
+//  Helper methods
 private void LogImportant(string message)
 private void LogRoutine(string message)
 ```
 
 ### **Event Compatibility:**
 ```csharp
-// ✅ Events work with 1-parameter overload
+//  Events work with 1-parameter overload
 public event Action<string> OnLogMessage;
 
 // When event fires:
@@ -88,14 +88,14 @@ OnLogMessage?.Invoke("Server message"); // → LogMessage(message) → LogMessag
 
 ### **Backward Compatibility:**
 ```csharp
-// ✅ Old code still works
+//  Old code still works
 LogMessage("Simple message"); // Uses overload, defaults to important
 
-// ✅ New code has more control
+//  New code has more control
 LogMessage("Routine message", false); // Can specify importance
 ```
 
-## 📊 **Behavior:**
+##  **Behavior:**
 
 ### **Event Messages (1 parameter):**
 ```csharp
@@ -110,7 +110,7 @@ LogMessage("Routine message", false); // Can specify importance
 // From internal calls
 LogMessage("📈 SCADA Scan: 100 Good", false)  → May skip (routine)
 LogMessage("❌ Connection failed", true)       → Always log (important)
-LogImportant("✅ Config saved")                → Always log
+LogImportant(" Config saved")                → Always log
 LogRoutine("📤 Data sent")                     → May skip
 ```
 
@@ -126,7 +126,7 @@ Helper Methods → LogImportant/LogRoutine → Specific Importance
 IsImportantMessage() → Filter → txtLogs (if important)
 ```
 
-## ✅ **Benefits:**
+##  **Benefits:**
 
 ### **1. Backward Compatibility:**
 - All existing event subscriptions work unchanged
@@ -151,25 +151,25 @@ IsImportantMessage() → Filter → txtLogs (if important)
 
 ### **Event Subscription Test:**
 ```csharp
-// ✅ Should compile and work
+//  Should compile and work
 _serverService.OnLogMessage += LogMessage;
 _driverManager.LogMessage += LogMessage;
 
-// ✅ Should fire without errors
+//  Should fire without errors
 _serverService.OnLogMessage?.Invoke("Test message");
 ```
 
 ### **Message Filtering Test:**
 ```csharp
-// ✅ Important messages always logged
+//  Important messages always logged
 LogMessage("❌ Error occurred", true);        // Always appears
-LogMessage("✅ Success", true);               // Always appears
+LogMessage(" Success", true);               // Always appears
 
-// ✅ Routine messages may be filtered
+//  Routine messages may be filtered
 LogMessage("📈 Regular scan", false);         // May not appear
 LogMessage("📤 Data transmission", false);    // May not appear
 ```
 
 ---
 
-**Kết quả:** Event subscription hoạt động bình thường, logging được tối ưu với message filtering, và backward compatibility được duy trì! 🚀
+**Kết quả:** Event subscription hoạt động bình thường, logging được tối ưu với message filtering, và backward compatibility được duy trì! 

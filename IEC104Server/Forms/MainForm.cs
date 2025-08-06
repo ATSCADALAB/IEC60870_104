@@ -12,6 +12,9 @@ using IEC60870ServerWinForm.Models;
 using IEC60870ServerWinForm.Services;
 using ATSCADA;
 using static IEC60870.IE.IeDoublePointWithQuality;
+using IEC104Server.Services;
+using System.IO;
+using IEC104Server.Models;
 
 namespace IEC60870ServerWinForm.Forms
 {
@@ -21,6 +24,7 @@ namespace IEC60870ServerWinForm.Forms
         private readonly IEC60870ServerService _serverService;
         private readonly ConfigManager _configManager;
         private readonly DriverManager _driverManager;
+        private readonly XmlConfigService _xmlConfigService;
 
         // Data
         private ServerConfig _serverConfig;
@@ -31,8 +35,17 @@ namespace IEC60870ServerWinForm.Forms
         private Timer _tagScanTimer;
         private Timer _dataSendTimer;
 
-        // ATSCADA Driver - nhận từ form chính
-        public iDriver iDriver1 { get; set; }
+        //  OPTIMIZATION: UI update control
+        private bool _enableGridValueUpdates = false; // Disable by default for performance
+
+        //  File management
+        private string _currentConfigFile = null;
+
+        //  Write response optimization
+        private bool _enableImmediateReadBack = true; // Enable immediate read back after write
+
+        //  Driver optimization
+        private bool _useDirectDriverOnly = true; // Skip DriverManager, use iDriver1 directly
 
         public MainForm()
         {
@@ -41,16 +54,20 @@ namespace IEC60870ServerWinForm.Forms
             _serverService = new IEC60870ServerService();
             _configManager = new ConfigManager();
             _driverManager = new DriverManager();
+            _xmlConfigService = new XmlConfigService();
+
+            //  Initialize _dataPoints early to prevent null reference
+            _dataPoints = new List<DataPoint>();
 
             // Setup events
             _driverManager.LogMessage += LogMessage;
             _serverService.OnLogMessage += LogMessage;
 
-            // ✅ SỬA LỖI: Event OnAsduReceived nhận ASdu parameter
+            //  SỬA LỖI: Event OnAsduReceived nhận ASdu parameter
             _serverService.OnAsduReceived += HandleReceivedAsdu;
 
-            // Setup timers với interval hợp lý
-            _tagScanTimer = new Timer { Interval = 1000 }; // Scan mỗi 1 giây
+            // Setup timers với interval hợp lý -  OPTIMIZATION: Adaptive intervals
+            _tagScanTimer = new Timer { Interval = GetOptimalScanInterval() };
             _tagScanTimer.Tick += (s, e) => UpdateTagValues();
 
             _dataSendTimer = new Timer { Interval = 3000 }; // Gửi data mỗi 3 giây
@@ -64,10 +81,17 @@ namespace IEC60870ServerWinForm.Forms
         {
             try
             {
-                iDriver1 = driver;
-                _driverManager.Initialize(driver, defaultTaskName);
+                LogMessage($"🔧 InitializeDriver called with driver: {(driver != null ? "NOT NULL" : "NULL")}");
 
-                LogMessage($"✅ Driver initialized successfully!");
+                iDriver1 = driver;
+                LogMessage($"🔧 iDriver1 set: {(iDriver1 != null ? "NOT NULL" : "NULL")}");
+
+                _driverManager.Initialize(driver, defaultTaskName);
+                LogMessage($"🔧 DriverManager.Initialize completed");
+
+                LogMessage($" Driver initialized successfully!");
+                LogMessage($"   iDriver1: {(iDriver1 != null ? "Available" : "NULL")}");
+                LogMessage($"   DriverManager.IsInitialized: {_driverManager.IsInitialized}");
                 LogMessage($"   Default Task: '{defaultTaskName}'");
 
                 // Test driver ngay sau khi khởi tạo
@@ -87,12 +111,18 @@ namespace IEC60870ServerWinForm.Forms
             InitializeDriver(driver, defaultTaskName);
         }
 
+
+
         private void MainForm_Load(object sender, EventArgs e)
         {
             try
             {
                 // Load config và data
                 _serverConfig = _configManager.LoadServerConfig();
+
+                //  Initialize _dataPoints if null
+                //_dataPoints = _configManager.LoadDataPoints() ?? new List<DataPoint>();
+                // LogMessage($"🔧 _dataPoints initialized: Count={_dataPoints.Count}");
 
                 // Setup data binding
                 _dataPointsBindingSource = new BindingSource
@@ -105,18 +135,17 @@ namespace IEC60870ServerWinForm.Forms
                 SetupDataGrid();
                 UpdateServerStatusUI();
 
-                LogMessage("📊 Application loaded successfully");
-                LogMessage($"   Data Points: {_dataPoints.Count}");
+                //LogMessage(" Application loaded successfully");
+                LogMessage($"Data Points: {_dataPoints.Count}");
 
                 // Kiểm tra xem có driver chưa
                 if (_driverManager.IsInitialized)
                 {
-                    LogMessage("🔄 Starting tag scanning...");
+                    //LogMessage("🔄 Starting tag scanning...");
                     _tagScanTimer.Start();
                 }
                 else
                 {
-                    LogMessage("⚠️  Driver not initialized yet. Call SetDriver() first.");
                 }
             }
             catch (Exception ex)
@@ -139,13 +168,10 @@ namespace IEC60870ServerWinForm.Forms
                 if (dgvDataPoints.Columns["Type"] != null)
                     dgvDataPoints.Columns["Type"].Width = 100;
 
-                if (dgvDataPoints.Columns["Value"] != null)
-                    dgvDataPoints.Columns["Value"].Width = 100;
-
                 if (dgvDataPoints.Columns["DataTagName"] != null)
                 {
                     dgvDataPoints.Columns["DataTagName"].Width = 200;
-                    dgvDataPoints.Columns["DataTagName"].HeaderText = "Tag Path (Task.Tag)";
+                    dgvDataPoints.Columns["DataTagName"].HeaderText = "Tag Name";
                 }
 
                 // Hide unnecessary columns
@@ -177,21 +203,62 @@ namespace IEC60870ServerWinForm.Forms
             }
         }
 
+        #region Performance Optimization
+
+        /// <summary>
+        ///  OPTIMIZATION: Calculate optimal scan interval based on data point count
+        /// </summary>
+        private int GetOptimalScanInterval()
+        {
+            var pointCount = _dataPoints?.Count ?? 0;
+
+            if (pointCount <= 50)
+                return 1000;    // 1 second for small datasets
+            else if (pointCount <= 200)
+                return 2000;    // 2 seconds for medium datasets
+            else if (pointCount <= 500)
+                return 3000;    // 3 seconds for large datasets
+            else if (pointCount <= 1000)
+                return 5000;    // 5 seconds for very large datasets
+            else
+                return 10000;   // 10 seconds for massive datasets
+        }
+
+        /// <summary>
+        ///  OPTIMIZATION: Update scan interval when data points change
+        /// </summary>
+        public void UpdateScanInterval()
+        {
+            if (_tagScanTimer != null)
+            {
+                var newInterval = GetOptimalScanInterval();
+                if (_tagScanTimer.Interval != newInterval)
+                {
+                    _tagScanTimer.Interval = newInterval;
+                    LogMessage($" Scan interval updated to {newInterval}ms for {_dataPoints.Count} data points");
+                }
+            }
+        }
+
+        #endregion
+
         #region Timer Methods - Cải tiến để đọc từ iDriver1
 
         /// <summary>
-        /// ✅ CẢI TIẾN: Sử dụng GetMultipleTagValues để đọc nhiều tag cùng lúc
+        ///  OPTIMIZED: Batch reading cho hiệu suất cao với nhiều tags
         /// </summary>
         private void UpdateTagValues()
         {
-            if (!_driverManager.IsInitialized)
+            if (iDriver1 == null)
             {
                 return;
             }
 
             try
             {
-                // Lấy danh sách các tag paths cần đọc
+                var startTime = DateTime.Now;
+
+                //  OPTIMIZATION 1: Batch read tất cả tags cùng lúc
                 var tagPaths = _dataPoints
                     .Where(dp => !string.IsNullOrEmpty(dp.DataTagName))
                     .Select(dp => dp.DataTagName)
@@ -199,12 +266,16 @@ namespace IEC60870ServerWinForm.Forms
 
                 if (tagPaths.Count == 0) return;
 
-                // ✅ HIỆU QUẢ HỚN: Đọc tất cả tag cùng lúc
-                var tagValues = _driverManager.GetMultipleTagValues(tagPaths);
+                //  OPTIMIZATION 2: Use direct iDriver1 reads (skip DriverManager)
+                var tagValues = GetTagValuesDirectly(tagPaths);
 
+                var readTime = DateTime.Now - startTime;
+
+                //  OPTIMIZATION 3: Process results nhanh chóng
                 bool hasChanges = false;
                 int successCount = 0;
                 int errorCount = 0;
+                int changedCount = 0;
 
                 foreach (var dataPoint in _dataPoints)
                 {
@@ -213,28 +284,29 @@ namespace IEC60870ServerWinForm.Forms
 
                     try
                     {
-                        // Lấy giá trị từ kết quả đã đọc
+                        // Lấy value từ batch result
                         var newValue = tagValues.ContainsKey(dataPoint.DataTagName)
                             ? tagValues[dataPoint.DataTagName]
                             : null;
 
-                        var isGood = !string.IsNullOrEmpty(newValue) &&
-                                   _driverManager.IsTagGood(dataPoint.DataTagName);
+                        var isGood = !string.IsNullOrEmpty(newValue);
 
                         // Chỉ update nếu có thay đổi
                         if (dataPoint.Value != newValue || dataPoint.IsValid != isGood)
                         {
+                            var oldValue = dataPoint.Value;
                             dataPoint.Value = newValue ?? "null";
                             dataPoint.IsValid = isGood;
                             dataPoint.LastUpdated = DateTime.Now;
 
-                            // ✅ Convert value theo DataType
+                            //  Convert value theo DataType
                             if (isGood && !string.IsNullOrEmpty(newValue))
                             {
                                 dataPoint.ConvertedValue = dataPoint.ConvertValueByDataType(newValue);
                             }
 
                             hasChanges = true;
+                            changedCount++;
                         }
 
                         if (isGood && !string.IsNullOrEmpty(newValue))
@@ -244,14 +316,18 @@ namespace IEC60870ServerWinForm.Forms
                     }
                     catch (Exception ex)
                     {
-                        LogMessage($"❌ Error processing tag '{dataPoint.DataTagName}': {ex.Message}");
+                        //  Chỉ log error đầu tiên để tránh spam
+                        if (errorCount == 0)
+                        {
+                            LogMessage($"❌ Error processing tags: {ex.Message} (and possibly more...)");
+                        }
                         dataPoint.IsValid = false;
                         errorCount++;
                     }
                 }
 
-                // Update UI nếu có thay đổi
-                if (hasChanges)
+                //  OPTIMIZATION 5: Optional UI update - chỉ khi enable và dataset nhỏ
+                if (hasChanges && _enableGridValueUpdates && _dataPoints.Count <= 100)
                 {
                     if (InvokeRequired)
                     {
@@ -263,10 +339,12 @@ namespace IEC60870ServerWinForm.Forms
                     }
                 }
 
-                // Log thống kê mỗi 10 giây
-                if (DateTime.Now.Second % 10 == 0)
+                var totalTime = DateTime.Now - startTime;
+
+                //  Chỉ log khi có vấn đề hoặc thay đổi đáng kể
+                if (errorCount > 0 || totalTime.TotalMilliseconds > 2000 || changedCount > 10)
                 {
-                    LogMessage($"📈 Tag Scan: {successCount} OK, {errorCount} Error, {tagPaths.Count} Total");
+                    LogMessage($" SCADA Scan: {successCount} Good, {errorCount} Error, {changedCount} Changed | Time: {totalTime.TotalMilliseconds:F0}ms");
                 }
             }
             catch (Exception ex)
@@ -276,7 +354,53 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ SỬA LỖI: Sử dụng BroadcastAsdu thay vì SendSpontaneousData không tồn tại
+        ///  FALLBACK: Direct tag reading using iDriver1 when DriverManager fails
+        /// </summary>
+        private Dictionary<string, string> GetTagValuesDirectly(List<string> tagPaths)
+        {
+            var results = new Dictionary<string, string>();
+
+            if (iDriver1 == null)
+            {
+                LogMessage($"❌ iDriver1 not available for tag reading");
+                return results;
+            }
+
+            foreach (var tagPath in tagPaths)
+            {
+                try
+                {
+                    // Parse task và tag từ DataTagName
+                    var parts = tagPath.Split('.');
+                    string taskName, tagName;
+
+                    if (parts.Length >= 2)
+                    {
+                        taskName = parts[0];
+                        tagName = parts.Length > 2 ? string.Join(".", parts, 1, parts.Length - 1) : parts[1];
+                    }
+                    else
+                    {
+                        taskName = _driverManager.DefaultTaskName ?? "DefaultTask";
+                        tagName = tagPath;
+                    }
+
+                    //  Direct read từ iDriver1
+                    var value = iDriver1.Task(taskName).Tag(tagName).Value?.ToString();
+                    results[tagPath] = value;
+                }
+                catch (Exception ex)
+                {
+                    LogMessage($"❌ Error reading tag '{tagPath}': {ex.Message}");
+                    results[tagPath] = null;
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        ///  SỬA LỖI: Sử dụng BroadcastAsdu thay vì SendSpontaneousData không tồn tại
         /// </summary>
         private void SendAllValidData()
         {
@@ -302,7 +426,7 @@ namespace IEC60870ServerWinForm.Forms
                         var asdu = ConvertToASdu(point);
                         if (asdu != null)
                         {
-                            // ✅ SỬA LỖI: Sử dụng BroadcastAsdu thay vì SendSpontaneousData
+                            //  SỬA LỖI: Sử dụng BroadcastAsdu thay vì SendSpontaneousData
                             _serverService.BroadcastAsdu(asdu);
                         }
                     }
@@ -312,7 +436,11 @@ namespace IEC60870ServerWinForm.Forms
                     }
                 }
 
-                LogMessage($"📤 Sent {validPoints.Count} data points to IEC104 clients");
+                //  Chỉ log khi có nhiều data points hoặc có vấn đề
+                if (validPoints.Count > 50 || validPoints.Count == 0)
+                {
+                    LogMessage($"📤 Sent {validPoints.Count} data points to IEC104 clients");
+                }
             }
             catch (Exception ex)
             {
@@ -328,9 +456,9 @@ namespace IEC60870ServerWinForm.Forms
         {
             try
             {
-                if (!_driverManager.IsInitialized)
+                if (iDriver1 == null)
                 {
-                    MessageBox.Show("Driver chưa được khởi tạo! Cần gọi SetDriver() trước.",
+                    MessageBox.Show("iDriver1 chưa được khởi tạo! Cần gọi SetDriver() hoặc InitializeDriver() trước.",
                         "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -340,7 +468,7 @@ namespace IEC60870ServerWinForm.Forms
                 _tagScanTimer.Start();
 
                 UpdateServerStatusUI();
-                LogMessage("🚀 IEC104 Server started successfully");
+                LogMessage(" IEC104 Server started successfully");
             }
             catch (Exception ex)
             {
@@ -371,7 +499,7 @@ namespace IEC60870ServerWinForm.Forms
         #region Value Conversion Helpers
 
         /// <summary>
-        /// ✅ HELPER: Convert string thành bool an toàn
+        ///  HELPER: Convert string thành bool an toàn
         /// </summary>
         private bool ConvertToBoolean(string value)
         {
@@ -382,7 +510,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ HELPER: Convert string thành int an toàn
+        ///  HELPER: Convert string thành int an toàn
         /// </summary>
         private int ConvertToInt32(string value)
         {
@@ -399,7 +527,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ HELPER: Convert string thành float an toàn
+        ///  HELPER: Convert string thành float an toàn
         /// </summary>
         private float ConvertToSingle(string value)
         {
@@ -412,7 +540,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ HELPER: Convert string thành uint an toàn (cho counter)
+        ///  HELPER: Convert string thành uint an toàn (cho counter)
         /// </summary>
         private uint ConvertToUInt32(string value)
         {
@@ -431,7 +559,7 @@ namespace IEC60870ServerWinForm.Forms
         #endregion
 
         /// <summary>
-        /// ✅ THÊM MỚI: Convert DataPoint thành ASdu để gửi
+        ///  THÊM MỚI: Convert DataPoint thành ASdu để gửi
         /// </summary>
         private ASdu ConvertToASdu(DataPoint point)
         {
@@ -579,15 +707,21 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ SỬA LỖI: Event handler nhận ASdu parameter
+        ///  SỬA LỖI: Event handler nhận ASdu parameter
         /// </summary>
         private void HandleReceivedAsdu(ASdu asdu)
         {
             try
             {
-                LogMessage($"📨 Received ASDU: Type={asdu.GetTypeIdentification()}, " +
-                          $"COT={asdu.GetCauseOfTransmission()}, " +
-                          $"CA={asdu.GetCommonAddress()}");
+                var typeId = asdu.GetTypeIdentification();
+
+                //  Chỉ log commands quan trọng, không log Interrogation spam
+                if (typeId != TypeId.C_IC_NA_1)
+                {
+                    LogMessage($"📨 Received ASDU: Type={typeId}, " +
+                              $"COT={asdu.GetCauseOfTransmission()}, " +
+                              $"CA={asdu.GetCommonAddress()}");
+                }
 
                 // Có thể xử lý commands từ client ở đây
                 HandleClientCommands(asdu);
@@ -613,15 +747,27 @@ namespace IEC60870ServerWinForm.Forms
                 {
                     case TypeId.C_SC_NA_1: // Single command
                         LogMessage($"🎛️  Received Single Command");
+                        HandleSingleCommand(asdu);
                         break;
 
                     case TypeId.C_IC_NA_1: // Interrogation command
-                        LogMessage($"🔍 Received Interrogation Command - sending all data");
+                        // LogMessage($"🔍 Received Interrogation Command - sending all data");
                         SendAllValidData(); // Gửi tất cả data hiện tại
                         break;
 
-                    case TypeId.C_SE_NC_1: // Set point command
-                        LogMessage($"📊 Received Set Point Command");
+                    case TypeId.C_SE_NC_1: // Set point command (float)
+                        LogMessage($" Received Set Point Float Command");
+                        HandleSetPointFloatCommand(asdu);
+                        break;
+
+                    case TypeId.C_SE_NB_1: // Set point command (int)
+                        LogMessage($" Received Set Point Int Command");
+                        HandleSetPointIntCommand(asdu);
+                        break;
+
+                    case TypeId.C_DC_NA_1: // Double command
+                        LogMessage($"🎛️  Received Double Command");
+                        HandleDoubleCommand(asdu);
                         break;
 
                     default:
@@ -632,6 +778,190 @@ namespace IEC60870ServerWinForm.Forms
             catch (Exception ex)
             {
                 LogMessage($"❌ Error processing client command: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        ///  Handle Single Command (C_SC_NA_1) - Boolean control
+        /// </summary>
+        private void HandleSingleCommand(ASdu asdu)
+        {
+            try
+            {
+                var informationObjects = asdu.GetInformationObjects();
+                if (informationObjects == null || informationObjects.Length == 0)
+                {
+                    LogMessage($"❌ Single Command: No information objects");
+                    return;
+                }
+
+                foreach (var infoObj in informationObjects)
+                {
+                    var ioa = infoObj.GetInformationObjectAddress();
+                    var elements = infoObj.GetInformationElements();
+
+                    if (elements != null && elements.Length > 0 && elements[0] != null && elements[0].Length > 0)
+                    {
+                        var element = elements[0][0];
+
+                        //  Extract command value using IeSingleCommand
+                        bool commandValue = false;
+                        if (element is IeSingleCommand singleCommand)
+                        {
+                            commandValue = singleCommand.IsCommandStateOn();
+                        }
+
+                        LogMessage($"🎛️  Single Command: IOA={ioa}, Value={commandValue}");
+
+                        //  WRITE BACK TO SCADA
+                        WriteToSCADA(ioa, commandValue);
+
+                        // Send confirmation back to client
+                        SendCommandConfirmation(ioa, TypeId.C_SC_NA_1, commandValue);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error handling single command: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        ///  Handle Set Point Float Command (C_SE_NC_1)
+        /// </summary>
+        private void HandleSetPointFloatCommand(ASdu asdu)
+        {
+            try
+            {
+                var informationObjects = asdu.GetInformationObjects();
+                if (informationObjects == null || informationObjects.Length == 0)
+                {
+                    LogMessage($"❌ Set Point Float: No information objects");
+                    return;
+                }
+
+                foreach (var infoObj in informationObjects)
+                {
+                    var ioa = infoObj.GetInformationObjectAddress();
+                    var elements = infoObj.GetInformationElements();
+
+                    if (elements != null && elements.Length > 0 && elements[0] != null && elements[0].Length > 0)
+                    {
+                        var element = elements[0][0];
+
+                        //  Extract command value using IeShortFloat
+                        float commandValue = 0.0f;
+                        if (element is IeShortFloat shortFloat)
+                        {
+                            commandValue = shortFloat.GetValue();
+                        }
+
+                        LogMessage($" Set Point Float: IOA={ioa}, Value={commandValue}");
+
+                        //  WRITE BACK TO SCADA
+                        WriteToSCADA(ioa, commandValue);
+
+                        // Send confirmation back to client
+                        SendCommandConfirmation(ioa, TypeId.C_SE_NC_1, commandValue);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error handling set point float command: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        ///  Handle Set Point Int Command (C_SE_NB_1)
+        /// </summary>
+        private void HandleSetPointIntCommand(ASdu asdu)
+        {
+            try
+            {
+                var informationObjects = asdu.GetInformationObjects();
+                if (informationObjects == null || informationObjects.Length == 0)
+                {
+                    LogMessage($"❌ Set Point Int: No information objects");
+                    return;
+                }
+
+                foreach (var infoObj in informationObjects)
+                {
+                    var ioa = infoObj.GetInformationObjectAddress();
+                    var elements = infoObj.GetInformationElements();
+
+                    if (elements != null && elements.Length > 0 && elements[0] != null && elements[0].Length > 0)
+                    {
+                        var element = elements[0][0];
+
+                        //  Extract command value using IeScaledValue
+                        int commandValue = 0;
+                        if (element is IeScaledValue scaledValue)
+                        {
+                            commandValue = scaledValue.GetValue();
+                        }
+
+                        LogMessage($" Set Point Int: IOA={ioa}, Value={commandValue}");
+
+                        //  WRITE BACK TO SCADA
+                        WriteToSCADA(ioa, commandValue);
+
+                        // Send confirmation back to client
+                        SendCommandConfirmation(ioa, TypeId.C_SE_NB_1, commandValue);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error handling set point int command: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        ///  Handle Double Command (C_DC_NA_1)
+        /// </summary>
+        private void HandleDoubleCommand(ASdu asdu)
+        {
+            try
+            {
+                var informationObjects = asdu.GetInformationObjects();
+                if (informationObjects == null || informationObjects.Length == 0)
+                {
+                    LogMessage($"❌ Double Command: No information objects");
+                    return;
+                }
+
+                foreach (var infoObj in informationObjects)
+                {
+                    var ioa = infoObj.GetInformationObjectAddress();
+                    var elements = infoObj.GetInformationElements();
+
+                    if (elements != null && elements.Length > 0 && elements[0] != null && elements[0].Length > 0)
+                    {
+                        var element = elements[0][0];
+
+                        //  Extract command value using IeDoubleCommand
+                        int commandValue = 0;
+                        if (element is IeDoubleCommand doubleCommand)
+                        {
+                            commandValue = (int)doubleCommand.GetCommandState();
+                        }
+
+                        LogMessage($"🎛️  Double Command: IOA={ioa}, Value={commandValue}");
+
+                        //  WRITE BACK TO SCADA
+                        WriteToSCADA(ioa, commandValue);
+
+                        // Send confirmation back to client
+                        SendCommandConfirmation(ioa, TypeId.C_DC_NA_1, commandValue);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error handling double command: {ex.Message}");
             }
         }
 
@@ -646,13 +976,22 @@ namespace IEC60870ServerWinForm.Forms
         {
             try
             {
+                //  Debug: Check _dataPoints status
+                LogMessage($"🔧 btnAddPoint_Click: _dataPoints is {(_dataPoints == null ? "NULL" : $"initialized with {_dataPoints.Count} items")}");
+
+                if (_dataPoints == null)
+                {
+                    LogMessage("🔧 _dataPoints is null, initializing...");
+                    _dataPoints = new List<DataPoint>();
+                }
+
                 using (var form = new DataPointForm())
                 {
                     if (form.ShowDialog() == DialogResult.OK)
                     {
                         _dataPoints.Add(form.DataPoint);
                         RefreshDataPointsGrid();
-                        LogMessage($"✅ Added data point: IOA={form.DataPoint.IOA}, Name={form.DataPoint.Name}");
+                        LogMessage($" Added data point: IOA={form.DataPoint.IOA}, Name={form.DataPoint.Name}");
                     }
                 }
             }
@@ -686,7 +1025,7 @@ namespace IEC60870ServerWinForm.Forms
                         if (form.ShowDialog() == DialogResult.OK)
                         {
                             RefreshDataPointsGrid();
-                            LogMessage($"✅ Updated data point: IOA={form.DataPoint.IOA}, Name={form.DataPoint.Name}");
+                            LogMessage($" Updated data point: IOA={form.DataPoint.IOA}, Name={form.DataPoint.Name}");
                         }
                     }
                 }
@@ -724,7 +1063,7 @@ namespace IEC60870ServerWinForm.Forms
                     {
                         _dataPoints.Remove(selectedPoint);
                         RefreshDataPointsGrid();
-                        LogMessage($"✅ Deleted data point: IOA={selectedPoint.IOA}, Name={selectedPoint.Name}");
+                        LogMessage($" Deleted data point: IOA={selectedPoint.IOA}, Name={selectedPoint.Name}");
                     }
                 }
             }
@@ -775,7 +1114,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// Refresh data points grid
+        /// Refresh data points grid - chỉ cho config changes, không cho value updates
         /// </summary>
         private void RefreshDataPointsGrid()
         {
@@ -783,12 +1122,68 @@ namespace IEC60870ServerWinForm.Forms
             {
                 if (_dataPointsBindingSource != null)
                 {
+                    //  OPTIMIZATION: Chỉ refresh grid khi config thay đổi (add/edit/delete)
+                    // Không refresh cho value updates để tránh UI lag với 1000+ tags
                     _dataPointsBindingSource.ResetBindings(false);
                 }
+
+                //  OPTIMIZATION: Auto-adjust scan interval when data points change
+                UpdateScanInterval();
             }
             catch (Exception ex)
             {
                 LogMessage($"❌ Error refreshing grid: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        ///  THÊM MỚI: Force refresh grid manually (for debugging only)
+        /// </summary>
+        public void ForceRefreshGrid()
+        {
+            try
+            {
+                if (_dataPointsBindingSource != null)
+                {
+                    _dataPointsBindingSource.ResetBindings(false);
+                    LogMessage("🔄 Grid manually refreshed");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error force refreshing grid: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        ///  THÊM MỚI: Toggle grid value updates (for debugging small datasets)
+        /// </summary>
+        public void ToggleGridValueUpdates(bool enable)
+        {
+            _enableGridValueUpdates = enable;
+            LogMessage($" Grid value updates: {(enable ? "Enabled" : "Disabled")}");
+
+            if (enable && _dataPoints.Count > 100)
+            {
+                LogMessage("⚠️  Warning: Grid updates enabled with large dataset - may cause UI lag");
+            }
+        }
+
+        /// <summary>
+        ///  THÊM MỚI: Toggle immediate read back after write commands
+        /// </summary>
+        public void ToggleImmediateReadBack(bool enable)
+        {
+            _enableImmediateReadBack = enable;
+            LogMessage($"🔄 Immediate read back after write: {(enable ? "Enabled" : "Disabled")}");
+
+            if (!enable)
+            {
+                LogMessage(" Clients will receive updates on next scan cycle (may take 1-10 seconds)");
+            }
+            else
+            {
+                LogMessage("⚡ Clients will receive immediate updates after write commands");
             }
         }
 
@@ -811,11 +1206,244 @@ namespace IEC60870ServerWinForm.Forms
                 _configManager.SaveDataPoints(_dataPoints);
                 _driverManager.Dispose();
 
-                LogMessage("✅ Application closed successfully");
+                LogMessage(" Application closed successfully");
             }
             catch (Exception ex)
             {
                 LogMessage($"❌ Error during shutdown: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        ///  Send command confirmation back to client
+        /// </summary>
+        private void SendCommandConfirmation(int ioa, TypeId commandType, object value)
+        {
+            try
+            {
+                InformationObject[] infoObjects = null;
+
+                switch (commandType)
+                {
+                    case TypeId.C_SC_NA_1: // Single Command
+                        //  IeSingleCommand with proper parameters
+                        var singleCommand = new IeSingleCommand((bool)value, 0, false); // value, qualifier=0, not select
+                        infoObjects = new[] { new InformationObject(ioa, new InformationElement[][] { new InformationElement[] { singleCommand } }) };
+                        break;
+
+                    case TypeId.C_SE_NC_1: // Set Point Float
+                        //  IeShortFloat
+                        var shortFloat = new IeShortFloat((float)value);
+                        infoObjects = new[] { new InformationObject(ioa, new InformationElement[][] { new InformationElement[] { shortFloat } }) };
+                        break;
+
+                    case TypeId.C_SE_NB_1: // Set Point Int
+                        //  IeScaledValue
+                        var scaledValue = new IeScaledValue((int)value);
+                        infoObjects = new[] { new InformationObject(ioa, new InformationElement[][] { new InformationElement[] { scaledValue } }) };
+                        break;
+
+                    case TypeId.C_DC_NA_1: // Double Command
+                        //  IeDoubleCommand
+                        var doubleCommand = new IeDoubleCommand((DoubleCommandState)value, 0, false);
+                        infoObjects = new[] { new InformationObject(ioa, new InformationElement[][] { new InformationElement[] { doubleCommand } }) };
+                        break;
+                }
+
+                if (infoObjects != null)
+                {
+                    var confirmationAsdu = new ASdu(
+                        commandType,
+                        false, // Not sequence
+                        CauseOfTransmission.ACTIVATION_CON, // Activation confirmation
+                        false, // Not test
+                        false, // Not negative
+                        0, // Originator address
+                        1, // Common address
+                        infoObjects
+                    );
+
+                    _serverService.BroadcastAsdu(confirmationAsdu);
+                    // LogMessage($" Command confirmation sent: IOA={ioa}, Type={commandType}, Value={value}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error sending command confirmation: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region SCADA Write Operations
+
+        /// <summary>
+        ///  Write value to SCADA system using iDriver1
+        /// </summary>
+        private void WriteToSCADA(int ioa, object value)
+        {
+            try
+            {
+                if (iDriver1 == null)
+                {
+                    LogMessage($"❌ Write failed: iDriver1 not available");
+                    return;
+                }
+
+                // Find data point by IOA
+                var dataPoint = _dataPoints.FirstOrDefault(dp => dp.IOA == ioa);
+                if (dataPoint == null)
+                {
+                    LogMessage($"❌ Write failed: IOA {ioa} not found in configuration");
+                    return;
+                }
+
+                // Parse task and tag from DataTagName (format: "TaskName.TagName")
+                var parts = dataPoint.DataTagName.Split('.');
+                if (parts.Length < 2)
+                {
+                    LogMessage($"❌ Write failed: Invalid tag format '{dataPoint.DataTagName}'. Expected 'TaskName.TagName'");
+                    return;
+                }
+
+                string taskName = parts[0];
+                string tagName = parts.Length > 2 ? string.Join(".", parts, 1, parts.Length - 1) : parts[1];
+
+                //  WRITE TO SCADA using iDriver1
+                iDriver1.Task(taskName).Tag(tagName).Value = value.ToString();
+
+                LogMessage($" SCADA Write: {dataPoint.DataTagName} = {value}");
+
+                //  IMMEDIATE READ BACK and UPDATE CLIENT (if enabled)
+                if (_enableImmediateReadBack)
+                {
+                    ReadBackAndUpdateClient(dataPoint, taskName, tagName);
+                }
+                else
+                {
+                    LogMessage($" Immediate read back disabled - client will get update on next scan cycle");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error writing to SCADA: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        ///  Immediate read back from SCADA after write and update client
+        /// </summary>
+        private void ReadBackAndUpdateClient(DataPoint dataPoint, string taskName, string tagName)
+        {
+            try
+            {
+                //  IMMEDIATE READ from SCADA
+                var readBackValue = iDriver1.Task(taskName).Tag(tagName).Value?.ToString();
+                var isGood = !string.IsNullOrEmpty(readBackValue);
+
+                //  UPDATE DataPoint immediately
+                if (dataPoint.Value != readBackValue || dataPoint.IsValid != isGood)
+                {
+                    var oldValue = dataPoint.Value;
+                    dataPoint.Value = readBackValue ?? "null";
+                    dataPoint.IsValid = isGood;
+                    dataPoint.LastUpdated = DateTime.Now;
+
+                    // Convert value theo DataType
+                    if (isGood && !string.IsNullOrEmpty(readBackValue))
+                    {
+                        dataPoint.ConvertedValue = dataPoint.ConvertValueByDataType(readBackValue);
+                    }
+
+                    LogMessage($"🔄 Write feedback: {dataPoint.DataTagName} = {readBackValue}");
+
+                    //  IMMEDIATE SEND to all clients
+                    SendSingleDataPoint(dataPoint);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error reading back from SCADA: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        ///  Send single data point immediately to all clients
+        /// </summary>
+        private void SendSingleDataPoint(DataPoint dataPoint)
+        {
+            try
+            {
+                if (!dataPoint.IsValid || string.IsNullOrEmpty(dataPoint.Value))
+                {
+                    LogMessage($"⚠️  Skipping invalid data point: {dataPoint.Name}");
+                    return;
+                }
+
+                //  Create InformationObject directly based on type
+                InformationObject infoObj = null;
+
+                switch (dataPoint.Type)
+                {
+                    case TypeId.M_SP_NA_1: // Single point
+                        if (bool.TryParse(dataPoint.Value, out bool boolValue) ||
+                            (int.TryParse(dataPoint.Value, out int intVal) && intVal != 0))
+                        {
+                            var singlePoint = new IeSinglePointWithQuality(boolValue, false, false, false, false);
+                            infoObj = new InformationObject(dataPoint.IOA, new InformationElement[][] { new InformationElement[] { singlePoint } });
+                        }
+                        break;
+
+                    case TypeId.M_ME_NC_1: // Short float
+                        if (float.TryParse(dataPoint.Value, out float floatValue))
+                        {
+                            var shortFloat = new IeShortFloat(floatValue);
+                            infoObj = new InformationObject(dataPoint.IOA, new InformationElement[][] { new InformationElement[] { shortFloat } });
+                        }
+                        break;
+
+                    case TypeId.M_ME_NB_1: // Scaled value
+                        if (int.TryParse(dataPoint.Value, out int intValue))
+                        {
+                            var scaledValue = new IeScaledValue(intValue);
+                            infoObj = new InformationObject(dataPoint.IOA, new InformationElement[][] { new InformationElement[] { scaledValue } });
+                        }
+                        break;
+
+                    default:
+                        // Try as float for unknown types
+                        if (float.TryParse(dataPoint.Value, out float defaultFloat))
+                        {
+                            var shortFloat = new IeShortFloat(defaultFloat);
+                            infoObj = new InformationObject(dataPoint.IOA, new InformationElement[][] { new InformationElement[] { shortFloat } });
+                        }
+                        break;
+                }
+
+                if (infoObj != null)
+                {
+                    var asdu = new ASdu(
+                        dataPoint.Type,
+                        false, // Not sequence
+                        CauseOfTransmission.SPONTANEOUS, // Spontaneous update
+                        false, // Not test
+                        false, // Not negative
+                        0, // Originator address
+                        1, // Common address
+                        new InformationObject[] { infoObj }
+                    );
+
+                    _serverService.BroadcastAsdu(asdu);
+                    // LogMessage($"📤 Immediate update sent: {dataPoint.Name} = {dataPoint.Value}");
+                }
+                else
+                {
+                    LogMessage($"⚠️  Could not create InformationObject for: {dataPoint.Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error sending single data point: {ex.Message}");
             }
         }
 
@@ -824,14 +1452,53 @@ namespace IEC60870ServerWinForm.Forms
         #region Debug Methods
 
         /// <summary>
+        ///  THÊM MỚI: Test XML configuration functionality
+        /// </summary>
+        public void TestXmlConfiguration()
+        {
+            try
+            {
+                LogMessage("🔧 === XML CONFIGURATION TEST ===");
+
+                // Test export
+                var testFile = Path.Combine(Path.GetTempPath(), "test_config.xml");
+                _xmlConfigService.ExportToXml(_dataPoints, testFile, "Test Project");
+                LogMessage($" Export test: {testFile}");
+
+                // Test file info
+                var info = _xmlConfigService.GetXmlFileInfo(testFile);
+
+                // Test import
+                var importedPoints = _xmlConfigService.ImportFromXml(testFile);
+                LogMessage($" Import test: {importedPoints.Count} tags loaded");
+
+                // Cleanup
+                if (File.Exists(testFile))
+                    File.Delete(testFile);
+
+                LogMessage("🔧 === XML TEST COMPLETED ===");
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ XML test error: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Test kết nối driver và hiển thị thông tin debug
         /// </summary>
         public void TestDriverConnection()
         {
             LogMessage("🔧 === DRIVER CONNECTION TEST ===");
-            LogMessage($"   Driver Initialized: {_driverManager.IsInitialized}");
+            LogMessage($"   iDriver1 Object: {(iDriver1 != null ? " Available" : "❌ Null")}");
             LogMessage($"   Default Task: '{_driverManager.DefaultTaskName}'");
-            LogMessage($"   iDriver1 Object: {(iDriver1 != null ? "✅ Available" : "❌ Null")}");
+
+            if (iDriver1 == null)
+            {
+                LogMessage("   ❌ Cannot test - iDriver1 is null");
+                LogMessage("🔧 === END CONNECTION TEST ===");
+                return;
+            }
 
             if (_dataPoints.Count > 0)
             {
@@ -841,12 +1508,30 @@ namespace IEC60870ServerWinForm.Forms
                 {
                     try
                     {
-                        var info = _driverManager.GetTagInfo(testPoint.DataTagName);
-                        LogMessage($"   Test Tag: {info}");
+                        // Parse task và tag từ DataTagName
+                        var parts = testPoint.DataTagName.Split('.');
+                        string taskName, tagName;
+
+                        if (parts.Length >= 2)
+                        {
+                            taskName = parts[0];
+                            tagName = parts.Length > 2 ? string.Join(".", parts, 1, parts.Length - 1) : parts[1];
+                        }
+                        else
+                        {
+                            taskName = _driverManager.DefaultTaskName ?? "DefaultTask";
+                            tagName = testPoint.DataTagName;
+                        }
+
+                        //  Test đọc trực tiếp từ iDriver1
+                        var value = iDriver1.Task(taskName).Tag(tagName).Value?.ToString();
+                        var status = !string.IsNullOrEmpty(value) ? " OK" : "⚠️  NULL/EMPTY";
+
+                        LogMessage($"   Test: {testPoint.DataTagName} -> Task='{taskName}', Tag='{tagName}', Value='{value ?? "null"}' {status}");
                     }
                     catch (Exception ex)
                     {
-                        LogMessage($"   Test Tag Error: {ex.Message}");
+                        LogMessage($"   ❌ Test Error: {testPoint.DataTagName} - {ex.Message}");
                     }
                 }
             }
@@ -875,7 +1560,7 @@ namespace IEC60870ServerWinForm.Forms
                     LastUpdated = DateTime.Now
                 };
 
-                // ✅ Set TypeId và tự động mapping DataType
+                //  Set TypeId và tự động mapping DataType
                 newPoint.SetTypeId(type);
 
                 _dataPoints.Add(newPoint);
@@ -890,7 +1575,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ THÊM MỚI: Thêm data point với DataType (tự động mapping TypeId)
+        ///  THÊM MỚI: Thêm data point với DataType (tự động mapping TypeId)
         /// </summary>
         public void AddDataPointByDataType(int ioa, string name, DataType dataType, string tagPath)
         {
@@ -906,7 +1591,7 @@ namespace IEC60870ServerWinForm.Forms
                     LastUpdated = DateTime.Now
                 };
 
-                // ✅ Set DataType và tự động mapping TypeId
+                //  Set DataType và tự động mapping TypeId
                 newPoint.SetDataType(dataType);
 
                 _dataPoints.Add(newPoint);
@@ -936,6 +1621,149 @@ namespace IEC60870ServerWinForm.Forms
         {
             LogMessage("📤 Force sending all data...");
             SendAllValidData();
+        }
+
+        /// <summary>
+        ///  THÊM MỚI: Reset server config về default values
+        /// </summary>
+        public void ResetServerConfig()
+        {
+            try
+            {
+                _configManager.ResetToDefaultConfig();
+                _serverConfig = _configManager.LoadServerConfig();
+                LogMessage(" Server config reset to default values");
+                LogMessage($"   T1: {_serverConfig.TimeoutT1}ms, T2: {_serverConfig.TimeoutT2}ms, T3: {_serverConfig.TimeoutT3}ms");
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error resetting server config: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region File Menu Event Handlers
+
+        /// <summary>
+        /// Save configuration to XML (quick save)
+        /// </summary>
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string filePath;
+
+                //  Use current file if available, otherwise create new
+                if (!string.IsNullOrEmpty(_currentConfigFile))
+                {
+                    filePath = _currentConfigFile;
+                }
+                else
+                {
+                    // Create default filename and path
+                    var defaultFileName = $"IEC104_Config_{DateTime.Now:yyyyMMdd_HHmmss}.xml";
+                    var defaultPath = Path.Combine(Application.StartupPath, "Configs");
+
+                    // Create Configs directory if not exists
+                    if (!Directory.Exists(defaultPath))
+                        Directory.CreateDirectory(defaultPath);
+
+                    filePath = Path.Combine(defaultPath, defaultFileName);
+                    _currentConfigFile = filePath; // Remember for next save
+                }
+
+                _xmlConfigService.ExportToXml(_dataPoints, filePath, "IEC104 Server");
+                //LogMessage($"Configuration saved to: {Path.GetFileName(filePath)}");
+                //LogMessage($"Saved {_dataPoints.Count} data points to XML");
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"Error saving configuration: {ex.Message}");
+                MessageBox.Show($"Error saving configuration: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Save As XML (export with dialog)
+        /// </summary>
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var dialog = new SaveFileDialog())
+                {
+                    dialog.Title = "Save IEC104 Configuration";
+                    dialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                    dialog.DefaultExt = "xml";
+                    dialog.FileName = $"IEC104_Config_{DateTime.Now:yyyyMMdd_HHmmss}.xml";
+
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        //  Export to XML using XmlConfigService
+                        _xmlConfigService.ExportToXml(_dataPoints, dialog.FileName, "IEC104 Server");
+                        _currentConfigFile = dialog.FileName; // Remember for next Save
+                        LogMessage($"Configuration saved to: {Path.GetFileName(dialog.FileName)}");
+                        LogMessage($"Saved {_dataPoints.Count} data points to XML");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error saving configuration: {ex.Message}");
+                MessageBox.Show($"Error saving configuration: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Open XML configuration (import with dialog)
+        /// </summary>
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var dialog = new OpenFileDialog())
+                {
+                    dialog.Title = "Open IEC104 Configuration";
+                    dialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                    dialog.DefaultExt = "xml";
+
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        // Show confirmation dialog
+                        var result = MessageBox.Show(
+                            $"Open Configuration?\n\n" +
+                            $"File: {System.IO.Path.GetFileName(dialog.FileName)}\n" +
+                            $"This will replace current configuration!\n\n" +
+                            $"Continue?",
+                            "Confirm Open", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                        if (result == DialogResult.Yes)
+                        {
+                            //  Import from XML using XmlConfigService
+                            var dataPoints = _xmlConfigService.ImportFromXml(dialog.FileName);
+                            if (dataPoints != null)
+                            {
+                                _dataPoints.Clear();
+                                _dataPoints.AddRange(dataPoints);
+                                RefreshDataPointsGrid();
+
+                                _currentConfigFile = dialog.FileName; // Remember for next Save
+                                LogMessage($"Configuration loaded from: {Path.GetFileName(dialog.FileName)}");
+                                LogMessage($"Loaded {_dataPoints.Count} data points from XML");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error opening configuration: {ex.Message}");
+                MessageBox.Show($"Error opening configuration: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         #endregion
@@ -986,8 +1814,8 @@ namespace IEC60870ServerWinForm.Forms
                 {
                     if (form.ShowDialog() == DialogResult.OK)
                     {
-                        _serverConfig = form.ServerConfig;
-                        LogMessage("✅ Server configuration updated");
+                        _serverConfig = form.ServerConfiguration; //  Fixed: Use ServerConfiguration
+                        LogMessage(" Server configuration updated");
                     }
                 }
             }

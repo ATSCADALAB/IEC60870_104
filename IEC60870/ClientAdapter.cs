@@ -187,7 +187,7 @@ namespace IEC60870Driver
             //            Client.SendInterrogation(commonAddress, 0);
             //            Thread.Sleep(2000);
 
-            //            // ✅ ĐÚNG: out TypeId (không nullable)
+            //            //  ĐÚNG: out TypeId (không nullable)
             //            if (Client.GetValueSmart(ioa, out value, out detectedTypeId))
             //            {
             //                return true;
@@ -215,7 +215,7 @@ namespace IEC60870Driver
                 // Gửi interrogation
                 Client.SendInterrogation(commonAddress, 0);
                 
-                // ✅ POLLING: Check mỗi 100ms thay vì sleep 2000ms
+                //  POLLING: Check mỗi 100ms thay vì sleep 2000ms
                 for (int poll = 0; poll < 20; poll++) // Max 2 seconds (20 * 100ms)
                 {
                     Thread.Sleep(100);

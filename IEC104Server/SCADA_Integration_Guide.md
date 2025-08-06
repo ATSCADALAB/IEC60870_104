@@ -77,10 +77,10 @@ AddDataPoint(16386, "Pump Status", TypeId.M_SP_NA_1, "PLC1.Pump01.Status");
 
 #### Log Messages
 ```
-✅ SCADA Test OK: PLC1.Temperature = 25.5
+ SCADA Test OK: PLC1.Temperature = 25.5
 ⚠️  SCADA Test Failed: PLC1.Pressure - Value: null, Good: False
 🔄 Updated Temperature (IOA:16385): PLC1.Temperature = 25.5 -> 25.5 (Float)
-📊 SCADA Scan Summary: 15 Good, 2 Error, 17 Total Tags
+ SCADA Scan Summary: 15 Good, 2 Error, 17 Total Tags
 ```
 
 ## API Reference

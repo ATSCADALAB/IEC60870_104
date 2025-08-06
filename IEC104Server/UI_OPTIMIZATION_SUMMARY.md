@@ -4,7 +4,7 @@
 
 ### **1. Client Connection Tracking**
 
-**✅ Thêm danh sách clients kết nối:**
+** Thêm danh sách clients kết nối:**
 ```csharp
 public class ClientInfo
 {
@@ -20,7 +20,7 @@ public class ClientInfo
 }
 ```
 
-**✅ UI hiển thị clients:**
+** UI hiển thị clients:**
 - ListView `lvConnectedClients` hiển thị:
   - IP Address
   - Port
@@ -29,7 +29,7 @@ public class ClientInfo
   - Status
 - Real-time update khi client connect/disconnect
 
-**✅ Events tracking:**
+** Events tracking:**
 ```csharp
 _serverService.OnClientsChanged += UpdateClientsList;
 
@@ -40,11 +40,11 @@ _serverService.OnClientsChanged += UpdateClientsList;
 
 ### **2. Optimized Logging**
 
-**✅ Chỉ log những thứ cần thiết:**
+** Chỉ log những thứ cần thiết:**
 ```csharp
 private void LogMessage(string message, bool isImportant = true)
 {
-    // ✅ Chỉ log những thứ quan trọng hoặc lỗi
+    //  Chỉ log những thứ quan trọng hoặc lỗi
     if (!isImportant && !IsImportantMessage(message))
     {
         return; // Skip routine messages
@@ -53,13 +53,13 @@ private void LogMessage(string message, bool isImportant = true)
 }
 ```
 
-**✅ Important message detection:**
+** Important message detection:**
 ```csharp
 private bool IsImportantMessage(string message)
 {
     return message.Contains("❌") ||      // Errors
-           message.Contains("✅") ||      // Success
-           message.Contains("🚀") ||      // Server events
+           message.Contains("") ||      // Success
+           message.Contains("") ||      // Server events
            message.Contains("📱") ||      // Client events
            message.Contains("⚠️") ||      // Warnings
            message.Contains("started") ||
@@ -71,15 +71,15 @@ private bool IsImportantMessage(string message)
 }
 ```
 
-**✅ Log levels:**
+** Log levels:**
 ```csharp
-LogImportant("🚀 IEC104 Server started successfully");  // Always log
+LogImportant(" IEC104 Server started successfully");  // Always log
 LogRoutine("📈 SCADA Scan: 100 Good, 0 Error");        // May skip
 ```
 
 ### **3. UI Cleanup**
 
-**✅ Ẩn Value columns không cần thiết:**
+** Ẩn Value columns không cần thiết:**
 ```csharp
 // Ẩn các columns:
 - Value (raw value từ SCADA)
@@ -88,7 +88,7 @@ LogRoutine("📈 SCADA Scan: 100 Good, 0 Error");        // May skip
 - LastUpdated (timestamp)
 ```
 
-**✅ Hiển thị chỉ những columns quan trọng:**
+** Hiển thị chỉ những columns quan trọng:**
 - IOA (Information Object Address)
 - Name (Data point name)
 - Type (IEC60870 type)
@@ -97,21 +97,21 @@ LogRoutine("📈 SCADA Scan: 100 Good, 0 Error");        // May skip
 
 ### **4. Performance Improvements**
 
-**✅ Reduced log buffer:**
+** Reduced log buffer:**
 ```csharp
 // Trước: 15000 chars → 7500 chars
 // Sau: 10000 chars → 5000 chars
 // Giảm memory usage và tăng performance
 ```
 
-**✅ Selective logging:**
+** Selective logging:**
 ```csharp
 // Trước: Log tất cả messages
 // Sau: Chỉ log errors, warnings, và events quan trọng
 // Giảm 70-80% log spam
 ```
 
-## 📊 **UI Layout hiện tại:**
+##  **UI Layout hiện tại:**
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -129,7 +129,7 @@ LogRoutine("📈 SCADA Scan: 100 Good, 0 Error");        // May skip
 ├─────────────────────────────────────────────────────────────┤
 │ Server Logs (Only Important Messages)                      │
 │ ┌─────────────────────────────────────────────────────────┐ │
-│ │ [14:30:15] 🚀 IEC104 Server started successfully       │ │
+│ │ [14:30:15]  IEC104 Server started successfully       │ │
 │ │ [14:30:16] 📱 Client connected: 192.168.1.100:52341   │ │
 │ │ [14:30:45] ❌ Error reading tag: TASK.InvalidTag      │ │
 │ └─────────────────────────────────────────────────────────┘ │
@@ -139,14 +139,14 @@ LogRoutine("📈 SCADA Scan: 100 Good, 0 Error");        // May skip
 
 ## 🎯 **Log Messages Examples:**
 
-### **✅ Important (Always logged):**
+### ** Important (Always logged):**
 ```
-🚀 IEC104 Server started successfully
+ IEC104 Server started successfully
 📱 Client connected: 192.168.1.100:52341
 📱 Client disconnected: 192.168.1.100:52341 (Duration: 5.2m)
 ❌ Error reading tag: MAFAGSBL1.InvalidTag
 ⚠️  Invalid timeout T1: 15ms. Using default: 15000ms
-✅ Send mode set to: SendOptimized
+ Send mode set to: SendOptimized
 ```
 
 ### **❌ Routine (Skipped):**
@@ -212,4 +212,4 @@ _clientRefreshTimer.Tick += (s, e) => UpdateClientsList(_serverService.GetConnec
 
 ---
 
-**Kết quả:** UI sạch sẽ, hiệu suất cao, dễ monitor clients, logs chỉ hiển thị những thứ quan trọng! 🚀
+**Kết quả:** UI sạch sẽ, hiệu suất cao, dễ monitor clients, logs chỉ hiển thị những thứ quan trọng! 

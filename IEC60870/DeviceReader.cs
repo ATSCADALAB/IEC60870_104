@@ -69,7 +69,7 @@ namespace IEC60870Driver
                     return ConnectionStatus;
                 }
 
-                // ✅ BƯỚC 1: Test ping trước
+                //  BƯỚC 1: Test ping trước
                 lastPingTest = DateTime.Now;
                 lastPingResult = PingDevice(Settings.IpAddress);
 
@@ -80,7 +80,7 @@ namespace IEC60870Driver
                     return false;
                 }
 
-                // ✅ BƯỚC 2: Nếu ping OK, kiểm tra IEC60870 connection
+                //  BƯỚC 2: Nếu ping OK, kiểm tra IEC60870 connection
                 bool iecConnection = this.clientAdapter?.CheckConnection() == true;
 
                 if (!iecConnection && lastPingResult)

@@ -10,13 +10,13 @@
 - Sử dụng `asdu.TypeId` (property) thay vì `asdu.GetTypeIdentification()` (method)
 - Thiếu `using IEC60870.Enum;` directive cho TypeId enum
 
-## ✅ **Root Cause Analysis:**
+##  **Root Cause Analysis:**
 
 ### **IEC60870 Library Structure:**
 
 **ASdu class có:**
 ```csharp
-// ✅ ĐÚNG: Method để lấy TypeId
+//  ĐÚNG: Method để lấy TypeId
 public TypeId GetTypeIdentification()
 {
     return typeId; // private field
@@ -39,11 +39,11 @@ public enum TypeId
 }
 ```
 
-## ✅ **Giải pháp đã triển khai:**
+##  **Giải pháp đã triển khai:**
 
 ### **1. Thêm Using Directive**
 ```csharp
-using IEC60870.Enum; // ✅ THÊM MỚI: Để sử dụng TypeId enum
+using IEC60870.Enum; //  THÊM MỚI: Để sử dụng TypeId enum
 ```
 
 ### **2. Sửa cách truy cập TypeId**
@@ -51,7 +51,7 @@ using IEC60870.Enum; // ✅ THÊM MỚI: Để sử dụng TypeId enum
 // ❌ TRƯỚC (Lỗi):
 if (asdu.TypeId == TypeId.C_IC_NA_1)
 
-// ✅ SAU (Đúng):
+//  SAU (Đúng):
 var typeId = asdu.GetTypeIdentification();
 if (typeId == TypeId.C_IC_NA_1)
 ```
@@ -64,10 +64,10 @@ private void OnNewAsduReceivedHandler(ASdu asdu)
     
     try
     {
-        // ✅ SỬA LỖI: Sử dụng GetTypeIdentification() method
+        //  SỬA LỖI: Sử dụng GetTypeIdentification() method
         var typeId = asdu.GetTypeIdentification();
         
-        // ✅ TỐI ƯU: Add client khi nhận bất kỳ command nào từ client
+        //  TỐI ƯU: Add client khi nhận bất kỳ command nào từ client
         lock (_clientsLock)
         {
             if (_connectedClients.Count == 0)
@@ -84,7 +84,7 @@ private void OnNewAsduReceivedHandler(ASdu asdu)
             }
         }
         
-        // ✅ Special handling cho Interrogation command
+        //  Special handling cho Interrogation command
         if (typeId == TypeId.C_IC_NA_1)
         {
             Log($"🔍 Interrogation command received - sending all data");
@@ -99,7 +99,7 @@ private void OnNewAsduReceivedHandler(ASdu asdu)
 }
 ```
 
-## 📊 **Client Detection Logic:**
+##  **Client Detection Logic:**
 
 ### **Trigger 1: Any ASDU Received**
 ```csharp
@@ -154,12 +154,12 @@ TypeId.M_ME_TC_1 = 36    // Float value with time
 
 ### **Correct TypeId Access:**
 ```csharp
-// ✅ ĐÚNG: Sử dụng method
+//  ĐÚNG: Sử dụng method
 var typeId = asdu.GetTypeIdentification();
 var cot = asdu.GetCauseOfTransmission();
 var ca = asdu.GetCommonAddress();
 
-// ✅ ĐÚNG: So sánh với enum
+//  ĐÚNG: So sánh với enum
 if (typeId == TypeId.C_IC_NA_1)
 {
     // Handle interrogation
@@ -195,7 +195,7 @@ if (typeId == IEC60870.Enum.TypeId.C_IC_NA_1) // Verbose, không cần thiết
 
 ### **After Fix:**
 ```
-✅ Compilation successful
+ Compilation successful
 📱 Client detected via ASDU: C_IC_NA_1
 🔍 Interrogation command received - sending all data
 📱 1 client(s) connected
@@ -236,10 +236,10 @@ using IEC60870.SAP;     // For ServerSAP
 
 ### **3. Handle TypeId comparisons properly:**
 ```csharp
-// ✅ Clean comparison
+//  Clean comparison
 if (typeId == TypeId.C_IC_NA_1)
 
-// ✅ Switch statement
+//  Switch statement
 switch (typeId)
 {
     case TypeId.C_IC_NA_1:
@@ -249,4 +249,4 @@ switch (typeId)
 
 ---
 
-**Kết quả:** Compilation thành công, client detection hoạt động, TypeId access đúng cách! 🚀
+**Kết quả:** Compilation thành công, client detection hoạt động, TypeId access đúng cách! 

@@ -15,8 +15,8 @@ Khi review MainForm, tôi phát hiện **Designer có event handlers nhưng Main
 7. **btnSendSelected_Click** - Send selected data point button
 8. **btnClearLogs_Click** - Clear logs button (đã comment trong Designer)
 
-## ✅ **Đã sửa chữa:**
-
+##  **Đã sửa chữa:**
+a
 ### 1. **Menu Event Handlers**
 
 **exitToolStripMenuItem_Click:**
@@ -151,7 +151,7 @@ using IEC60870ServerWinForm.Forms; // Cho ServerConfigForm, DataPointForm
 
 ## 📋 **Kết quả:**
 
-### ✅ **Hoàn thiện:**
+###  **Hoàn thiện:**
 - **Menu System**: File → Exit, Tools → Configure Server, Help → About
 - **Data Point Management**: Add, Edit, Delete, Send Selected
 - **Log Management**: Clear Logs với confirmation
@@ -171,7 +171,7 @@ using IEC60870ServerWinForm.Forms; // Cho ServerConfigForm, DataPointForm
 - **IOA duplicate checking**
 - **Server restart offer** khi config thay đổi
 
-## 🚀 **Tính năng mới hoạt động:**
+##  **Tính năng mới hoạt động:**
 
 1. **File Menu**:
    - Exit: Graceful shutdown với server stop

@@ -6,7 +6,7 @@
 
 **Nguyên nhân:** Code không hỗ trợ các IEC60870 types với Time Tag (TA_1 suffix)
 
-## ✅ **Root Cause Analysis:**
+##  **Root Cause Analysis:**
 
 ### **IEC60870 Type Categories:**
 - **Without Time Tag**: M_SP_NA_1, M_DP_NA_1, M_ME_NC_1, etc.
@@ -22,13 +22,13 @@ IOA 4: M_SP_TA_1 (Single Point with Time Tag)
 ```
 
 ### **ConvertToInformationObject chỉ hỗ trợ:**
-- M_SP_NA_1 ✅
-- M_DP_NA_1 ✅  
-- M_ME_NC_1 ✅
-- M_ME_NB_1 ✅
-- M_ME_NA_1 ✅
-- M_IT_NA_1 ✅
-- M_BO_NA_1 ✅
+- M_SP_NA_1 
+- M_DP_NA_1   
+- M_ME_NC_1 
+- M_ME_NB_1 
+- M_ME_NA_1 
+- M_IT_NA_1 
+- M_BO_NA_1 
 
 ### **Thiếu hỗ trợ:**
 - M_SP_TA_1 ❌
@@ -38,14 +38,14 @@ IOA 4: M_SP_TA_1 (Single Point with Time Tag)
 - M_ME_TA_1 ❌
 - M_IT_TA_1 ❌
 
-## ✅ **Giải pháp đã triển khai:**
+##  **Giải pháp đã triển khai:**
 
 ### 1. **Thêm hỗ trợ Time Tag Types**
 
 ```csharp
 switch (point.Type)
 {
-    // ✅ THÊM MỚI: Hỗ trợ các type với Time Tag
+    //  THÊM MỚI: Hỗ trợ các type với Time Tag
     case TypeId.M_SP_TA_1: // Single point with time tag
         bool boolValTime = ConvertToBoolean(point.Value);
         var singlePointTime = new IeSinglePointWithQuality(boolValTime, false, false, false, false);
@@ -73,10 +73,10 @@ switch (point.Type)
 ### 2. **IeTime56 Constructor Usage**
 
 ```csharp
-// ✅ TRƯỚC (Lỗi):
+//  TRƯỚC (Lỗi):
 var timeTag = new IeTime56(DateTime.Now);
 
-// ✅ SAU (Đúng):
+//  SAU (Đúng):
 var timeTag = new IeTime56(DateTime.Now.Ticks);
 ```
 
@@ -131,14 +131,14 @@ new InformationObject(IOA, new[] { new InformationElement[] { value, quality, ti
 🔄 Converting IOA 3: Type=M_SP_TA_1, DataType=Bool, Value=1
 🔄 Converting IOA 4: Type=M_SP_TA_1, DataType=Bool, Value=0
 📤 Sent 4 data points to IEC104 clients
-✅ All time tag types converted successfully
+ All time tag types converted successfully
 ```
 
 ## 🔧 **Debug Information:**
 
 ### **Added Debug Logging:**
 ```csharp
-// ✅ DEBUG: Log type conversion
+//  DEBUG: Log type conversion
 LogMessage($"🔄 Converting IOA {point.IOA}: Type={point.Type}, DataType={point.DataType}, Value={point.Value}");
 ```
 
@@ -167,13 +167,13 @@ public void ConvertTimeTagTypesToNormal()
 }
 ```
 
-## 🚀 **Benefits:**
+##  **Benefits:**
 
-✅ **Full IEC60870 Compliance**: Hỗ trợ đầy đủ time tag types  
-✅ **Real-time Timestamps**: Mỗi data point có timestamp chính xác  
-✅ **Backward Compatibility**: Vẫn hỗ trợ non-time tag types  
-✅ **Debug Capability**: Logging chi tiết cho troubleshooting  
-✅ **Flexible Conversion**: Có thể convert giữa time/non-time types  
+ **Full IEC60870 Compliance**: Hỗ trợ đầy đủ time tag types  
+ **Real-time Timestamps**: Mỗi data point có timestamp chính xác  
+ **Backward Compatibility**: Vẫn hỗ trợ non-time tag types  
+ **Debug Capability**: Logging chi tiết cho troubleshooting  
+ **Flexible Conversion**: Có thể convert giữa time/non-time types  
 
 ---
 

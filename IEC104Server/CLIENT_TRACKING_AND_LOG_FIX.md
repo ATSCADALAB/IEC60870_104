@@ -5,7 +5,7 @@
 1. **Client không hiển thị dù đã kết nối**
 2. **Log spam mỗi lần gửi data** (📤 Sent X data points...)
 
-## ✅ **Root Cause Analysis:**
+##  **Root Cause Analysis:**
 
 ### **1. Client Tracking Issue:**
 - **IEC60870 library limitation**: Không expose connection events trực tiếp
@@ -17,17 +17,17 @@
 - **Với 1000 points**: Tạo ra 20 log messages/minute
 - **Không cần thiết**: Routine transmission không cần log
 
-## ✅ **Giải pháp đã triển khai:**
+##  **Giải pháp đã triển khai:**
 
 ### **1. Client Tracking Workaround**
 
-**✅ Track clients qua ASDU messages:**
+** Track clients qua ASDU messages:**
 ```csharp
 private void OnNewAsduReceivedHandler(ASdu asdu)
 {
     if (!IsRunning) return;
     
-    // ✅ Track client connection từ ASDU
+    //  Track client connection từ ASDU
     try
     {
         // Chỉ add client khi nhận được Interrogation command (C_IC_NA_1)
@@ -54,13 +54,13 @@ private void OnNewAsduReceivedHandler(ASdu asdu)
 }
 ```
 
-**✅ Simulate client connection for testing:**
+** Simulate client connection for testing:**
 ```csharp
 // Trong Start() method
 IsRunning = true;
 Log($"Server started successfully on {config.IPAddress}:{config.Port}");
 
-// ✅ Simulate client connection sau 2 giây để test
+//  Simulate client connection sau 2 giây để test
 Task.Delay(2000).ContinueWith(_ =>
 {
     if (IsRunning)
@@ -72,25 +72,25 @@ Task.Delay(2000).ContinueWith(_ =>
 
 ### **2. Log Optimization**
 
-**✅ Convert transmission logs to routine:**
+** Convert transmission logs to routine:**
 ```csharp
-// ✅ TRƯỚC (Spam):
+//  TRƯỚC (Spam):
 LogMessage($"📤 Sent {validPoints.Count} data points in {totalAsdus} ASDUs to IEC104 clients");
 
-// ✅ SAU (Filtered):
+//  SAU (Filtered):
 LogRoutine($"📤 Sent {validPoints.Count} data points in {totalAsdus} ASDUs to IEC104 clients");
 ```
 
-**✅ Client update logs to routine:**
+** Client update logs to routine:**
 ```csharp
-// ✅ TRƯỚC (Spam):
+//  TRƯỚC (Spam):
 LogMessage($"📱 {clients.Count} client(s) connected", false);
 
-// ✅ SAU (Filtered):
+//  SAU (Filtered):
 LogRoutine($"📱 {clients.Count} client(s) connected");
 ```
 
-## 📊 **Client Detection Triggers:**
+##  **Client Detection Triggers:**
 
 ### **1. Automatic Detection:**
 ```csharp
@@ -144,9 +144,9 @@ Connected Clients
 
 ## 📝 **Log Behavior:**
 
-### **✅ Important (Always logged):**
+### ** Important (Always logged):**
 ```
-🚀 IEC104 Server started successfully
+ IEC104 Server started successfully
 📱 Client connected: IEC104-Client-1
 ❌ Error reading tag: TASK.InvalidTag
 ⚠️  Invalid timeout T1: 15ms
@@ -220,4 +220,4 @@ mainForm.AddTestClient();
 
 ---
 
-**Kết quả:** Clients được detect và hiển thị, logs sạch sẽ chỉ hiển thị events quan trọng! 🚀
+**Kết quả:** Clients được detect và hiển thị, logs sạch sẽ chỉ hiển thị events quan trọng! 

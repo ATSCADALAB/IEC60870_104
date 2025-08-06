@@ -1,6 +1,6 @@
 # Current Send Behavior Analysis
 
-## 📊 **Hiện tại Server đang hoạt động như thế nào:**
+##  **Hiện tại Server đang hoạt động như thế nào:**
 
 ### **1. Timer Configuration:**
 
@@ -62,7 +62,7 @@ SendAllValidData() // Chạy mỗi 3000ms
 
 ### **Gửi TẤT CẢ tags cùng lúc:**
 ```csharp
-// ✅ HIỆN TẠI: Gửi tất cả valid data points
+//  HIỆN TẠI: Gửi tất cả valid data points
 foreach (var point in validPoints)
 {
     var asdu = ConvertToASdu(point);
@@ -112,7 +112,7 @@ btnSendSelected_Click() // Gửi 1 data point cụ thể
 └── _serverService.SendASdu(asdu);
 ```
 
-## 📊 **Data Flow:**
+##  **Data Flow:**
 
 ```
 iDriver1 Tags (Real-time)

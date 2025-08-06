@@ -20,7 +20,7 @@ IEC104 Client → IEC104 Server → SCADA Tag
 Client Command → IOA → iDriver.Task("TASK").Tag("TAG").Value = "value"
 ```
 
-## ✅ **Implemented Write Commands:**
+##  **Implemented Write Commands:**
 
 ### **1. Single Command (Bool) - C_SC_NA_1**
 ```csharp
@@ -60,14 +60,14 @@ private void WriteToSCADA(int ioa, object value)
     string taskName = parts[0];  // "PLC1"
     string tagName = parts[1];   // "Temperature"
     
-    // 3. ✅ WRITE TO SCADA using iDriver
+    // 3.  WRITE TO SCADA using iDriver
     _driverManager.Driver.Task(taskName).Tag(tagName).Value = value.ToString();
     
-    LogMessage($"✅ SCADA Write: {dataPoint.DataTagName} = {value}");
+    LogMessage($" SCADA Write: {dataPoint.DataTagName} = {value}");
 }
 ```
 
-## 📊 **Command Processing Flow:**
+##  **Command Processing Flow:**
 
 ### **1. Command Reception:**
 ```csharp
@@ -132,9 +132,9 @@ Server → Client: Activation Confirmation
 
 Log Output:
 🎛️  Single Command: IOA=3, Value=True
-✅ SCADA Write: PLC1.PumpStatus = True
+ SCADA Write: PLC1.PumpStatus = True
 🔄 Written to SCADA: Task='PLC1', Tag='PumpStatus', Value='True'
-✅ Command confirmation sent: IOA=3, Type=C_SC_NA_1, Value=True
+ Command confirmation sent: IOA=3, Type=C_SC_NA_1, Value=True
 ```
 
 ### **Scenario 2: Temperature Setpoint**
@@ -151,10 +151,10 @@ Server → SCADA: iDriver.Task("PLC1").Tag("TempSetpoint").Value = "25.5"
 Server → Client: Activation Confirmation
 
 Log Output:
-📊 Set Point Float: IOA=1, Value=25.5
-✅ SCADA Write: PLC1.TempSetpoint = 25.5
+ Set Point Float: IOA=1, Value=25.5
+ SCADA Write: PLC1.TempSetpoint = 25.5
 🔄 Written to SCADA: Task='PLC1', Tag='TempSetpoint', Value='25.5'
-✅ Command confirmation sent: IOA=1, Type=C_SE_NC_1, Value=25.5
+ Command confirmation sent: IOA=1, Type=C_SE_NC_1, Value=25.5
 ```
 
 ### **Scenario 3: Pressure Setpoint**
@@ -171,10 +171,10 @@ Server → SCADA: iDriver.Task("PLC1").Tag("PressureSetpoint").Value = "5"
 Server → Client: Activation Confirmation
 
 Log Output:
-📊 Set Point Int: IOA=2, Value=5
-✅ SCADA Write: PLC1.PressureSetpoint = 5
+ Set Point Int: IOA=2, Value=5
+ SCADA Write: PLC1.PressureSetpoint = 5
 🔄 Written to SCADA: Task='PLC1', Tag='PressureSetpoint', Value='5'
-✅ Command confirmation sent: IOA=2, Type=C_SE_NB_1, Value=5
+ Command confirmation sent: IOA=2, Type=C_SE_NB_1, Value=5
 ```
 
 ## ⚠️ **Error Handling:**
@@ -259,4 +259,4 @@ Send: M_SP_NA_1 (IOA=3, Value=true) → Client
 
 ---
 
-**Kết quả:** Hoàn chỉnh tính năng Write với bidirectional communication: IEC104 Client ↔ IEC104 Server ↔ SCADA System! 🚀
+**Kết quả:** Hoàn chỉnh tính năng Write với bidirectional communication: IEC104 Client ↔ IEC104 Server ↔ SCADA System! 

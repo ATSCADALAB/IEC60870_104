@@ -4,7 +4,7 @@
 
 ### **1. XML Configuration Structure**
 
-**✅ IEC104Configuration XML Schema:**
+** IEC104Configuration XML Schema:**
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <IEC104Configuration>
@@ -24,7 +24,7 @@
 
 ### **2. File Menu Integration**
 
-**✅ File Menu Options:**
+** File Menu Options:**
 ```
 File
 ├── Save                    (Ctrl+S)
@@ -40,29 +40,29 @@ File
 
 ### **3. Core Functionality**
 
-**✅ Export to XML:**
+** Export to XML:**
 - Save current data points to XML file
 - Include server information and metadata
 - Formatted XML with proper indentation
 - UTF-8 encoding support
 
-**✅ Import from XML:**
+** Import from XML:**
 - Load data points from XML file
 - Validate XML structure before import
 - Show file information before confirmation
 - Replace current configuration
 
-**✅ Save/Save As:**
+** Save/Save As:**
 - Save current configuration (JSON format)
 - Save As XML (same as Export XML)
 
-**✅ Sample XML Creation:**
+** Sample XML Creation:**
 - Create sample configuration with 20 data points
 - Various data types (Bool, Int, Float)
 - Different IEC60870 types (M_SP_NA_1, M_ME_NB_1, M_ME_NC_1)
 - Option to import sample after creation
 
-## 📊 **XML Data Point Attributes:**
+##  **XML Data Point Attributes:**
 
 ### **Required Attributes:**
 ```xml
@@ -143,7 +143,7 @@ Default: "IEC104_Sample_Config.xml"
 Option: Import sample after creation
 ```
 
-## ✅ **Validation & Error Handling:**
+##  **Validation & Error Handling:**
 
 ### **XML Validation:**
 ```csharp
@@ -169,7 +169,7 @@ This will replace current configuration!
 
 ### **Error Messages:**
 ```
-✅ Success: "Configuration exported successfully! Data Points: 20"
+ Success: "Configuration exported successfully! Data Points: 20"
 ❌ Error: "Error importing XML: Invalid root element"
 ⚠️  Warning: "This will replace current configuration!"
 ```
@@ -197,7 +197,7 @@ This will replace current configuration!
            Unit="bar" MinValue="0" MaxValue="10" DefaultValue="1" />
 ```
 
-## 🚀 **Benefits:**
+##  **Benefits:**
 
 ### **1. Configuration Management:**
 - Easy backup and restore of configurations
@@ -262,4 +262,4 @@ Project_Name_IEC104_Config.xml       (Project-specific)
 
 ---
 
-**Kết quả:** Hoàn chỉnh tính năng Import/Export XML với File menu integration, validation, và sample configurations! 🚀
+**Kết quả:** Hoàn chỉnh tính năng Import/Export XML với File menu integration, validation, và sample configurations! 

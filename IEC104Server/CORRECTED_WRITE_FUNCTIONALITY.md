@@ -5,7 +5,7 @@
 1. **Missing Classes**: `IeScs` và `IInformationElement` không tồn tại
 2. **Wrong Class Names**: Sử dụng sai tên class trong IEC60870 library
 
-## ✅ **Corrected Implementation:**
+##  **Corrected Implementation:**
 
 ### **1. Correct IE Classes Found:**
 
@@ -14,7 +14,7 @@
 // ❌ WRONG: IeScs (không tồn tại)
 if (element is IeScs scs)
 
-// ✅ CORRECT: IeSingleCommand
+//  CORRECT: IeSingleCommand
 if (element is IeSingleCommand singleCommand)
 {
     commandValue = singleCommand.IsCommandStateOn();
@@ -23,7 +23,7 @@ if (element is IeSingleCommand singleCommand)
 
 **Float Values:**
 ```csharp
-// ✅ CORRECT: IeShortFloat (có sẵn)
+//  CORRECT: IeShortFloat (có sẵn)
 if (element is IeShortFloat shortFloat)
 {
     commandValue = shortFloat.GetValue();
@@ -32,7 +32,7 @@ if (element is IeShortFloat shortFloat)
 
 **Int Values:**
 ```csharp
-// ✅ CORRECT: IeScaledValue (có sẵn)
+//  CORRECT: IeScaledValue (có sẵn)
 if (element is IeScaledValue scaledValue)
 {
     commandValue = scaledValue.GetValue();
@@ -46,7 +46,7 @@ if (element is IeScaledValue scaledValue)
 // ❌ WRONG: IInformationElement (interface không tồn tại)
 new IInformationElement[][] { new IInformationElement[] { scs } }
 
-// ✅ CORRECT: InformationElement (abstract class)
+//  CORRECT: InformationElement (abstract class)
 new InformationElement[][] { new InformationElement[] { singleCommand } }
 ```
 
@@ -65,7 +65,7 @@ private void HandleSingleCommand(ASdu asdu, InformationObject[] informationObjec
         {
             var element = elements[0][0];
             
-            // ✅ CORRECT: Extract command value using IeSingleCommand
+            //  CORRECT: Extract command value using IeSingleCommand
             bool commandValue = false;
             if (element is IeSingleCommand singleCommand)
             {
@@ -74,7 +74,7 @@ private void HandleSingleCommand(ASdu asdu, InformationObject[] informationObjec
 
             LogMessage($"🎛️  Single Command: IOA={ioa}, Value={commandValue}");
 
-            // ✅ WRITE BACK TO SCADA
+            //  WRITE BACK TO SCADA
             WriteToSCADA(ioa, commandValue);
 
             // Send confirmation back to client
@@ -97,16 +97,16 @@ private void HandleSetPointFloatCommand(ASdu asdu, InformationObject[] informati
         {
             var element = elements[0][0];
             
-            // ✅ CORRECT: Extract command value using IeShortFloat
+            //  CORRECT: Extract command value using IeShortFloat
             float commandValue = 0.0f;
             if (element is IeShortFloat shortFloat)
             {
                 commandValue = shortFloat.GetValue();
             }
 
-            LogMessage($"📊 Set Point Float: IOA={ioa}, Value={commandValue}");
+            LogMessage($" Set Point Float: IOA={ioa}, Value={commandValue}");
 
-            // ✅ WRITE BACK TO SCADA
+            //  WRITE BACK TO SCADA
             WriteToSCADA(ioa, commandValue);
 
             // Send confirmation back to client
@@ -129,16 +129,16 @@ private void HandleSetPointIntCommand(ASdu asdu, InformationObject[] information
         {
             var element = elements[0][0];
             
-            // ✅ CORRECT: Extract command value using IeScaledValue
+            //  CORRECT: Extract command value using IeScaledValue
             int commandValue = 0;
             if (element is IeScaledValue scaledValue)
             {
                 commandValue = scaledValue.GetValue();
             }
 
-            LogMessage($"📊 Set Point Int: IOA={ioa}, Value={commandValue}");
+            LogMessage($" Set Point Int: IOA={ioa}, Value={commandValue}");
 
-            // ✅ WRITE BACK TO SCADA
+            //  WRITE BACK TO SCADA
             WriteToSCADA(ioa, commandValue);
 
             // Send confirmation back to client
@@ -159,19 +159,19 @@ private void SendCommandConfirmation(int ioa, TypeId commandType, object value)
     switch (commandType)
     {
         case TypeId.C_SC_NA_1: // Single Command
-            // ✅ CORRECT: IeSingleCommand with proper parameters
+            //  CORRECT: IeSingleCommand with proper parameters
             var singleCommand = new IeSingleCommand((bool)value, 0, false); // value, qualifier=0, not select
             infoObjects = new[] { new InformationObject(ioa, new InformationElement[][] { new InformationElement[] { singleCommand } }) };
             break;
 
         case TypeId.C_SE_NC_1: // Set Point Float
-            // ✅ CORRECT: IeShortFloat
+            //  CORRECT: IeShortFloat
             var shortFloat = new IeShortFloat((float)value);
             infoObjects = new[] { new InformationObject(ioa, new InformationElement[][] { new InformationElement[] { shortFloat } }) };
             break;
 
         case TypeId.C_SE_NB_1: // Set Point Int
-            // ✅ CORRECT: IeScaledValue
+            //  CORRECT: IeScaledValue
             var scaledValue = new IeScaledValue((int)value);
             infoObjects = new[] { new InformationObject(ioa, new InformationElement[][] { new InformationElement[] { scaledValue } }) };
             break;
@@ -191,7 +191,7 @@ private void SendCommandConfirmation(int ioa, TypeId commandType, object value)
         );
 
         _serverService.BroadcastAsdu(confirmationAsdu);
-        LogMessage($"✅ Command confirmation sent: IOA={ioa}, Type={commandType}, Value={value}");
+        LogMessage($" Command confirmation sent: IOA={ioa}, Type={commandType}, Value={value}");
     }
 }
 ```
@@ -222,12 +222,12 @@ private void WriteToSCADA(int ioa, object value)
         string taskName = parts[0];
         string tagName = parts[1];
 
-        // ✅ WRITE TO SCADA using iDriver
+        //  WRITE TO SCADA using iDriver
         if (_driverManager?.Driver != null)
         {
             _driverManager.Driver.Task(taskName).Tag(tagName).Value = value.ToString();
             
-            LogMessage($"✅ SCADA Write: {dataPoint.DataTagName} = {value}");
+            LogMessage($" SCADA Write: {dataPoint.DataTagName} = {value}");
             LogMessage($"🔄 Written to SCADA: Task='{taskName}', Tag='{tagName}', Value='{value}'");
         }
         else
@@ -242,7 +242,7 @@ private void WriteToSCADA(int ioa, object value)
 }
 ```
 
-## 📊 **Complete Write Flow (Corrected):**
+##  **Complete Write Flow (Corrected):**
 
 ### **Example: Pump Control**
 ```
@@ -253,12 +253,12 @@ private void WriteToSCADA(int ioa, object value)
 5. Send confirmation: IeSingleCommand(true, 0, false) → ACTIVATION_CON
 6. Log output:
    🎛️  Single Command: IOA=3, Value=True
-   ✅ SCADA Write: PLC1.PumpStatus = True
+    SCADA Write: PLC1.PumpStatus = True
    🔄 Written to SCADA: Task='PLC1', Tag='PumpStatus', Value='True'
-   ✅ Command confirmation sent: IOA=3, Type=C_SC_NA_1, Value=True
+    Command confirmation sent: IOA=3, Type=C_SC_NA_1, Value=True
 ```
 
-## ✅ **Key Corrections Made:**
+##  **Key Corrections Made:**
 
 1. **IeScs** → **IeSingleCommand**
 2. **IInformationElement** → **InformationElement**
@@ -266,7 +266,7 @@ private void WriteToSCADA(int ioa, object value)
 4. **Correct using statements** already present
 5. **Proper type casting** and value extraction
 
-## 🚀 **Result:**
+##  **Result:**
 
 **Bidirectional communication now works correctly:**
 - **Read**: SCADA → IEC104 Server → IEC104 Client

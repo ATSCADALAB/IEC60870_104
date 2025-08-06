@@ -1,8 +1,11 @@
 ﻿// File: Models/DataPoint.cs - Cập nhật với mapping DataType và TypeId
 using System;
 using IEC60870.Enum;
+using IEC60870.IE;
+using IEC60870.IE.Base;
+using IEC60870.Object;
 
-namespace IEC60870ServerWinForm.Models
+namespace IEC104Server.Models
 {
     /// <summary>
     /// Enum DataType tự định nghĩa - khác với TypeId của IEC60870
@@ -23,7 +26,7 @@ namespace IEC60870ServerWinForm.Models
         public string Name { get; set; }                // Tên hiển thị
         public string Description { get; set; }         // Mô tả
 
-        // ✅ QUAN TRỌNG: TypeId là chuẩn IEC60870, DataType là enum tự định nghĩa
+        //  QUAN TRỌNG: TypeId là chuẩn IEC60870, DataType là enum tự định nghĩa
         public TypeId Type { get; set; }                // TypeId theo chuẩn IEC60870
         public DataType DataType { get; set; }          // DataType tự định nghĩa
 
@@ -48,7 +51,7 @@ namespace IEC60870ServerWinForm.Models
         }
 
         /// <summary>
-        /// ✅ MAPPING: Convert DataType thành TypeId tương ứng
+        ///  MAPPING: Convert DataType thành TypeId tương ứng
         /// </summary>
         public static TypeId GetTypeIdFromDataType(DataType dataType)
         {
@@ -76,7 +79,7 @@ namespace IEC60870ServerWinForm.Models
         }
 
         /// <summary>
-        /// ✅ MAPPING: Convert TypeId thành DataType tương ứng
+        ///  MAPPING: Convert TypeId thành DataType tương ứng
         /// </summary>
         public static DataType GetDataTypeFromTypeId(TypeId typeId)
         {
@@ -124,7 +127,7 @@ namespace IEC60870ServerWinForm.Models
         }
 
         /// <summary>
-        /// ✅ HELPER: Tự động set TypeId khi thay đổi DataType
+        ///  HELPER: Tự động set TypeId khi thay đổi DataType
         /// </summary>
         public void SetDataType(DataType dataType)
         {
@@ -133,7 +136,7 @@ namespace IEC60870ServerWinForm.Models
         }
 
         /// <summary>
-        /// ✅ HELPER: Tự động set DataType khi thay đổi TypeId
+        ///  HELPER: Tự động set DataType khi thay đổi TypeId
         /// </summary>
         public void SetTypeId(TypeId typeId)
         {
@@ -237,6 +240,77 @@ namespace IEC60870ServerWinForm.Models
                 case TypeId.M_IT_NA_1: return "Counter";
                 case TypeId.M_BO_NA_1: return "Bitstring";
                 default: return Type.ToString();
+            }
+        }
+
+        /// <summary>
+        ///  Convert DataPoint to IEC104 InformationObject for transmission
+        /// </summary>
+        public InformationObject ToInformationObject()
+        {
+            try
+            {
+                if (!IsValid || string.IsNullOrEmpty(Value))
+                {
+                    return null;
+                }
+
+                InformationElement[][] elements = null;
+
+                switch (Type)
+                {
+                    case TypeId.M_SP_NA_1: // Single point
+                        {
+                            bool boolValue = false;
+                            if (bool.TryParse(Value, out boolValue) ||
+                                (int.TryParse(Value, out int intVal) && intVal != 0))
+                            {
+                                var singlePoint = new IeSinglePointWithQuality(boolValue, false, false, false, false);
+                                elements = new InformationElement[][] { new InformationElement[] { singlePoint } };
+                            }
+                        }
+                        break;
+
+                    case TypeId.M_ME_NC_1: // Short float
+                        {
+                            if (float.TryParse(Value, out float floatValue))
+                            {
+                                var shortFloat = new IeShortFloat(floatValue);
+                                elements = new InformationElement[][] { new InformationElement[] { shortFloat } };
+                            }
+                        }
+                        break;
+
+                    case TypeId.M_ME_NB_1: // Scaled value (int)
+                        {
+                            if (int.TryParse(Value, out int intValue))
+                            {
+                                var scaledValue = new IeScaledValue(intValue);
+                                elements = new InformationElement[][] { new InformationElement[] { scaledValue } };
+                            }
+                        }
+                        break;
+
+                    default:
+                        // For unsupported types, try as float
+                        if (float.TryParse(Value, out float defaultFloat))
+                        {
+                            var shortFloat = new IeShortFloat(defaultFloat);
+                            elements = new InformationElement[][] { new InformationElement[] { shortFloat } };
+                        }
+                        break;
+                }
+
+                if (elements != null)
+                {
+                    return new InformationObject(IOA, elements);
+                }
+
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
             }
         }
 

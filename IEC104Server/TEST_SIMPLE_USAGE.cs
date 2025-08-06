@@ -7,7 +7,7 @@ using IEC60870ServerWinForm.Models;
 namespace IEC104Server
 {
     /// <summary>
-    /// ✅ Test class để verify việc sử dụng đơn giản với iDriver1
+    ///  Test class để verify việc sử dụng đơn giản với iDriver1
     /// </summary>
     public partial class TestSimpleUsage : Form
     {
@@ -23,22 +23,22 @@ namespace IEC104Server
         {
             try
             {
-                // ✅ Giả lập setup SCADA data như code của bạn
+                //  Giả lập setup SCADA data như code của bạn
                 SetupSCADAData();
 
-                // ✅ Tạo và setup IEC104 Server
+                //  Tạo và setup IEC104 Server
                 iecServerForm = new MainForm();
                 
-                // ✅ Set iDriver1 - ĐƠN GIẢN!
+                //  Set iDriver1 - ĐƠN GIẢN!
                 iecServerForm.SetDriver(iDriver1);
                 
-                // ✅ Thêm data points
+                //  Thêm data points
                 AddSampleDataPoints();
                 
-                // ✅ Hiển thị form
+                //  Hiển thị form
                 iecServerForm.Show();
                 
-                LogMessage("✅ Test setup completed successfully!");
+                LogMessage(" Test setup completed successfully!");
             }
             catch (Exception ex)
             {
@@ -49,7 +49,7 @@ namespace IEC104Server
 
         private void SetupSCADAData()
         {
-            // ✅ Setup SCADA data như code của bạn
+            //  Setup SCADA data như code của bạn
             DateTime dateTime = DateTime.Now;
             dateTime = dateTime.AddSeconds(2);
             
@@ -61,12 +61,12 @@ namespace IEC104Server
             iDriver1.Task("MAFAGSBL1").Tag("Nam").Value = dateTime.ToString("yy");
             iDriver1.Task("MAFAGSBL1").Tag("XacNhanDoiGio").Value = "100";
             
-            LogMessage("✅ SCADA data setup completed");
+            LogMessage(" SCADA data setup completed");
         }
 
         private void AddSampleDataPoints()
         {
-            // ✅ Thêm data points tương ứng với tags của bạn
+            //  Thêm data points tương ứng với tags của bạn
             iecServerForm.AddDataPointByDataType(16385, "Gio", DataType.Int, "MAFAGSBL1.Gio");
             iecServerForm.AddDataPointByDataType(16386, "Phut", DataType.Int, "MAFAGSBL1.Phut");
             iecServerForm.AddDataPointByDataType(16387, "Giay", DataType.Int, "MAFAGSBL1.Giay");
@@ -75,7 +75,7 @@ namespace IEC104Server
             iecServerForm.AddDataPointByDataType(16390, "Nam", DataType.Int, "MAFAGSBL1.Nam");
             iecServerForm.AddDataPointByDataType(16391, "XacNhanDoiGio", DataType.Int, "MAFAGSBL1.XacNhanDoiGio");
             
-            LogMessage("✅ Data points added successfully");
+            LogMessage(" Data points added successfully");
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -83,7 +83,7 @@ namespace IEC104Server
             timer1.Stop();
             try
             {
-                // ✅ Update SCADA data như code của bạn
+                //  Update SCADA data như code của bạn
                 DateTime dateTime = DateTime.Now;
                 dateTime = dateTime.AddSeconds(2);
                 
@@ -95,7 +95,7 @@ namespace IEC104Server
                 iDriver1.Task("MAFAGSBL1").Tag("Nam").Value = dateTime.ToString("yy");
                 iDriver1.Task("MAFAGSBL1").Tag("XacNhanDoiGio").Value = "100";
                 
-                // ✅ IEC104Server sẽ tự động đọc và gửi data
+                //  IEC104Server sẽ tự động đọc và gửi data
                 LogMessage($"🔄 SCADA data updated at {DateTime.Now:HH:mm:ss}");
             }
             catch (Exception ex)
@@ -113,7 +113,7 @@ namespace IEC104Server
             System.Diagnostics.Debug.WriteLine($"[{DateTime.Now:HH:mm:ss}] {message}");
         }
 
-        // ✅ Test methods để verify functionality
+        //  Test methods để verify functionality
         private void btnTestConnection_Click(object sender, EventArgs e)
         {
             try
@@ -128,7 +128,7 @@ namespace IEC104Server
                 var gio = iDriver1.Task("MAFAGSBL1").Tag("Gio").Value;
                 var phut = iDriver1.Task("MAFAGSBL1").Tag("Phut").Value;
                 
-                LogMessage($"✅ Test read: Gio={gio}, Phut={phut}");
+                LogMessage($" Test read: Gio={gio}, Phut={phut}");
                 
                 MessageBox.Show($"Connection test successful!\nGio: {gio}\nPhut: {phut}", 
                     "Test Result", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -148,7 +148,7 @@ namespace IEC104Server
                 if (iecServerForm != null)
                 {
                     // Trigger start server programmatically
-                    LogMessage("🚀 Starting IEC104 Server...");
+                    LogMessage(" Starting IEC104 Server...");
                     // iecServerForm.StartServer(); // Nếu có public method
                 }
             }
@@ -161,7 +161,7 @@ namespace IEC104Server
 }
 
 /*
-✅ Expected workflow:
+ Expected workflow:
 
 1. TestSimpleUsage_Load:
    - Setup SCADA data với iDriver1
@@ -175,14 +175,14 @@ namespace IEC104Server
    - IEC104Server tự động đọc và gửi
 
 3. Expected logs:
-   ✅ SCADA data setup completed
-   ✅ iDriver1 set successfully!
-   ✅ Data points added successfully
-   ✅ SCADA Test OK: MAFAGSBL1.Gio = 12
-   ✅ SCADA Test OK: MAFAGSBL1.Phut = 30
+    SCADA data setup completed
+    iDriver1 set successfully!
+    Data points added successfully
+    SCADA Test OK: MAFAGSBL1.Gio = 12
+    SCADA Test OK: MAFAGSBL1.Phut = 30
    🔄 Starting tag scanning...
    📈 SCADA Scan: 7 Good, 0 Error, 7 Total
-   🚀 IEC104 Server started successfully
+    IEC104 Server started successfully
 
 4. No more errors:
    ❌ Driver chưa được khởi tạo! <- SHOULD NOT APPEAR

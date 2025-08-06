@@ -17,7 +17,7 @@ namespace IEC60870Driver
 
         public string TagAddress
         {
-            get => nudIOA.Value.ToString(); // ✅ Chỉ trả về IOA number
+            get => nudIOA.Value.ToString(); //  Chỉ trả về IOA number
             set => ParseTagAddress(value);
         }
 
@@ -64,12 +64,12 @@ namespace IEC60870Driver
 
         private void InitializeControls()
         {
-            // ✅ IOA SETTINGS - CHỈ CẦN NHẬP TRỰC TIẾP
+            //  IOA SETTINGS - CHỈ CẦN NHẬP TRỰC TIẾP
             nudIOA.Minimum = 0;
             nudIOA.Maximum = 16777215; // 3 bytes max
             nudIOA.Value = 1;
 
-            // ✅ DATA TYPE - CHỈ CÁC LOẠI CƠ BẢN
+            //  DATA TYPE - CHỈ CÁC LOẠI CƠ BẢN
             cbxDataType.Items.Clear();
             cbxDataType.Items.AddRange(new object[]
             {
@@ -82,7 +82,7 @@ namespace IEC60870Driver
             cbxDataType.DropDownStyle = ComboBoxStyle.DropDownList;
             cbxDataType.SelectedIndex = 0; // Default Bool
 
-            // ✅ EXAMPLES - THÔNG TIN THAM KHẢO
+            //  EXAMPLES - THÔNG TIN THAM KHẢO
             lblExamples.Text = "Common IOA Ranges:\n" +
                               "• Digital Inputs: 1-999\n" +
                               "• Digital Outputs: 1000-1999\n" +
@@ -162,14 +162,14 @@ namespace IEC60870Driver
         {
             try
             {
-                // ✅ CHỈ PARSE IOA NUMBER
+                //  CHỈ PARSE IOA NUMBER
                 if (int.TryParse(tagAddress, out int ioa))
                 {
                     nudIOA.Value = Math.Max(nudIOA.Minimum, Math.Min(nudIOA.Maximum, ioa));
                 }
                 else
                 {
-                    // ✅ FALLBACK: Nếu là format cũ "TypeId:IOA"
+                    //  FALLBACK: Nếu là format cũ "TypeId:IOA"
                     var parts = tagAddress.Split(':');
                     if (parts.Length == 2 && int.TryParse(parts[1], out int oldIoa))
                     {
@@ -199,7 +199,7 @@ namespace IEC60870Driver
             try
             {
                 driver.TagNameDesignMode = TagName;
-                driver.TagAddressDesignMode = TagAddress; // ✅ Chỉ là IOA number
+                driver.TagAddressDesignMode = TagAddress; //  Chỉ là IOA number
                 driver.TagTypeDesignMode = TagType.ToDisplayName();
 
                 MessageBox.Show("Tag configuration saved successfully!",
@@ -226,7 +226,7 @@ namespace IEC60870Driver
                 var ioa = (int)nudIOA.Value;
                 var dataType = (DataType)cbxDataType.SelectedItem;
 
-                // ✅ SIMPLE VALIDATION TEST
+                //  SIMPLE VALIDATION TEST
                 string validationResult = ValidateIOAAndType(ioa, dataType);
 
                 MessageBox.Show($"Tag Validation Result:\n\n" +
@@ -251,11 +251,11 @@ namespace IEC60870Driver
 
         private string ValidateIOAAndType(int ioa, DataType dataType)
         {
-            // ✅ BASIC VALIDATION LOGIC
+            //  BASIC VALIDATION LOGIC
             if (ioa == 0)
             {
                 if (dataType == DataType.String)
-                    return "✅ Valid - System command with String type";
+                    return " Valid - System command with String type";
                 else
                     return "⚠️ Warning - System commands typically use String type";
             }
@@ -263,7 +263,7 @@ namespace IEC60870Driver
             if (ioa >= 1 && ioa <= 999)
             {
                 if (dataType == DataType.Bool)
-                    return "✅ Valid - Digital Input with Bool type";
+                    return " Valid - Digital Input with Bool type";
                 else
                     return "⚠️ Warning - Digital Inputs typically use Bool type";
             }
@@ -271,7 +271,7 @@ namespace IEC60870Driver
             if (ioa >= 1000 && ioa <= 1999)
             {
                 if (dataType == DataType.Bool)
-                    return "✅ Valid - Digital Output with Bool type";
+                    return " Valid - Digital Output with Bool type";
                 else
                     return "⚠️ Warning - Digital Outputs typically use Bool type";
             }
@@ -279,7 +279,7 @@ namespace IEC60870Driver
             if (ioa >= 2000 && ioa <= 2999)
             {
                 if (dataType == DataType.Float || dataType == DataType.Int)
-                    return "✅ Valid - Analog Input with numeric type";
+                    return " Valid - Analog Input with numeric type";
                 else
                     return "⚠️ Warning - Analog Inputs typically use Float or Int type";
             }
@@ -287,7 +287,7 @@ namespace IEC60870Driver
             if (ioa >= 3000 && ioa <= 3999)
             {
                 if (dataType == DataType.Float || dataType == DataType.Int)
-                    return "✅ Valid - Analog Output with numeric type";
+                    return " Valid - Analog Output with numeric type";
                 else
                     return "⚠️ Warning - Analog Outputs typically use Float or Int type";
             }
@@ -295,12 +295,12 @@ namespace IEC60870Driver
             if (ioa >= 4000 && ioa <= 4999)
             {
                 if (dataType == DataType.DWord || dataType == DataType.Int)
-                    return "✅ Valid - Counter with numeric type";
+                    return " Valid - Counter with numeric type";
                 else
                     return "⚠️ Warning - Counters typically use DWord or Int type";
             }
 
-            return "✅ Valid - Custom IOA range";
+            return " Valid - Custom IOA range";
         }
 
         private bool ValidateTag()

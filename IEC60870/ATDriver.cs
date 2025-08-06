@@ -146,11 +146,11 @@ namespace IEC60870Driver
                 if (this.currentReader is null || !this.currentReader.ConnectionStatus)
                     return default;
 
-                // ✅ PARSE TagAddress thành IOA number
+                //  PARSE TagAddress thành IOA number
                 if (int.TryParse(TagAddress, out int ioa))
                 {
 
-                    // ✅ SỬ DỤNG ReadByIOA để auto-detect TypeId
+                    //  SỬ DỤNG ReadByIOA để auto-detect TypeId
                     var smartResult = ReadByIOA(ioa);
                     if (smartResult != null)
                     {
@@ -159,14 +159,14 @@ namespace IEC60870Driver
                         {
                             ChannelAddress = ChannelAddress,
                             DeviceID = DeviceID,
-                            TagAddress = TagAddress,      // ✅ Giữ nguyên "400001"
-                            TagType = smartResult.TagType, // ✅ Auto-detected type
+                            TagAddress = TagAddress,      //  Giữ nguyên "400001"
+                            TagType = smartResult.TagType, //  Auto-detected type
                             Value = smartResult.Value
                         };
                     }
                 }
 
-                // ✅ FALLBACK: Nếu TagAddress không phải số, dùng cách cũ
+                //  FALLBACK: Nếu TagAddress không phải số, dùng cách cũ
                 if (!GetIOAddress(TagAddress, TagType, out IOAddress address))
                     return default;
 
@@ -201,7 +201,7 @@ namespace IEC60870Driver
                 var clientAdapter = this.clientAdapters.FirstOrDefault(x => x.Name == this.currentReader.Settings.ClientID);
                 if (clientAdapter != null)
                 {
-                    // ✅ ĐÚNG: out TypeId (không nullable)
+                    //  ĐÚNG: out TypeId (không nullable)
                     if (clientAdapter.ReadSmart(this.currentReader.Settings.CommonAddress, ioa, out object value, out TypeId detectedTypeId))
                     {
                         string dataType = GetDataTypeFromTypeId(detectedTypeId);
@@ -280,7 +280,7 @@ namespace IEC60870Driver
             //    if (this.currentReader is null || !this.currentReader.ConnectionStatus)
             //        return WriteBad;
 
-            //    // ✅ THÊM: Kiểm tra nếu TagAddress là IOA number
+            //    //  THÊM: Kiểm tra nếu TagAddress là IOA number
             //    if (int.TryParse(sendPack.TagAddress, out int ioa))
             //    {
             //        Console.WriteLine($"[DEBUG] Using smart write for IOA: {sendPack.TagAddress}");
@@ -289,7 +289,7 @@ namespace IEC60870Driver
             //        return WriteSmartIOA(ioa, sendPack.Value, sendPack.TagType);
             //    }
 
-            //    // ✅ GIỮ NGUYÊN: Cách cũ cho format "TypeId:IOA"
+            //    //  GIỮ NGUYÊN: Cách cũ cho format "TypeId:IOA"
             //    if (!GetIOAddress(sendPack.TagAddress, sendPack.TagType, out IOAddress address))
             //        return WriteBad;
 
@@ -320,7 +320,7 @@ namespace IEC60870Driver
 
                 // Sửa lại: Trả về giá trị đã ghi thay vì WriteGood
                 bool success = deviceReader.Write(address, sendPack.Value.Trim());
-                return success ? sendPack.Value.Trim() : WriteBad;  // ✅ Trả về giá trị thực tế
+                return success ? sendPack.Value.Trim() : WriteBad;  //  Trả về giá trị thực tế
             }
             catch
             {
@@ -333,7 +333,7 @@ namespace IEC60870Driver
         //{
         //    try
         //    {
-        //        // ✅ SỬ DỤNG HINT TYPE TRỰC TIẾP - KHÔNG ĐỌC TRƯỚC
+        //        //  SỬ DỤNG HINT TYPE TRỰC TIẾP - KHÔNG ĐỌC TRƯỚC
         //        string targetTagType = hintType ?? GuessTypeFromValue(value);
 
         //        // Map sang write command TypeId
@@ -368,7 +368,7 @@ namespace IEC60870Driver
 
                 // Sửa lại: Nếu ghi thành công thì trả về giá trị đã ghi
                 bool writeSuccess = deviceReader.Write(address, value.Trim());
-                return writeSuccess ? value.Trim() : WriteBad;  // ✅ Trả về giá trị thực tế
+                return writeSuccess ? value.Trim() : WriteBad;  //  Trả về giá trị thực tế
             }
             catch (Exception ex)
             {
@@ -376,7 +376,7 @@ namespace IEC60870Driver
                 return WriteBad;
             }
         }
-        // ✅ IMPROVE GuessTypeFromValue
+        //  IMPROVE GuessTypeFromValue
         private string GuessTypeFromValue(string value)
         {
             // More accurate guessing
@@ -397,7 +397,7 @@ namespace IEC60870Driver
             return "String";
         }
 
-        // ✅ COMPLETE GetTypeIdFromDataType mapping
+        //  COMPLETE GetTypeIdFromDataType mapping
         private TypeId GetTypeIdFromDataType(string dataType, bool isWrite = false)
         {
             if (isWrite)

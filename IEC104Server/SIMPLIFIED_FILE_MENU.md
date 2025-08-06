@@ -12,7 +12,7 @@ File
 └── Exit
 ```
 
-## ✅ **Core Functionality:**
+##  **Core Functionality:**
 
 ### **1. Save (JSON Format)**
 ```csharp
@@ -93,7 +93,7 @@ private void openToolStripMenuItem_Click(object sender, EventArgs e)
 ### **Quick Save (JSON):**
 ```
 File → Save
-✅ Configuration saved successfully!
+ Configuration saved successfully!
 ```
 - Fast save for backup
 - No filename dialog
@@ -103,8 +103,8 @@ File → Save
 ```
 File → Save As...
 → Choose filename: "Project_A_Config.xml"
-✅ Configuration saved to: Project_A_Config.xml
-📊 Saved 20 data points
+ Configuration saved to: Project_A_Config.xml
+ Saved 20 data points
 ```
 - Custom filename
 - Portable XML format
@@ -124,7 +124,7 @@ File → Open...
    [Yes] [No]
 ```
 
-## 📊 **Dialog Examples:**
+##  **Dialog Examples:**
 
 ### **Save As Dialog:**
 ```
@@ -153,7 +153,7 @@ This will replace current configuration!
 [Yes] [No]
 ```
 
-## ✅ **Benefits of Simplified Menu:**
+##  **Benefits of Simplified Menu:**
 
 ### **1. Clear Purpose:**
 - **Save**: Quick backup (JSON)
@@ -267,4 +267,4 @@ File
 
 ---
 
-**Kết quả:** File menu đơn giản, rõ ràng với 3 chức năng cốt lõi: Save (JSON), Save As (XML), Open (XML)! 🚀
+**Kết quả:** File menu đơn giản, rõ ràng với 3 chức năng cốt lõi: Save (JSON), Save As (XML), Open (XML)! 

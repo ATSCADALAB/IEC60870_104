@@ -1,6 +1,6 @@
 # Optimization for 100-1000 Data Points
 
-## 🚀 **Tối ưu hóa đã triển khai:**
+##  **Tối ưu hóa đã triển khai:**
 
 ### **1. Send Mode Configuration**
 
@@ -13,7 +13,7 @@ public enum SendMode
     SendOptimized      // Gửi theo batch + chỉ khi có thay đổi (BEST!)
 }
 
-// ✅ Cách sử dụng:
+//  Cách sử dụng:
 mainForm.SetSendMode(SendMode.SendOptimized, 50); // Batch size = 50
 ```
 
@@ -45,30 +45,30 @@ Mỗi 3 giây: Chỉ gửi points có thay đổi (VD: 50 points)
 → Giảm 99.7% traffic!
 ```
 
-## 📊 **Performance Comparison:**
+##  **Performance Comparison:**
 
 | Scenario | Mode | Data Points | ASDUs/Cycle | Network Efficiency |
 |----------|------|-------------|-------------|-------------------|
 | **Legacy** | SendAll | 1000 | 1000 | ❌ Baseline |
-| **Change Only** | SendOnChange | 50 changed | 50 | ✅ 95% reduction |
-| **Batch All** | SendBatch | 1000 | 20 | ✅ 98% reduction |
-| **Optimized** | SendOptimized | 50 changed | 1 | 🚀 **99.9% reduction** |
+| **Change Only** | SendOnChange | 50 changed | 50 |  95% reduction |
+| **Batch All** | SendBatch | 1000 | 20 |  98% reduction |
+| **Optimized** | SendOptimized | 50 changed | 1 |  **99.9% reduction** |
 
 ## 🎯 **Recommended Settings:**
 
 ### **For 100-1000 Data Points:**
 ```csharp
-// ✅ BEST: Optimized mode với batch size 50
+//  BEST: Optimized mode với batch size 50
 mainForm.SetSendMode(SendMode.SendOptimized, 50);
 
-// ✅ Timer settings cho high-volume
+//  Timer settings cho high-volume
 _tagScanTimer.Interval = 1000;  // Scan mỗi 1 giây
 _dataSendTimer.Interval = 2000; // Gửi mỗi 2 giây (nhanh hơn)
 ```
 
 ### **For Real-time Applications:**
 ```csharp
-// ✅ Faster scanning và sending
+//  Faster scanning và sending
 _tagScanTimer.Interval = 500;   // Scan mỗi 500ms
 _dataSendTimer.Interval = 1000; // Gửi mỗi 1 giây
 mainForm.SetSendMode(SendMode.SendOptimized, 30); // Smaller batches
@@ -76,7 +76,7 @@ mainForm.SetSendMode(SendMode.SendOptimized, 30); // Smaller batches
 
 ### **For Bandwidth Conservation:**
 ```csharp
-// ✅ Slower sending, larger batches
+//  Slower sending, larger batches
 _dataSendTimer.Interval = 5000; // Gửi mỗi 5 giây
 mainForm.SetSendMode(SendMode.SendOptimized, 100); // Larger batches
 ```
@@ -89,7 +89,7 @@ mainForm.SetSendMode(SendMode.SendOptimized, 100); // Larger batches
 if (dataPoint.Value != newValue || dataPoint.IsValid != isGood)
 {
     dataPoint.Value = newValue;
-    dataPoint.HasChanged = true; // ✅ Mark as changed
+    dataPoint.HasChanged = true; //  Mark as changed
     // ...
 }
 
@@ -171,7 +171,7 @@ catch (Exception ex)
 var iecServer = new MainForm();
 iecServer.SetDriver(iDriver1);
 
-// ✅ Set optimized mode for 1000 points
+//  Set optimized mode for 1000 points
 iecServer.SetSendMode(SendMode.SendOptimized, 50);
 ```
 
@@ -189,9 +189,9 @@ else // 1000+
 ### **Runtime Monitoring:**
 ```csharp
 // Log messages sẽ hiển thị:
-✅ Send mode set to: SendOptimized
+ Send mode set to: SendOptimized
    Batch size: 50
-   🚀 Will send ONLY CHANGED data points in batches of 50 (BEST for 100-1000 points)
+    Will send ONLY CHANGED data points in batches of 50 (BEST for 100-1000 points)
 
 📤 Sent 1000 data points in 20 ASDUs to IEC104 clients
 ```
@@ -215,4 +215,4 @@ else // 1000+
 
 ---
 
-**Kết quả:** Với 1000 data points, network traffic giảm từ **1000 ASDUs** xuống **1-20 ASDUs** per cycle, tăng hiệu suất lên **50-100 lần**! 🚀
+**Kết quả:** Với 1000 data points, network traffic giảm từ **1000 ASDUs** xuống **1-20 ASDUs** per cycle, tăng hiệu suất lên **50-100 lần**! 

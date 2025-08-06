@@ -6,7 +6,7 @@
 
 **Nguyên nhân:** Config file có timeout values sai (giây thay vì milliseconds)
 
-## ✅ **Root Cause Analysis:**
+##  **Root Cause Analysis:**
 
 ### **IEC60870 Library Requirements:**
 - **T1 (NoACK received)**: 1000ms - 255000ms
@@ -25,13 +25,13 @@
 ### **Cần phải là:**
 ```json
 {
-  "TimeoutT1": 15000,  // ✅ ĐÚNG: 15000ms = 15 giây
-  "TimeoutT2": 10000,  // ✅ ĐÚNG: 10000ms = 10 giây
-  "TimeoutT3": 20000   // ✅ ĐÚNG: 20000ms = 20 giây
+  "TimeoutT1": 15000,  //  ĐÚNG: 15000ms = 15 giây
+  "TimeoutT2": 10000,  //  ĐÚNG: 10000ms = 10 giây
+  "TimeoutT3": 20000   //  ĐÚNG: 20000ms = 20 giây
 }
 ```
 
-## ✅ **Giải pháp đã triển khai:**
+##  **Giải pháp đã triển khai:**
 
 ### 1. **Auto-Validation trong ConfigManager**
 
@@ -43,7 +43,7 @@ public ServerConfig LoadServerConfig()
     
     if (config != null)
     {
-        // ✅ Validate và fix timeout values
+        //  Validate và fix timeout values
         bool needsUpdate = false;
         
         if (config.TimeoutT1 < 1000 || config.TimeoutT1 > 255000)
@@ -76,7 +76,7 @@ public ServerConfig LoadServerConfig()
 ### 2. **Runtime Validation trong IEC60870ServerService**
 
 ```csharp
-// ✅ Validate và fix timeout values trước khi set
+//  Validate và fix timeout values trước khi set
 int t1 = ValidateTimeout(config.TimeoutT1, 15000, "T1");
 int t2 = ValidateTimeout(config.TimeoutT2, 10000, "T2");
 int t3 = ValidateTimeout(config.TimeoutT3, 20000, "T3");
@@ -106,7 +106,7 @@ public void ResetServerConfig()
 {
     _configManager.ResetToDefaultConfig();
     _serverConfig = _configManager.LoadServerConfig();
-    LogMessage("✅ Server config reset to default values");
+    LogMessage(" Server config reset to default values");
 }
 ```
 
@@ -148,7 +148,7 @@ int validT1 = ValidateTimeout(invalidValue, 15000, "T1");
 _server.SetMaxTimeNoAckReceived(validT1);
 ```
 
-## 🚀 **Expected Results:**
+##  **Expected Results:**
 
 ### **Before Fix:**
 ```
@@ -158,9 +158,9 @@ time must be between 1000ms and 255000ms
 
 ### **After Fix:**
 ```
-[14:07:03] ✅ Server config loaded successfully
+[14:07:03]  Server config loaded successfully
 [14:07:03] T1: 15000ms, T2: 10000ms, T3: 20000ms
-[14:07:03] 🚀 IEC104 Server started successfully
+[14:07:03]  IEC104 Server started successfully
 [14:07:03] 📡 Server listening on 127.0.0.1:2404
 ```
 

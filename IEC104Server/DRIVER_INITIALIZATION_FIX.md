@@ -6,7 +6,7 @@
 
 **Nguyên nhân:** SCADA driver chưa được khởi tạo khi ứng dụng start, dẫn đến không thể đọc tag values và start server.
 
-## ✅ **Giải pháp đã triển khai:**
+##  **Giải pháp đã triển khai:**
 
 ### 1. **Mock Driver Support**
 
@@ -16,7 +16,7 @@
 
 ```csharp
 /// <summary>
-/// ✅ THÊM MỚI: Khởi tạo mock driver cho testing khi không có SCADA system
+///  THÊM MỚI: Khởi tạo mock driver cho testing khi không có SCADA system
 /// </summary>
 public void InitializeMockDriver(string defaultTaskName = "MockTask")
 {
@@ -92,7 +92,7 @@ public string GetTagValue(string tagPath)
     if (!_isInitialized || string.IsNullOrEmpty(tagPath))
         return null;
 
-    // ✅ Mock mode - trả về simulated data
+    //  Mock mode - trả về simulated data
     if (_driver == null)
         return GetMockTagValue(tagPath);
     
@@ -104,7 +104,7 @@ public bool IsTagGood(string tagPath)
     if (!_isInitialized || string.IsNullOrEmpty(tagPath))
         return false;
 
-    // ✅ Mock mode - luôn trả về true
+    //  Mock mode - luôn trả về true
     if (_driver == null)
         return true; // Mock tags luôn "good"
     
@@ -155,7 +155,7 @@ mainForm.InitializeMockDriver();
 - Type-aware simulation
 - Consistent data patterns
 
-## 🚀 **Cách sử dụng:**
+##  **Cách sử dụng:**
 
 ### **For Real SCADA:**
 ```csharp
@@ -185,10 +185,10 @@ mainForm.Show();
 
 ```
 🔧 Initializing mock driver for testing...
-✅ Mock driver initialized successfully!
+ Mock driver initialized successfully!
 ⚠️  Note: This is a mock driver for testing. No real SCADA data will be available.
 💡 To use real SCADA data, call SetDriver(iDriver1, "TaskName") with actual driver.
-📊 SCADA Scan Summary: 15 Good, 0 Error, 15 Total Tags
+ SCADA Scan Summary: 15 Good, 0 Error, 15 Total Tags
 ```
 
 ---

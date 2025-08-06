@@ -4,50 +4,69 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
+using IEC104Server.Models;
+using IEC60870.Enum;
 using IEC60870ServerWinForm.Models;
 
-namespace IEC60870ServerWinForm.Services
+namespace IEC104Server.Services
 {
     /// <summary>
-    /// ✅ THÊM MỚI: Service để import/export XML configuration
+    ///  THÊM MỚI: Service để import/export XML configuration
     /// </summary>
     public class XmlConfigService
     {
         /// <summary>
-        /// Export data points to XML file
+        ///  Export data points to simple XML format
         /// </summary>
-        public bool ExportToXml(List<DataPoint> dataPoints, string filePath, string serverName = "IEC104 Server")
+        public void ExportToXml(List<DataPoint> dataPoints, string filePath, string projectName = "IEC104 Project")
         {
             try
             {
-                var config = new IEC104Configuration
+                var root = new XElement("IEC104Configuration",
+                    new XAttribute("ProjectName", projectName),
+                    new XAttribute("CreatedDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
+                    new XAttribute("Version", "1.0"),
+                    new XAttribute("TagCount", dataPoints.Count)
+                );
+
+                var tagsElement = new XElement("Tags");
+
+                foreach (var dataPoint in dataPoints.OrderBy(dp => dp.IOA))
                 {
-                    ServerInfo = new ServerInfo
+                    var tagElement = new XElement("Tag",
+                        new XAttribute("IOA", dataPoint.IOA),
+                        new XAttribute("Name", dataPoint.Name ?? ""),
+                        new XAttribute("Type", dataPoint.Type.ToString()),
+                        new XAttribute("DataType", dataPoint.DataType.ToString()),
+                        new XAttribute("DataTagName", dataPoint.DataTagName ?? ""),
+                        new XAttribute("Description", dataPoint.Description ?? ""),
+                        new XAttribute("Enabled", true)
+                    );
+
+                    // Add optional attributes if available
+                    if (!string.IsNullOrEmpty(dataPoint.Value))
                     {
-                        Name = serverName,
-                        Version = "1.0",
-                        CreatedDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                        Description = "IEC 60870-5-104 Server Configuration"
-                    },
-                    DataPoints = dataPoints.Select(DataPointXml.FromDataPoint).ToList()
-                };
+                        tagElement.Add(new XAttribute("LastValue", dataPoint.Value));
+                    }
 
-                var serializer = new XmlSerializer(typeof(IEC104Configuration));
-                var settings = new XmlWriterSettings
-                {
-                    Indent = true,
-                    IndentChars = "\t",
-                    Encoding = Encoding.UTF8,
-                    OmitXmlDeclaration = false
-                };
+                    if (dataPoint.LastUpdated != DateTime.MinValue)
+                    {
+                        tagElement.Add(new XAttribute("LastUpdated", dataPoint.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss")));
+                    }
 
-                using (var writer = XmlWriter.Create(filePath, settings))
-                {
-                    serializer.Serialize(writer, config);
+                    tagsElement.Add(tagElement);
                 }
 
-                return true;
+                root.Add(tagsElement);
+
+                var doc = new XDocument(
+                    new XDeclaration("1.0", "UTF-8", "yes"),
+                    root
+                );
+
+                doc.Save(filePath);
             }
             catch (Exception ex)
             {
@@ -56,24 +75,80 @@ namespace IEC60870ServerWinForm.Services
         }
 
         /// <summary>
-        /// Import data points from XML file
+        ///  Import data points from simple XML format
         /// </summary>
         public List<DataPoint> ImportFromXml(string filePath)
         {
             try
             {
+                var dataPoints = new List<DataPoint>();
+
                 if (!File.Exists(filePath))
                 {
                     throw new FileNotFoundException($"File not found: {filePath}");
                 }
 
-                var serializer = new XmlSerializer(typeof(IEC104Configuration));
-                
-                using (var reader = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+                var doc = XDocument.Load(filePath);
+                var root = doc.Root;
+
+                if (root?.Name != "IEC104Configuration")
                 {
-                    var config = (IEC104Configuration)serializer.Deserialize(reader);
-                    return config.DataPoints.Select(dp => dp.ToDataPoint()).ToList();
+                    throw new Exception("Invalid XML format. Expected root element 'IEC104Configuration'");
                 }
+
+                var tagsElement = root.Element("Tags");
+                if (tagsElement == null)
+                {
+                    throw new Exception("No 'Tags' element found in XML");
+                }
+
+                foreach (var tagElement in tagsElement.Elements("Tag"))
+                {
+                    var dataPoint = new DataPoint();
+
+                    // Required attributes
+                    dataPoint.IOA = GetIntAttribute(tagElement, "IOA");
+                    dataPoint.Name = GetStringAttribute(tagElement, "Name");
+                    dataPoint.DataTagName = GetStringAttribute(tagElement, "DataTagName");
+
+                    // Parse Type (TypeId enum)
+                    if (Enum.TryParse<TypeId>(GetStringAttribute(tagElement, "Type"), out var typeId))
+                    {
+                        dataPoint.Type = typeId;
+                    }
+                    else
+                    {
+                        dataPoint.Type = TypeId.M_ME_NC_1; // Default to float
+                    }
+
+                    // Parse DataType enum
+                    if (Enum.TryParse<DataType>(GetStringAttribute(tagElement, "DataType"), out var dataType))
+                    {
+                        dataPoint.DataType = dataType;
+                    }
+                    else
+                    {
+                        dataPoint.DataType = DataType.Float; // Default
+                    }
+
+                    // Optional attributes
+                    dataPoint.Description = GetStringAttribute(tagElement, "Description");
+                    dataPoint.Value = GetStringAttribute(tagElement, "LastValue");
+
+                    // Parse LastUpdated
+                    var lastUpdatedStr = GetStringAttribute(tagElement, "LastUpdated");
+                    if (DateTime.TryParse(lastUpdatedStr, out var lastUpdated))
+                    {
+                        dataPoint.LastUpdated = lastUpdated;
+                    }
+
+                    // Initialize other properties
+                    dataPoint.IsValid = !string.IsNullOrEmpty(dataPoint.Value);
+
+                    dataPoints.Add(dataPoint);
+                }
+
+                return dataPoints;
             }
             catch (Exception ex)
             {
@@ -135,7 +210,7 @@ namespace IEC60870ServerWinForm.Services
                 {
                     IOA = 1,
                     Name = "Temperature_01",
-                    Type = IEC60870.Enum.TypeId.M_ME_NC_1,
+                    Type = TypeId.M_ME_NC_1,
                     DataType = DataType.Float,
                     DataTagName = "PLC1.Temperature",
                     Description = "Temperature sensor 1"
@@ -144,7 +219,7 @@ namespace IEC60870ServerWinForm.Services
                 {
                     IOA = 2,
                     Name = "Pressure_01",
-                    Type = IEC60870.Enum.TypeId.M_ME_NB_1,
+                    Type = TypeId.M_ME_NB_1,
                     DataType = DataType.Int,
                     DataTagName = "PLC1.Pressure",
                     Description = "Pressure sensor 1"
@@ -153,7 +228,7 @@ namespace IEC60870ServerWinForm.Services
                 {
                     IOA = 3,
                     Name = "Pump_Status",
-                    Type = IEC60870.Enum.TypeId.M_SP_NA_1,
+                    Type = TypeId.M_SP_NA_1,
                     DataType = DataType.Bool,
                     DataTagName = "PLC1.PumpStatus",
                     Description = "Pump running status"
@@ -162,7 +237,7 @@ namespace IEC60870ServerWinForm.Services
                 {
                     IOA = 4,
                     Name = "Flow_Rate",
-                    Type = IEC60870.Enum.TypeId.M_ME_NC_1,
+                    Type = TypeId.M_ME_NC_1,
                     DataType = DataType.Float,
                     DataTagName = "PLC1.FlowRate",
                     Description = "Water flow rate"
@@ -171,7 +246,7 @@ namespace IEC60870ServerWinForm.Services
                 {
                     IOA = 5,
                     Name = "Tank_Level",
-                    Type = IEC60870.Enum.TypeId.M_ME_NB_1,
+                    Type = TypeId.M_ME_NB_1,
                     DataType = DataType.Int,
                     DataTagName = "PLC1.TankLevel",
                     Description = "Water tank level"
@@ -211,6 +286,36 @@ namespace IEC60870ServerWinForm.Services
                 throw new Exception($"Error reading XML file info: {ex.Message}", ex);
             }
         }
+
+        #region Helper Methods
+
+        /// <summary>
+        /// Get string attribute value from XML element
+        /// </summary>
+        private string GetStringAttribute(XElement element, string attributeName)
+        {
+            return element.Attribute(attributeName)?.Value ?? "";
+        }
+
+        /// <summary>
+        /// Get integer attribute value from XML element
+        /// </summary>
+        private int GetIntAttribute(XElement element, string attributeName)
+        {
+            var value = element.Attribute(attributeName)?.Value;
+            return int.TryParse(value, out var result) ? result : 0;
+        }
+
+        /// <summary>
+        /// Get boolean attribute value from XML element
+        /// </summary>
+        private bool GetBoolAttribute(XElement element, string attributeName)
+        {
+            var value = element.Attribute(attributeName)?.Value;
+            return bool.TryParse(value, out var result) && result;
+        }
+
+        #endregion
     }
 
     /// <summary>

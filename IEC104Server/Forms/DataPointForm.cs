@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Windows.Forms;
+using IEC104Server.Models;
 using IEC60870.Enum;
 using IEC60870ServerWinForm.Models;
 
@@ -24,12 +25,12 @@ namespace IEC60870ServerWinForm.Forms
 
         private void InitializeForm()
         {
-            // ✅ Setup ComboBox cho DataType
+            //  Setup ComboBox cho DataType
             cmbDataType.Items.Clear();
             cmbDataType.Items.AddRange(Enum.GetValues(typeof(DataType)).Cast<object>().ToArray());
             cmbDataType.DropDownStyle = ComboBoxStyle.DropDownList;
 
-            // ✅ Setup ComboBox cho TypeId (optional - nếu muốn cho user chọn trực tiếp)
+            //  Setup ComboBox cho TypeId (optional - nếu muốn cho user chọn trực tiếp)
             cmbTypeId.Items.Clear();
             var commonTypeIds = new[]
             {
@@ -56,7 +57,7 @@ namespace IEC60870ServerWinForm.Forms
                 DataPoint.SetDataType(DataType.Bool); // Auto set TypeId
             }
 
-            // ✅ Event handlers cho auto-sync
+            //  Event handlers cho auto-sync
             cmbDataType.SelectedIndexChanged += CmbDataType_SelectedIndexChanged;
             cmbTypeId.SelectedIndexChanged += CmbTypeId_SelectedIndexChanged;
 
@@ -64,7 +65,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ Khi user chọn DataType, tự động set TypeId tương ứng
+        ///  Khi user chọn DataType, tự động set TypeId tương ứng
         /// </summary>
         private void CmbDataType_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -80,7 +81,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ Khi user chọn TypeId, tự động set DataType tương ứng
+        ///  Khi user chọn TypeId, tự động set DataType tương ứng
         /// </summary>
         private void CmbTypeId_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -99,7 +100,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ Hiển thị ví dụ value cho từng DataType
+        ///  Hiển thị ví dụ value cho từng DataType
         /// </summary>
         private void UpdateExample(DataType dataType)
         {
@@ -137,7 +138,7 @@ namespace IEC60870ServerWinForm.Forms
             txtDescription.Text = DataPoint.Description;
             txtTagPath.Text = DataPoint.DataTagName;
 
-            // ✅ Load DataType và TypeId
+            //  Load DataType và TypeId
             cmbDataType.SelectedItem = DataPoint.DataType;
             cmbTypeId.SelectedItem = DataPoint.Type;
         }
@@ -206,13 +207,13 @@ namespace IEC60870ServerWinForm.Forms
             DataPoint.Description = txtDescription.Text.Trim();
             DataPoint.DataTagName = txtTagPath.Text.Trim();
 
-            // ✅ QUAN TRỌNG: Sử dụng SetDataType thay vì gán trực tiếp
+            //  QUAN TRỌNG: Sử dụng SetDataType thay vì gán trực tiếp
             if (cmbDataType.SelectedItem is DataType selectedDataType)
             {
                 DataPoint.SetDataType(selectedDataType); // Tự động set cả DataType và TypeId
             }
 
-            // ✅ Hoặc nếu user chọn TypeId trực tiếp:
+            //  Hoặc nếu user chọn TypeId trực tiếp:
             // if (cmbTypeId.SelectedItem is TypeId selectedTypeId)
             // {
             //     DataPoint.SetTypeId(selectedTypeId); // Tự động set cả TypeId và DataType
@@ -222,7 +223,7 @@ namespace IEC60870ServerWinForm.Forms
         }
 
         /// <summary>
-        /// ✅ HELPER: Kiểm tra tag path format
+        ///  HELPER: Kiểm tra tag path format
         /// </summary>
         private void btnTestTag_Click(object sender, EventArgs e)
         {
@@ -282,7 +283,11 @@ namespace IEC60870ServerWinForm.Forms
                 txtIOA.SelectAll();
 
                 // Additional initialization if needed
-                UpdateTypeIdBasedOnDataType();
+                // Trigger DataType change to sync TypeId
+                if (cmbDataType.SelectedItem != null)
+                {
+                    CmbDataType_SelectedIndexChanged(cmbDataType, EventArgs.Empty);
+                }
             }
             catch (Exception ex)
             {

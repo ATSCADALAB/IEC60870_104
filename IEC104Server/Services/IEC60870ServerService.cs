@@ -40,9 +40,16 @@ namespace IEC60870ServerWinForm.Services
                     // Cấu hình các tham số server
                     _server.SetCotFieldLength((byte)config.CotFieldLength);
                     _server.SetCommonAddressFieldLength((byte)config.CaFieldLength);
-                    _server.SetMaxTimeNoAckReceived(config.TimeoutT1 * 1000);
-                    _server.SetMaxTimeNoAckSent(config.TimeoutT2 * 1000);
-                    _server.SetMaxIdleTime(config.TimeoutT3 * 1000);
+
+                    //  SỬA LỖI: Config đã là milliseconds, không cần nhân 1000
+                    // Validate và fix timeout values trước khi set
+                    int t1 = ValidateTimeout(config.TimeoutT1, 15000, "T1");
+                    int t2 = ValidateTimeout(config.TimeoutT2, 10000, "T2");
+                    int t3 = ValidateTimeout(config.TimeoutT3, 20000, "T3");
+
+                    _server.SetMaxTimeNoAckReceived(t1);
+                    _server.SetMaxTimeNoAckSent(t2);
+                    _server.SetMaxIdleTime(t3);
 
                     _server.NewASdu += OnNewAsduReceivedHandler;
 
@@ -165,6 +172,23 @@ namespace IEC60870ServerWinForm.Services
         {
             if (!IsRunning) return;
             OnAsduReceived?.Invoke(asdu);
+        }
+
+        /// <summary>
+        ///  THÊM MỚI: Validate timeout values
+        /// </summary>
+        private int ValidateTimeout(int value, int defaultValue, string timeoutName)
+        {
+            // T1, T2: 1000ms - 255000ms
+            // T3: 1000ms - 172800000ms (48 hours)
+            int maxValue = timeoutName == "T3" ? 172800000 : 255000;
+
+            if (value < 1000 || value > maxValue)
+            {
+                Log($"⚠️  Invalid {timeoutName} timeout: {value}ms. Using default: {defaultValue}ms");
+                return defaultValue;
+            }
+            return value;
         }
 
         private void Log(string message)

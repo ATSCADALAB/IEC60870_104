@@ -43,7 +43,7 @@ SCADA Tag Manager là công cụ quản lý và monitor các SCADA tags trong IE
 - Màu xanh cho thông tin bình thường
 - Timestamp + message format
 
-### 📊 **SCADA Tags Grid**
+###  **SCADA Tags Grid**
 
 **Các cột hiển thị:**
 - **IOA**: Information Object Address
@@ -53,7 +53,7 @@ SCADA Tag Manager là công cụ quản lý và monitor các SCADA tags trong IE
 - **TypeId**: IEC60870 Type ID
 - **Value**: Giá trị raw từ SCADA
 - **ConvertedValue**: Giá trị đã convert theo DataType
-- **IsValid**: ✅ (Good) hoặc ❌ (Bad)
+- **IsValid**:  (Good) hoặc ❌ (Bad)
 - **LastUpdated**: Thời gian cập nhật cuối (HH:mm:ss)
 - **Status**: Trạng thái kết nối (Good/Bad/Unknown)
 
@@ -83,7 +83,7 @@ SCADA Tag Manager là công cụ quản lý và monitor các SCADA tags trong IE
 
 ## Các trạng thái Tag
 
-### ✅ **Good Status**
+###  **Good Status**
 - Kết nối SCADA thành công
 - Value hợp lệ và up-to-date
 - IsValid = true
@@ -138,7 +138,7 @@ SCADA Tag Manager là công cụ quản lý và monitor các SCADA tags trong IE
 - Sử dụng "View Details" để xem driver info
 - Test individual tags để isolate problems
 
-### 📊 **Monitoring**
+###  **Monitoring**
 - Theo dõi LastUpdated để detect stale data
 - So sánh Value vs ConvertedValue để check conversion
 - Sử dụng IsValid để filter good/bad tags
