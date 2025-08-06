@@ -257,5 +257,40 @@ namespace IEC60870ServerWinForm.Forms
                 return "Tag only (requires default task to be set)";
             }
         }
+
+        #region Form Events
+
+        /// <summary>
+        /// Form Load event handler
+        /// </summary>
+        private void DataPointForm_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                // Set form title based on mode
+                if (_isEditMode)
+                {
+                    this.Text = $"Edit Data Point - IOA {DataPoint.IOA}";
+                }
+                else
+                {
+                    this.Text = "Add New Data Point";
+                }
+
+                // Focus on first input
+                txtIOA.Focus();
+                txtIOA.SelectAll();
+
+                // Additional initialization if needed
+                UpdateTypeIdBasedOnDataType();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading form: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        #endregion
     }
 }

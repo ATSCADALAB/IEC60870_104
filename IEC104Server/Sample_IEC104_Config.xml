@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<IEC104Configuration>
+	<ServerInfo Name="Sample IEC104 Server" Version="1.0" CreatedDate="2025-01-08 14:30:00" Description="Sample IEC 60870-5-104 Server Configuration" />
+	<DataPoints>
+		<DataPoint IOA="1" Name="Temperature_01" Type="M_ME_NC_1" DataType="Float" DataTagName="PLC1.Temperature" Description="Temperature sensor 1" Enabled="true" />
+		<DataPoint IOA="2" Name="Pressure_01" Type="M_ME_NB_1" DataType="Int" DataTagName="PLC1.Pressure" Description="Pressure sensor 1" Enabled="true" />
+		<DataPoint IOA="3" Name="Pump_Status" Type="M_SP_NA_1" DataType="Bool" DataTagName="PLC1.PumpStatus" Description="Pump running status" Enabled="true" />
+		<DataPoint IOA="4" Name="Flow_Rate" Type="M_ME_NC_1" DataType="Float" DataTagName="PLC1.FlowRate" Description="Water flow rate" Enabled="true" />
+		<DataPoint IOA="5" Name="Tank_Level" Type="M_ME_NB_1" DataType="Int" DataTagName="PLC1.TankLevel" Description="Water tank level" Enabled="true" />
+		<DataPoint IOA="6" Name="Alarm_High_Temp" Type="M_SP_NA_1" DataType="Bool" DataTagName="PLC1.AlarmHighTemp" Description="High temperature alarm" Enabled="true" />
+		<DataPoint IOA="7" Name="Motor_Speed" Type="M_ME_NB_1" DataType="Int" DataTagName="PLC1.MotorSpeed" Description="Motor speed" Enabled="true" />
+		<DataPoint IOA="8" Name="Valve_Position" Type="M_ME_NC_1" DataType="Float" DataTagName="PLC1.ValvePosition" Description="Control valve position" Enabled="true" />
+		<DataPoint IOA="9" Name="System_Ready" Type="M_SP_NA_1" DataType="Bool" DataTagName="PLC1.SystemReady" Description="System ready status" Enabled="true" />
+		<DataPoint IOA="10" Name="Power_Consumption" Type="M_ME_NC_1" DataType="Float" DataTagName="PLC1.PowerConsumption" Description="Power consumption" Enabled="true" />
+		<DataPoint IOA="11" Name="Vibration_X" Type="M_ME_NC_1" DataType="Float" DataTagName="PLC1.VibrationX" Description="Vibration X-axis" Enabled="true" />
+		<DataPoint IOA="12" Name="Vibration_Y" Type="M_ME_NC_1" DataType="Float" DataTagName="PLC1.VibrationY" Description="Vibration Y-axis" Enabled="true" />
+		<DataPoint IOA="13" Name="Emergency_Stop" Type="M_SP_NA_1" DataType="Bool" DataTagName="PLC1.EmergencyStop" Description="Emergency stop button" Enabled="true" />
+		<DataPoint IOA="14" Name="Oil_Pressure" Type="M_ME_NB_1" DataType="Int" DataTagName="PLC1.OilPressure" Description="Hydraulic oil pressure" Enabled="true" />
+		<DataPoint IOA="15" Name="Cooling_Fan" Type="M_SP_NA_1" DataType="Bool" DataTagName="PLC1.CoolingFan" Description="Cooling fan status" Enabled="true" />
+		<DataPoint IOA="16" Name="Production_Count" Type="M_ME_NB_1" DataType="Int" DataTagName="PLC1.ProductionCount" Description="Production counter" Enabled="true" />
+		<DataPoint IOA="17" Name="Quality_Index" Type="M_ME_NC_1" DataType="Float" DataTagName="PLC1.QualityIndex" Description="Product quality index" Enabled="true" />
+		<DataPoint IOA="18" Name="Maintenance_Due" Type="M_SP_NA_1" DataType="Bool" DataTagName="PLC1.MaintenanceDue" Description="Maintenance required" Enabled="true" />
+		<DataPoint IOA="19" Name="Ambient_Humidity" Type="M_ME_NB_1" DataType="Int" DataTagName="PLC1.AmbientHumidity" Description="Ambient humidity" Enabled="true" />
+		<DataPoint IOA="20" Name="Process_Active" Type="M_SP_NA_1" DataType="Bool" DataTagName="PLC1.ProcessActive" Description="Process running status" Enabled="true" />
+	</DataPoints>
+</IEC104Configuration>

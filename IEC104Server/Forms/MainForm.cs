@@ -637,6 +637,163 @@ namespace IEC60870ServerWinForm.Forms
 
         #endregion
 
+        #region Data Point Management
+
+        /// <summary>
+        /// Add new data point
+        /// </summary>
+        private void btnAddPoint_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var form = new DataPointForm())
+                {
+                    if (form.ShowDialog() == DialogResult.OK)
+                    {
+                        _dataPoints.Add(form.DataPoint);
+                        RefreshDataPointsGrid();
+                        LogMessage($"✅ Added data point: IOA={form.DataPoint.IOA}, Name={form.DataPoint.Name}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error adding data point: {ex.Message}");
+                MessageBox.Show($"Error adding data point: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Edit selected data point
+        /// </summary>
+        private void btnEditPoint_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dgvDataPoints.SelectedRows.Count == 0)
+                {
+                    MessageBox.Show("Please select a data point to edit.", "No Selection",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var selectedPoint = dgvDataPoints.SelectedRows[0].DataBoundItem as DataPoint;
+                if (selectedPoint != null)
+                {
+                    using (var form = new DataPointForm(selectedPoint))
+                    {
+                        if (form.ShowDialog() == DialogResult.OK)
+                        {
+                            RefreshDataPointsGrid();
+                            LogMessage($"✅ Updated data point: IOA={form.DataPoint.IOA}, Name={form.DataPoint.Name}");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error editing data point: {ex.Message}");
+                MessageBox.Show($"Error editing data point: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Delete selected data point
+        /// </summary>
+        private void btnDeletePoint_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dgvDataPoints.SelectedRows.Count == 0)
+                {
+                    MessageBox.Show("Please select a data point to delete.", "No Selection",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var selectedPoint = dgvDataPoints.SelectedRows[0].DataBoundItem as DataPoint;
+                if (selectedPoint != null)
+                {
+                    var result = MessageBox.Show(
+                        $"Are you sure you want to delete data point?\n\nIOA: {selectedPoint.IOA}\nName: {selectedPoint.Name}",
+                        "Confirm Delete", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        _dataPoints.Remove(selectedPoint);
+                        RefreshDataPointsGrid();
+                        LogMessage($"✅ Deleted data point: IOA={selectedPoint.IOA}, Name={selectedPoint.Name}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error deleting data point: {ex.Message}");
+                MessageBox.Show($"Error deleting data point: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Send selected data point immediately
+        /// </summary>
+        private void btnSendSelected_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (dgvDataPoints.SelectedRows.Count == 0)
+                {
+                    MessageBox.Show("Please select a data point to send.", "No Selection",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var selectedPoint = dgvDataPoints.SelectedRows[0].DataBoundItem as DataPoint;
+                if (selectedPoint != null && selectedPoint.IsValid)
+                {
+                    var asdu = ConvertToASdu(selectedPoint);
+                    if (asdu != null)
+                    {
+                        _serverService.BroadcastAsdu(asdu);
+                        LogMessage($"📤 Sent data point: IOA={selectedPoint.IOA}, Value={selectedPoint.Value}");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Selected data point is not valid or has no value.", "Invalid Data",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error sending data point: {ex.Message}");
+                MessageBox.Show($"Error sending data point: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Refresh data points grid
+        /// </summary>
+        private void RefreshDataPointsGrid()
+        {
+            try
+            {
+                if (_dataPointsBindingSource != null)
+                {
+                    _dataPointsBindingSource.ResetBindings(false);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error refreshing grid: {ex.Message}");
+            }
+        }
+
+        #endregion
+
         #region Form Events
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -779,6 +936,94 @@ namespace IEC60870ServerWinForm.Forms
         {
             LogMessage("📤 Force sending all data...");
             SendAllValidData();
+        }
+
+        #endregion
+
+        #region Menu Event Handlers
+
+        /// <summary>
+        /// Exit application
+        /// </summary>
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (_serverService.IsRunning)
+                {
+                    var result = MessageBox.Show(
+                        "Server is still running. Do you want to stop it and exit?",
+                        "Confirm Exit", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        _serverService.Stop();
+                        _dataSendTimer.Stop();
+                        _tagScanTimer.Stop();
+                        Application.Exit();
+                    }
+                }
+                else
+                {
+                    Application.Exit();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error during exit: {ex.Message}");
+                Application.Exit();
+            }
+        }
+
+        /// <summary>
+        /// Configure server settings
+        /// </summary>
+        private void configureServerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var form = new ServerConfigForm(_serverConfig))
+                {
+                    if (form.ShowDialog() == DialogResult.OK)
+                    {
+                        _serverConfig = form.ServerConfig;
+                        LogMessage("✅ Server configuration updated");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error opening server configuration: {ex.Message}");
+                MessageBox.Show($"Error opening server configuration: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// Show about dialog
+        /// </summary>
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                MessageBox.Show(
+                    "IEC 60870-5-104 Server\n\n" +
+                    "Version: 1.0\n" +
+                    "Built with .NET Framework\n\n" +
+                    "Features:\n" +
+                    "• SCADA Integration\n" +
+                    "• IEC104 Protocol Support\n" +
+                    "• Real-time Data Transmission\n" +
+                    "• Command Reception\n\n" +
+                    "© 2025 IEC104 Server Project",
+                    "About IEC104 Server",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"❌ Error showing about dialog: {ex.Message}");
+            }
         }
 
         #endregion
