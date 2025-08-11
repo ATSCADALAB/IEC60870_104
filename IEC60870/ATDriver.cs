@@ -144,11 +144,14 @@ namespace IEC60870Driver
             try
             {
                 if (this.currentReader is null || !this.currentReader.ConnectionStatus)
-                    return default;
+                {
+                    return null; // Luôn trả về default khi connection fail
+                }
 
                 //  PARSE TagAddress thành IOA number
                 if (int.TryParse(TagAddress, out int ioa))
                 {
+
 
                     //  SỬ DỤNG ReadByIOA để auto-detect TypeId
                     var smartResult = ReadByIOA(ioa);
@@ -164,11 +167,15 @@ namespace IEC60870Driver
                             Value = smartResult.Value
                         };
                     }
+
+                    // ReadByIOA fail → return default để caller biết có lỗi
                 }
 
                 //  FALLBACK: Nếu TagAddress không phải số, dùng cách cũ
                 if (!GetIOAddress(TagAddress, TagType, out IOAddress address))
-                    return default;
+                {
+                    return null; // Invalid address format → return default
+                }
 
                 this.currentReader.ReadMulti();
 
@@ -184,11 +191,17 @@ namespace IEC60870Driver
                     };
                 }
 
-                return default;
+                // Read fail → return default để caller biết có lỗi
+
+                return null;
             }
-            catch
+            catch (Exception ex)
             {
-                return default;
+                Console.WriteLine($"[ERROR] Read exception for tag {TagAddress}: {ex.Message}");
+
+                // Exception occurred → rethrow để caller biết có lỗi
+
+                return null;
             }
         }
         public SendPack ReadByIOA(int ioa)
@@ -308,6 +321,8 @@ namespace IEC60870Driver
 
                 if (int.TryParse(sendPack.TagAddress, out int ioa))
                 {
+
+
                     Console.WriteLine($"[DEBUG] Using smart write for IOA: {sendPack.TagAddress}");
                     return WriteSmartIOA(ioa, sendPack.Value, sendPack.TagType);
                 }
@@ -479,9 +494,14 @@ namespace IEC60870Driver
                     IpAddress = deviceSettings.IpAddress,
                     Port = deviceSettings.Port,
                     CommonAddress = deviceSettings.CommonAddress,
-                    OriginatorAddress = deviceSettings.OriginatorAddress
+                    OriginatorAddress = deviceSettings.OriginatorAddress,
+                    CotFieldLength = deviceSettings.CotFieldLength,
+                    CommonAddressFieldLength = deviceSettings.CommonAddressFieldLength,
+                    IoaFieldLength = deviceSettings.IoaFieldLength
                 };
-                var clientAdapter = new ClientAdapter(deviceSettings.ClientID, client)
+
+                // THÊM: Truyền DeviceSettings vào ClientAdapter
+                var clientAdapter = new ClientAdapter(deviceSettings.ClientID, client, deviceSettings)
                 {
                     Lifetime = this.lifetime
                 };

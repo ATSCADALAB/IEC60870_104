@@ -100,16 +100,16 @@ namespace IEC60870Driver
             {
                 Console.WriteLine($"[INFO] Reconnecting device {DeviceName}...");
 
-                // Đợi một chút để tránh reconnect quá nhanh
-                Thread.Sleep(1000);
+                // Sử dụng RetryDelay từ settings
+                Thread.Sleep(Settings?.RetryDelay ?? 1000);
 
                 // Force reconnect ClientAdapter
                 if (this.clientAdapter != null)
                 {
                     this.clientAdapter.Reconnect();
 
-                    // Test lại sau khi reconnect
-                    Thread.Sleep(2000);
+                    // Test lại sau khi reconnect - sử dụng ConnectionTimeout
+                    Thread.Sleep(Settings?.ConnectionTimeout ?? 2000);
                     bool reconnectSuccess = this.clientAdapter.CheckConnection();
 
                     if (reconnectSuccess)
@@ -134,9 +134,12 @@ namespace IEC60870Driver
         {
             try
             {
+                // Sử dụng PingTimeout từ settings
+                int actualTimeout = Settings?.PingTimeout ?? timeoutMs;
+
                 using (var ping = new Ping())
                 {
-                    var reply = ping.Send(ipAddress, timeoutMs);
+                    var reply = ping.Send(ipAddress, actualTimeout);
                     bool success = reply.Status == IPStatus.Success;
 
                     if (success)
@@ -183,11 +186,11 @@ namespace IEC60870Driver
         }
 
         /// <summary>
-        /// Ham doc single tag
+        /// Ham doc single tag với cơ chế skip missing tags
         /// </summary>
         public bool Read(IOAddress ioAddress, out string value)
         {
-            value = "0";
+            value = Settings?.MissingTagValue ?? "BAD";
 
             // Tim trong buffer truoc (neu co Multi read)
             foreach (var blockReader in this.blockReaders)
@@ -201,24 +204,94 @@ namespace IEC60870Driver
 
             if (!CheckConnection())
             {
+                // Nếu SkipMissingTags = true, trả về success với giá trị BAD
+                if (Settings?.SkipMissingTags == true)
+                {
+                    Console.WriteLine($"[SKIP] Tag IOA {ioAddress.InformationObjectAddress} - Connection failed, returning {value}");
+                    return true; // Trả về success để không block toàn bộ hệ thống
+                }
                 return false;
             }
 
-            return this.clientAdapter.Read(Settings.CommonAddress, ioAddress, out object objValue) &&
-                   ConvertValue(objValue, ioAddress.DataType, out value);
+            // Thực hiện đọc với retry mechanism
+            for (int retry = 0; retry < (Settings?.MaxRetryCount ?? 3); retry++)
+            {
+                try
+                {
+                    if (this.clientAdapter.Read(Settings.CommonAddress, ioAddress, out object objValue) &&
+                        ConvertValue(objValue, ioAddress.DataType, out value))
+                    {
+                        return true;
+                    }
+
+                    // Nếu không đọc được và còn retry
+                    if (retry < (Settings?.MaxRetryCount ?? 3) - 1)
+                    {
+                        Thread.Sleep(Settings?.RetryDelay ?? 500);
+                        Console.WriteLine($"[RETRY] Tag IOA {ioAddress.InformationObjectAddress} - Attempt {retry + 2}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ERROR] Read IOA {ioAddress.InformationObjectAddress} attempt {retry + 1}: {ex.Message}");
+                    if (retry < (Settings?.MaxRetryCount ?? 3) - 1)
+                    {
+                        Thread.Sleep(Settings?.RetryDelay ?? 500);
+                    }
+                }
+            }
+
+            // Nếu tất cả retry đều fail
+            if (Settings?.SkipMissingTags == true)
+            {
+                Console.WriteLine($"[SKIP] Tag IOA {ioAddress.InformationObjectAddress} - All retries failed, returning {value}");
+                return true; // Trả về success với giá trị BAD
+            }
+
+            return false; // Trả về fail nếu không skip missing tags
         }
 
         /// <summary>
-        /// Ham ghi gia tri
+        /// Ham ghi gia tri với retry mechanism
         /// </summary>
         public bool Write(IOAddress ioAddress, string value)
         {
             if (!CheckConnection())
             {
+                Console.WriteLine($"[ERROR] Write IOA {ioAddress.InformationObjectAddress} - Connection failed");
                 return false;
             }
 
-            return this.clientAdapter.Write(Settings.CommonAddress, ioAddress, value);
+            // Thực hiện ghi với retry mechanism
+            for (int retry = 0; retry < (Settings?.MaxRetryCount ?? 3); retry++)
+            {
+                try
+                {
+                    if (this.clientAdapter.Write(Settings.CommonAddress, ioAddress, value))
+                    {
+                        Console.WriteLine($"[SUCCESS] Write IOA {ioAddress.InformationObjectAddress} = {value}");
+                        return true;
+                    }
+
+                    // Nếu không ghi được và còn retry
+                    if (retry < (Settings?.MaxRetryCount ?? 3) - 1)
+                    {
+                        Thread.Sleep(Settings?.RetryDelay ?? 500);
+                        Console.WriteLine($"[RETRY] Write IOA {ioAddress.InformationObjectAddress} - Attempt {retry + 2}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[ERROR] Write IOA {ioAddress.InformationObjectAddress} attempt {retry + 1}: {ex.Message}");
+                    if (retry < (Settings?.MaxRetryCount ?? 3) - 1)
+                    {
+                        Thread.Sleep(Settings?.RetryDelay ?? 500);
+                    }
+                }
+            }
+
+            Console.WriteLine($"[FAILED] Write IOA {ioAddress.InformationObjectAddress} - All retries failed");
+            return false;
         }
 
         private bool ConvertValue(object objValue, DataType dataType, out string value)

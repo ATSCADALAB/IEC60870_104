@@ -5,6 +5,8 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Collections.Generic;
+
 
 namespace IEC60870.SAP
 {
@@ -45,6 +47,8 @@ namespace IEC60870.SAP
             _connection.NewASdu += _newAsduEvent;
 
             _connection.WaitForStartDT(5000);
+            // Notify ready state so publisher can start sending safely
+            _pubSubHub.Publish(this, "ready", true);
         }
     }
 
@@ -72,7 +76,7 @@ namespace IEC60870.SAP
             try
             {
                 while (true)
-                {                                    
+                {
                     try
                     {
                         var clientSocket = _serverSocket.Accept();
@@ -80,9 +84,10 @@ namespace IEC60870.SAP
                         {
                             clientSocket.Close();
                             continue;
-                        }                            
-                        
+                        }
+
                         var handler = new ConnectionHandler(clientSocket, _settings, _newAsduEvent, _pubSubHub);
+                        _handlers.Add(handler);
                         handler.Start();
                         _connectionCount++;
                     }
@@ -104,13 +109,20 @@ namespace IEC60870.SAP
         }
     }
 
-    public class ServerSAP
+    public class ServerSAP : IDisposable
     {
         private readonly ConnectionSettings _settings = new ConnectionSettings();
         private readonly PubSubHub _pubSubHub = new PubSubHub();
         private readonly IPAddress _host;
         private readonly int _port;
         private const int _maxConnections = 10;
+
+        // Hold references to allow stopping/disposing
+        private Socket _serverSocket;
+        private ServerThread _serverThread;
+        private readonly List<ConnectionHandler> _handlers = new List<ConnectionHandler>();
+
+        public event Action ClientReady;
 
         public ConnectionEventListener.NewASdu NewASdu { get; set; }
 
@@ -141,11 +153,42 @@ namespace IEC60870.SAP
         public void StartListen(int backlog)
         {
             var remoteEp = new IPEndPoint(_host, _port);
-            var socket = new Socket(_host.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            socket.Bind(remoteEp);
-            socket.Listen(backlog);
-            var serverThread = new ServerThread(socket, _settings, _maxConnections, NewASdu, _pubSubHub);
-            serverThread.Start();
+            _serverSocket = new Socket(_host.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _serverSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            _serverSocket.Bind(remoteEp);
+            _serverSocket.Listen(backlog);
+            _serverThread = new ServerThread(_serverSocket, _settings, _maxConnections, NewASdu, _pubSubHub);
+            // Subscribe once to ready events to surface externally
+            _pubSubHub.Subscribe<bool>(this, "ready", _ => ClientReady?.Invoke());
+
+            _serverThread.Start();
+        }
+
+
+        public void Stop()
+        {
+            try
+            {
+                // Close listening socket to break out Accept()
+                _serverSocket?.Close();
+
+                // Abort all connection handlers immediately
+                foreach (var h in _handlers)
+                {
+                    try { h.Abort(); } catch { }
+                }
+                _handlers.Clear();
+            }
+            catch { }
+            finally
+            {
+                _serverSocket = null;
+            }
+        }
+
+        public void Dispose()
+        {
+            Stop();
         }
 
         public void SendASdu(ASdu asdu)

@@ -20,6 +20,16 @@ namespace IEC60870Driver
         private bool isConnected = false;
         private readonly AutoResetEvent responseReceived = new AutoResetEvent(false);
         private readonly Dictionary<int, TypeId> ioaTypeMapping = new Dictionary<int, TypeId>();
+
+        // THÊM: Chờ xác nhận lệnh ghi
+        private class CommandAwaiter
+        {
+            public readonly ManualResetEventSlim Ev = new ManualResetEventSlim(false);
+            public bool Success;
+        }
+        private readonly object pendingLock = new object();
+        private readonly Dictionary<string, CommandAwaiter> pending = new Dictionary<string, CommandAwaiter>();
+        private string Key(TypeId t, int ioa) => $"{t}:{ioa}";
         #endregion
 
         #region PROPERTIES
@@ -29,6 +39,17 @@ namespace IEC60870Driver
         public int CommonAddress { get; set; }
         public int OriginatorAddress { get; set; }
         public bool IsConnected => isConnected && clientSAP != null;
+
+        // Hint timeout để chờ xác nhận lệnh (ms), được set từ DeviceSettings.WriteTimeout
+        public int WriteTimeoutHintMs { get; set; } = 3000;
+
+        // Cho phép bật/tắt việc CHỜ xác nhận lệnh từ thiết bị
+        public bool RequireCommandConfirmation { get; set; } = false; // false => hành vi giống console: gửi là xong
+
+        // Cho phép cấu hình độ dài trường COT/CA/IOA từ DeviceSettings
+        public int CotFieldLength { get; set; } = 2;           // 1 hoặc 2
+        public int CommonAddressFieldLength { get; set; } = 2; // 1 hoặc 2
+        public int IoaFieldLength { get; set; } = 3;           // 2 hoặc 3
 
         #endregion
 
@@ -51,10 +72,10 @@ namespace IEC60870Driver
 
                 clientSAP = new ClientSAP(IpAddress, Port);
 
-                // THÊM: Set connection parameters
-                clientSAP.SetCotFieldLength(2);           // Cot field length = 2
-                clientSAP.SetCommonAddressFieldLength(2); // CA field length = 2  
-                clientSAP.SetIoaFieldLength(3);           // IOA field length = 3 for IOA 16385
+                // THÊM: Set connection parameters từ cấu hình
+                clientSAP.SetCotFieldLength(CotFieldLength);
+                clientSAP.SetCommonAddressFieldLength(CommonAddressFieldLength);
+                clientSAP.SetIoaFieldLength(IoaFieldLength);
                 clientSAP.SetOriginatorAddress(OriginatorAddress);
 
                 // Set timeouts
@@ -83,6 +104,12 @@ namespace IEC60870Driver
             try
             {
                 isConnected = false;
+                if (clientSAP != null)
+                {
+                    clientSAP.ConnectionClosed -= OnConnectionClosed;
+                    clientSAP.NewASdu -= OnNewASdu;
+                    try { clientSAP.Disconnect(); } catch { }
+                }
                 clientSAP = null;
             }
             catch { }
@@ -100,7 +127,7 @@ namespace IEC60870Driver
                 {
                     ProcessASdu(asdu);
                 }
-                responseReceived.Set();
+                responseReceived.Set(); // wake any waiters
             }
             catch (Exception)
             {
@@ -111,8 +138,7 @@ namespace IEC60870Driver
         private void OnConnectionClosed(Exception exception)
         {
             isConnected = false;
-            // Trigger reconnection sau một khoảng thời gian
-            Task.Delay(5000).ContinueWith(t => TryReconnect());
+            // Do not auto-reconnect here; let outer ClientAdapter control reconnection
         }
         public bool GetValueSmart(int ioa, out object value, out TypeId detectedTypeId)
         {
@@ -184,8 +210,30 @@ namespace IEC60870Driver
             try
             {
                 var typeId = asdu.GetTypeIdentification();
+                var cot = asdu.GetCauseOfTransmission();
                 var informationObjects = asdu.GetInformationObjects();
 
+                // XỬ LÝ: Xác nhận lệnh ghi
+                bool isCommandType = typeId == TypeId.C_SC_NA_1 || typeId == TypeId.C_DC_NA_1 ||
+                                     typeId == TypeId.C_SE_NC_1 || typeId == TypeId.C_SE_NB_1;
+                if (isCommandType && (cot == CauseOfTransmission.ACTIVATION_CON || cot == CauseOfTransmission.ACTIVATION_TERMINATION))
+                {
+                    foreach (var informationObject in informationObjects)
+                    {
+                        var ioa = informationObject.GetInformationObjectAddress();
+                        var key = Key(typeId, ioa);
+                        CommandAwaiter aw = null;
+                        lock (pendingLock) pending.TryGetValue(key, out aw);
+                        if (aw != null)
+                        {
+                            aw.Success = !asdu.IsNegativeConfirm();
+                            aw.Ev.Set();
+                        }
+                    }
+                    return; // Không đưa vào buffer dữ liệu
+                }
+
+                // MẶC ĐỊNH: Lưu các bản tin dữ liệu vào buffer
                 foreach (var informationObject in informationObjects)
                 {
                     var ioa = informationObject.GetInformationObjectAddress();
@@ -329,8 +377,25 @@ namespace IEC60870Driver
 
                 if (commandAsdu != null)
                 {
+                    if (!RequireCommandConfirmation)
+                    {
+                        // Hành vi giống console trực tiếp: gửi là xong
+                        clientSAP.SendASdu(commandAsdu);
+                        return true;
+                    }
+
+                    // Require confirmation: đăng ký awaiter và chờ ACT_CON/ACT_TERM
+                    var awaiter = new CommandAwaiter();
+                    var key = Key(typeId, ioa);
+                    lock (pendingLock) pending[key] = awaiter;
+
                     clientSAP.SendASdu(commandAsdu);
-                    return true;
+
+                    int timeoutMs = WriteTimeoutHintMs > 0 ? WriteTimeoutHintMs : 3000;
+                    bool signaled = awaiter.Ev.Wait(timeoutMs);
+
+                    lock (pendingLock) pending.Remove(key);
+                    return signaled && awaiter.Success;
                 }
 
                 return false;

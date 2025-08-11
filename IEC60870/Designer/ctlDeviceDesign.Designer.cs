@@ -1,4 +1,4 @@
-﻿namespace IEC60870Driver
+namespace IEC60870Driver
 {
     partial class ctlDeviceDesign
     {
@@ -21,10 +21,16 @@
         private System.Windows.Forms.ComboBox cbxCaFieldLength;
         private System.Windows.Forms.Label lblIoaFieldLength;
         private System.Windows.Forms.ComboBox cbxIoaFieldLength;
-        private System.Windows.Forms.Label lblDescription;
-        private System.Windows.Forms.TextBox txtDescription;
         private System.Windows.Forms.Button btnOk;
         private System.Windows.Forms.Button btnCancel;
+        
+        // THÊM: Timeout controls
+        private System.Windows.Forms.GroupBox gbTimeouts;
+        private System.Windows.Forms.Label lblConnectionTimeout;
+        private System.Windows.Forms.NumericUpDown nudConnectionTimeout;
+
+
+
 
         protected override void Dispose(bool disposing)
         {
@@ -55,8 +61,9 @@
             this.cbxCaFieldLength = new System.Windows.Forms.ComboBox();
             this.lblIoaFieldLength = new System.Windows.Forms.Label();
             this.cbxIoaFieldLength = new System.Windows.Forms.ComboBox();
-            this.lblDescription = new System.Windows.Forms.Label();
-            this.txtDescription = new System.Windows.Forms.TextBox();
+            this.gbTimeouts = new System.Windows.Forms.GroupBox();
+            this.lblConnectionTimeout = new System.Windows.Forms.Label();
+            this.nudConnectionTimeout = new System.Windows.Forms.NumericUpDown();
             this.btnOk = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.gbConnection.SuspendLayout();
@@ -64,6 +71,8 @@
             this.gbProtocol.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudCommonAddress)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudOriginatorAddress)).BeginInit();
+            this.gbTimeouts.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudConnectionTimeout)).BeginInit();
             this.SuspendLayout();
             // 
             // lblDeviceName
@@ -279,43 +288,73 @@
             this.cbxIoaFieldLength.Size = new System.Drawing.Size(150, 21);
             this.cbxIoaFieldLength.TabIndex = 9;
             // 
-            // lblDescription
+            // gbTimeouts
             // 
-            this.lblDescription.AutoSize = true;
-            this.lblDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
-            this.lblDescription.Location = new System.Drawing.Point(15, 325);
-            this.lblDescription.Name = "lblDescription";
-            this.lblDescription.Size = new System.Drawing.Size(75, 13);
-            this.lblDescription.TabIndex = 5;
-            this.lblDescription.Text = "Description:";
+            this.gbTimeouts.Controls.Add(this.lblConnectionTimeout);
+            this.gbTimeouts.Controls.Add(this.nudConnectionTimeout);
+            this.gbTimeouts.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.gbTimeouts.Location = new System.Drawing.Point(15, 320);
+            this.gbTimeouts.Name = "gbTimeouts";
+            this.gbTimeouts.Size = new System.Drawing.Size(350, 92);
+            this.gbTimeouts.TabIndex = 5;
+            this.gbTimeouts.TabStop = false;
+            this.gbTimeouts.Text = "Timeout Settings";
             // 
-            // txtDescription
+            // lblConnectionTimeout
             // 
-            this.txtDescription.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.txtDescription.Location = new System.Drawing.Point(15, 345);
-            this.txtDescription.Multiline = true;
-            this.txtDescription.Name = "txtDescription";
-            this.txtDescription.ReadOnly = true;
-            this.txtDescription.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtDescription.Size = new System.Drawing.Size(350, 80);
-            this.txtDescription.TabIndex = 6;
+            this.lblConnectionTimeout.AutoSize = true;
+            this.lblConnectionTimeout.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.lblConnectionTimeout.Location = new System.Drawing.Point(15, 25);
+            this.lblConnectionTimeout.Name = "lblConnectionTimeout";
+            this.lblConnectionTimeout.Size = new System.Drawing.Size(127, 13);
+            this.lblConnectionTimeout.TabIndex = 0;
+            this.lblConnectionTimeout.Text = "Connection Timeout (ms):";
+            // 
+            // nudConnectionTimeout
+            // 
+            this.nudConnectionTimeout.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.nudConnectionTimeout.Increment = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.nudConnectionTimeout.Location = new System.Drawing.Point(15, 45);
+            this.nudConnectionTimeout.Maximum = new decimal(new int[] {
+            60000,
+            0,
+            0,
+            0});
+            this.nudConnectionTimeout.Minimum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.nudConnectionTimeout.Name = "nudConnectionTimeout";
+            this.nudConnectionTimeout.Size = new System.Drawing.Size(80, 20);
+            this.nudConnectionTimeout.TabIndex = 1;
+            this.nudConnectionTimeout.Value = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
             // 
             // btnOk
             // 
-            this.btnOk.Enabled = false;
-            this.btnOk.Location = new System.Drawing.Point(210, 440);
+            this.btnOk.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold);
+            this.btnOk.Location = new System.Drawing.Point(200, 418);
             this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(75, 23);
-            this.btnOk.TabIndex = 7;
+            this.btnOk.Size = new System.Drawing.Size(75, 30);
+            this.btnOk.TabIndex = 8;
             this.btnOk.Text = "OK";
             this.btnOk.UseVisualStyleBackColor = true;
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(290, 440);
+            this.btnCancel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.btnCancel.Location = new System.Drawing.Point(290, 418);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 8;
+            this.btnCancel.Size = new System.Drawing.Size(75, 30);
+            this.btnCancel.TabIndex = 9;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
@@ -323,16 +362,15 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.btnCancel);
-            this.Controls.Add(this.btnOk);
-            this.Controls.Add(this.txtDescription);
-            this.Controls.Add(this.lblDescription);
-            this.Controls.Add(this.gbProtocol);
-            this.Controls.Add(this.gbConnection);
-            this.Controls.Add(this.txtDeviceName);
             this.Controls.Add(this.lblDeviceName);
+            this.Controls.Add(this.txtDeviceName);
+            this.Controls.Add(this.gbConnection);
+            this.Controls.Add(this.gbProtocol);
+            this.Controls.Add(this.gbTimeouts);
+            this.Controls.Add(this.btnOk);
+            this.Controls.Add(this.btnCancel);
             this.Name = "ctlDeviceDesign";
-            this.Size = new System.Drawing.Size(380, 480);
+            this.Size = new System.Drawing.Size(380, 464);
             this.gbConnection.ResumeLayout(false);
             this.gbConnection.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudPort)).EndInit();
@@ -340,6 +378,9 @@
             this.gbProtocol.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudCommonAddress)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nudOriginatorAddress)).EndInit();
+            this.gbTimeouts.ResumeLayout(false);
+            this.gbTimeouts.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nudConnectionTimeout)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

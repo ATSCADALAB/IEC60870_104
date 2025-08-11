@@ -17,6 +17,16 @@ namespace IEC60870Driver
         public int TimeOut { get; set; } = 5000;
         public int MaxReadTimes { get; set; } = 1;
         public string BlockSettings { get; set; }
+
+        // THÊM: Timeout configurations
+        public int ConnectionTimeout { get; set; } = 10000;      // Timeout kết nối (ms)
+        public int ReadTimeout { get; set; } = 5000;             // Timeout đọc dữ liệu (ms)
+        public int InterrogationTimeout { get; set; } = 8000;    // Timeout cho General Interrogation (ms)
+        public int PingTimeout { get; set; } = 3000;             // Timeout cho ping test (ms)
+        public int MaxRetryCount { get; set; } = 3;              // Số lần retry tối đa
+        public int RetryDelay { get; set; } = 500;               // Delay giữa các lần retry (ms)
+        public bool SkipMissingTags { get; set; } = true;        // Bỏ qua tag không tồn tại
+        public string MissingTagValue { get; set; } = "BAD";     // Giá trị trả về cho tag không tồn tại
         public string ClientID => $"{IpAddress}:{Port}";
 
         public static DeviceSettings Initialize(string deviceID)
@@ -26,8 +36,8 @@ namespace IEC60870Driver
                 if (string.IsNullOrWhiteSpace(deviceID))
                     return null;
 
-                // Format: "IP|Port|CommonAddress|OriginatorAddress|CotFieldLength|CAFieldLength|IOAFieldLength|MaxReadTimes|BlockSettings"
-                // Example: "192.168.1.100|2404|1|0|1|1|2|1|M_SP_NA_1-1-100/M_ME_NC_1-101-200"
+                // Format: "IP|Port|CommonAddress|OriginatorAddress|CotFieldLength|CAFieldLength|IOAFieldLength|MaxReadTimes|BlockSettings|ConnTimeout|ReadTimeout|InterrogationTimeout|PingTimeout|MaxRetry|RetryDelay|SkipMissing|MissingValue"
+                // Example: "192.168.1.100|2404|1|0|1|1|2|1|M_SP_NA_1-1-100/M_ME_NC_1-101-200|10000|5000|8000|3000|3|500|true|BAD"
                 var parts = deviceID.Split('|');
                 if (parts.Length < 7)
                     return null;
@@ -42,7 +52,17 @@ namespace IEC60870Driver
                     CommonAddressFieldLength = int.Parse(parts[5]),
                     IoaFieldLength = int.Parse(parts[6]),
                     MaxReadTimes = parts.Length > 7 ? int.Parse(parts[7]) : 1,
-                    BlockSettings = parts.Length > 8 ? parts[8] : ""
+                    BlockSettings = parts.Length > 8 ? parts[8] : "",
+
+                    // THÊM: Parse timeout configurations
+                    ConnectionTimeout = parts.Length > 9 ? int.Parse(parts[9]) : 10000,
+                    ReadTimeout = parts.Length > 10 ? int.Parse(parts[10]) : 5000,
+                    InterrogationTimeout = parts.Length > 11 ? int.Parse(parts[11]) : 8000,
+                    PingTimeout = parts.Length > 12 ? int.Parse(parts[12]) : 3000,
+                    MaxRetryCount = parts.Length > 13 ? int.Parse(parts[13]) : 3,
+                    RetryDelay = parts.Length > 14 ? int.Parse(parts[14]) : 500,
+                    SkipMissingTags = parts.Length > 15 ? bool.Parse(parts[15]) : true,
+                    MissingTagValue = parts.Length > 16 ? parts[16] : "BAD"
                 };
 
                 // Validate the settings
@@ -158,11 +178,22 @@ namespace IEC60870Driver
                 CommonAddressFieldLength.ToString(),
                 IoaFieldLength.ToString(),
                 MaxReadTimes.ToString(),
-                BlockSettings ?? ""
+                BlockSettings ?? "",
+                ConnectionTimeout.ToString(),
+                ReadTimeout.ToString(),
+                InterrogationTimeout.ToString(),
+                PingTimeout.ToString(),
+                MaxRetryCount.ToString(),
+                RetryDelay.ToString(),
+                SkipMissingTags.ToString(),
+                MissingTagValue ?? "BAD"
             };
 
-            // Remove empty block settings from the end
-            if (string.IsNullOrEmpty(parts[8]))
+            // Remove empty block settings from the end if all timeout configs are default
+            if (string.IsNullOrEmpty(parts[8]) &&
+                ConnectionTimeout == 10000 && ReadTimeout == 5000 &&
+                InterrogationTimeout == 8000 && PingTimeout == 3000 && MaxRetryCount == 3 &&
+                RetryDelay == 500 && SkipMissingTags == true && MissingTagValue == "BAD")
             {
                 return string.Join("|", parts, 0, 8);
             }
@@ -308,7 +339,15 @@ namespace IEC60870Driver
                 IoaFieldLength = 2,
                 TimeOut = 5000,
                 MaxReadTimes = 1,
-                BlockSettings = ""
+                BlockSettings = "",
+                ConnectionTimeout = 10000,
+                ReadTimeout = 5000,
+                InterrogationTimeout = 8000,
+                PingTimeout = 3000,
+                MaxRetryCount = 3,
+                RetryDelay = 500,
+                SkipMissingTags = true,
+                MissingTagValue = "BAD"
             };
         }
 
@@ -325,7 +364,15 @@ namespace IEC60870Driver
                 IoaFieldLength = this.IoaFieldLength,
                 TimeOut = this.TimeOut,
                 MaxReadTimes = this.MaxReadTimes,
-                BlockSettings = this.BlockSettings
+                BlockSettings = this.BlockSettings,
+                ConnectionTimeout = this.ConnectionTimeout,
+                ReadTimeout = this.ReadTimeout,
+                InterrogationTimeout = this.InterrogationTimeout,
+                PingTimeout = this.PingTimeout,
+                MaxRetryCount = this.MaxRetryCount,
+                RetryDelay = this.RetryDelay,
+                SkipMissingTags = this.SkipMissingTags,
+                MissingTagValue = this.MissingTagValue
             };
         }
     }

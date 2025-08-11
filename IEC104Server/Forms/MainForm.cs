@@ -71,6 +71,17 @@ namespace IEC60870ServerWinForm.Forms
             _tagScanTimer.Tick += (s, e) => UpdateTagValues();
 
             _dataSendTimer = new Timer { Interval = 3000 }; // Gửi data mỗi 3 giây
+            _serverService.OnClientReady += () =>
+            {
+                try
+                {
+                    if (InvokeRequired) BeginInvoke(new Action(() => _dataSendTimer.Start()));
+                    else _dataSendTimer.Start();
+                    LogMessage("Client connection ready. Data sending started.");
+                }
+                catch { }
+            };
+
             _dataSendTimer.Tick += (s, e) => SendAllValidData();
         }
 
@@ -175,7 +186,7 @@ namespace IEC60870ServerWinForm.Forms
                 }
 
                 // Hide unnecessary columns
-                var hideColumns = new[] { "Description", "ConvertedValue", "LastUpdated" };
+                var hideColumns = new[] { "Description", "ConvertedValue", "LastUpdated", "Value", "IsValid" };
                 foreach (var col in hideColumns)
                 {
                     if (dgvDataPoints.Columns[col] != null)
@@ -456,10 +467,12 @@ namespace IEC60870ServerWinForm.Forms
         {
             try
             {
-                if (iDriver1 == null)
+                // Prevent starting when there are no data points
+                if (_dataPoints == null || _dataPoints.Count == 0)
                 {
-                    MessageBox.Show("iDriver1 chưa được khởi tạo! Cần gọi SetDriver() hoặc InitializeDriver() trước.",
-                        "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("No data points available", "No DataPoint",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    LogMessage("⚠️ Start blocked: No data points available.");
                     return;
                 }
 
@@ -977,11 +990,11 @@ namespace IEC60870ServerWinForm.Forms
             try
             {
                 //  Debug: Check _dataPoints status
-                LogMessage($"🔧 btnAddPoint_Click: _dataPoints is {(_dataPoints == null ? "NULL" : $"initialized with {_dataPoints.Count} items")}");
+                //LogMessage($"🔧 btnAddPoint_Click: _dataPoints is {(_dataPoints == null ? "NULL" : $"initialized with {_dataPoints.Count} items")}");
 
                 if (_dataPoints == null)
                 {
-                    LogMessage("🔧 _dataPoints is null, initializing...");
+                    //LogMessage("🔧 _dataPoints is null, initializing...");
                     _dataPoints = new List<DataPoint>();
                 }
 
@@ -1075,43 +1088,6 @@ namespace IEC60870ServerWinForm.Forms
             }
         }
 
-        /// <summary>
-        /// Send selected data point immediately
-        /// </summary>
-        private void btnSendSelected_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (dgvDataPoints.SelectedRows.Count == 0)
-                {
-                    MessageBox.Show("Please select a data point to send.", "No Selection",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-
-                var selectedPoint = dgvDataPoints.SelectedRows[0].DataBoundItem as DataPoint;
-                if (selectedPoint != null && selectedPoint.IsValid)
-                {
-                    var asdu = ConvertToASdu(selectedPoint);
-                    if (asdu != null)
-                    {
-                        _serverService.BroadcastAsdu(asdu);
-                        LogMessage($"📤 Sent data point: IOA={selectedPoint.IOA}, Value={selectedPoint.Value}");
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("Selected data point is not valid or has no value.", "Invalid Data",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogMessage($"❌ Error sending data point: {ex.Message}");
-                MessageBox.Show($"Error sending data point: {ex.Message}", "Error",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
 
         /// <summary>
         /// Refresh data points grid - chỉ cho config changes, không cho value updates
@@ -1280,7 +1256,7 @@ namespace IEC60870ServerWinForm.Forms
         /// <summary>
         ///  Write value to SCADA system using iDriver1
         /// </summary>
-        private void WriteToSCADA(int ioa, object value)
+        private void WriteToSCADA(int ioa, object c)
         {
             try
             {
@@ -1309,10 +1285,67 @@ namespace IEC60870ServerWinForm.Forms
                 string taskName = parts[0];
                 string tagName = parts.Length > 2 ? string.Join(".", parts, 1, parts.Length - 1) : parts[1];
 
-                //  WRITE TO SCADA using iDriver1
-                iDriver1.Task(taskName).Tag(tagName).Value = value.ToString();
+                // Convert input 'c' to string for driver based on DataPoint.DataType
+                string writeValue;
+                try
+                {
+                    switch (dataPoint.DataType)
+                    {
+                        case DataType.Bool:
+                            {
+                                bool b;
+                                if (c is bool bb) b = bb;
+                                else
+                                {
+                                    var s = (c?.ToString() ?? "").Trim().ToLower();
+                                    b = s == "1" || s == "true" || s == "on" || s == "yes";
+                                }
+                                writeValue = b ? "1" : "0";
+                                break;
+                            }
+                        case DataType.Int:
+                        case DataType.Counter:
+                            {
+                                int i;
+                                if (c is int ii) i = ii;
+                                else if (c is long l) i = (int)l;
+                                else if (c is double dd) i = (int)Math.Round(dd);
+                                else if (c is float ff) i = (int)Math.Round(ff);
+                                else if (!int.TryParse((c?.ToString() ?? "0").Trim(), out i)) i = 0;
+                                writeValue = i.ToString();
+                                break;
+                            }
+                        case DataType.Float:
+                        case DataType.Double:
+                            {
+                                double d;
+                                if (c is double d0) d = d0;
+                                else if (c is float f0) d = f0;
+                                else if (!double.TryParse((c?.ToString() ?? "0").Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out d))
+                                {
+                                    // Fallback to current culture if invariant fails
+                                    double.TryParse((c?.ToString() ?? "0").Trim(), out d);
+                                }
+                                writeValue = d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                                break;
+                            }
+                        case DataType.String:
+                            writeValue = c?.ToString() ?? string.Empty;
+                            break;
+                        default:
+                            writeValue = c?.ToString() ?? string.Empty;
+                            break;
+                    }
+                }
+                catch
+                {
+                    writeValue = c?.ToString() ?? string.Empty;
+                }
 
-                LogMessage($" SCADA Write: {dataPoint.DataTagName} = {value}");
+                //  WRITE TO SCADA using iDriver1
+                iDriver1.Task(taskName).Tag(tagName).Value = writeValue;
+
+                LogMessage($" SCADA Write: {dataPoint.DataTagName} = {writeValue}");
 
                 //  IMMEDIATE READ BACK and UPDATE CLIENT (if enabled)
                 if (_enableImmediateReadBack)
@@ -1500,6 +1533,9 @@ namespace IEC60870ServerWinForm.Forms
                 return;
             }
 
+            // ✅ TEST WRITE CAPABILITY
+            TestWriteCapability();
+
             if (_dataPoints.Count > 0)
             {
                 var testPoints = _dataPoints.Take(3).Where(p => !string.IsNullOrEmpty(p.DataTagName));
@@ -1541,6 +1577,80 @@ namespace IEC60870ServerWinForm.Forms
             }
 
             LogMessage("🔧 === END CONNECTION TEST ===");
+        }
+
+        /// <summary>
+        /// ✅ TEST WRITE CAPABILITY - Debug write issues
+        /// </summary>
+        private void TestWriteCapability()
+        {
+            LogMessage("🔧 === WRITE CAPABILITY TEST ===");
+
+            if (_dataPoints.Count == 0)
+            {
+                LogMessage("   ❌ No data points configured for write test");
+                return;
+            }
+
+            var testPoint = _dataPoints.FirstOrDefault(dp => !string.IsNullOrEmpty(dp.DataTagName));
+            if (testPoint == null)
+            {
+                LogMessage("   ❌ No valid data points with DataTagName");
+                return;
+            }
+
+            LogMessage($"   Testing write to: {testPoint.DataTagName} (IOA: {testPoint.IOA})");
+
+            try
+            {
+                // Parse task và tag
+                var parts = testPoint.DataTagName.Split('.');
+                if (parts.Length < 2)
+                {
+                    LogMessage($"   ❌ Invalid tag format: {testPoint.DataTagName}");
+                    return;
+                }
+
+                string taskName = parts[0];
+                string tagName = parts.Length > 2 ? string.Join(".", parts, 1, parts.Length - 1) : parts[1];
+
+                LogMessage($"   Task: '{taskName}', Tag: '{tagName}'");
+
+                // Test read first
+                var currentValue = iDriver1.Task(taskName).Tag(tagName).Value?.ToString();
+                LogMessage($"   Current value: {currentValue ?? "NULL"}");
+
+                // Test write
+                string testValue = testPoint.Type == TypeId.M_SP_NA_1 ? "true" : "123.45";
+                LogMessage($"   Attempting write: {testValue}");
+
+                iDriver1.Task(taskName).Tag(tagName).Value = testValue;
+                LogMessage($"   ✅ Write completed successfully");
+
+                // Test read back
+                var readBackValue = iDriver1.Task(taskName).Tag(tagName).Value?.ToString();
+                LogMessage($"   Read back value: {readBackValue ?? "NULL"}");
+
+                if (readBackValue == testValue)
+                {
+                    LogMessage($"   ✅ Write verification SUCCESS");
+                }
+                else
+                {
+                    LogMessage($"   ⚠️  Write verification FAILED - values don't match");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"   ❌ Write test FAILED: {ex.Message}");
+                LogMessage($"   Exception type: {ex.GetType().Name}");
+                if (ex.InnerException != null)
+                {
+                    LogMessage($"   Inner exception: {ex.InnerException.Message}");
+                }
+            }
+
+            LogMessage("🔧 === END WRITE TEST ===");
         }
 
         /// <summary>
@@ -1621,6 +1731,23 @@ namespace IEC60870ServerWinForm.Forms
         {
             LogMessage("📤 Force sending all data...");
             SendAllValidData();
+        }
+
+        /// <summary>
+        /// ✅ DEBUG: Test write functionality manually
+        /// </summary>
+        public void DebugTestWrite()
+        {
+            LogMessage("🔧 === MANUAL WRITE TEST ===");
+            TestWriteCapability();
+
+            // Test WriteToSCADA method directly
+            if (_dataPoints.Count > 0)
+            {
+                var testPoint = _dataPoints.First();
+                LogMessage($"🔧 Testing WriteToSCADA method with IOA: {testPoint.IOA}");
+                WriteToSCADA(testPoint.IOA, "TEST_VALUE_123");
+            }
         }
 
         /// <summary>
@@ -1732,28 +1859,17 @@ namespace IEC60870ServerWinForm.Forms
 
                     if (dialog.ShowDialog() == DialogResult.OK)
                     {
-                        // Show confirmation dialog
-                        var result = MessageBox.Show(
-                            $"Open Configuration?\n\n" +
-                            $"File: {System.IO.Path.GetFileName(dialog.FileName)}\n" +
-                            $"This will replace current configuration!\n\n" +
-                            $"Continue?",
-                            "Confirm Open", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                        if (result == DialogResult.Yes)
+                        // Import from XML without confirmation
+                        var dataPoints = _xmlConfigService.ImportFromXml(dialog.FileName);
+                        if (dataPoints != null)
                         {
-                            //  Import from XML using XmlConfigService
-                            var dataPoints = _xmlConfigService.ImportFromXml(dialog.FileName);
-                            if (dataPoints != null)
-                            {
-                                _dataPoints.Clear();
-                                _dataPoints.AddRange(dataPoints);
-                                RefreshDataPointsGrid();
+                            _dataPoints.Clear();
+                            _dataPoints.AddRange(dataPoints);
+                            RefreshDataPointsGrid();
 
-                                _currentConfigFile = dialog.FileName; // Remember for next Save
-                                LogMessage($"Configuration loaded from: {Path.GetFileName(dialog.FileName)}");
-                                LogMessage($"Loaded {_dataPoints.Count} data points from XML");
-                            }
+                            _currentConfigFile = dialog.FileName; // Remember for next Save
+                            LogMessage($"Configuration loaded from: {Path.GetFileName(dialog.FileName)}");
+                            LogMessage($"Loaded {_dataPoints.Count} data points from XML");
                         }
                     }
                 }

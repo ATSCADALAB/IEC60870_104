@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IEC60870", "IEC60870.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IEC104Server", "..\IEC104Server\IEC104Server.csproj", "{D9DE1C1F-141B-49E6-BC11-8C53EA99AD75}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestIEC104V", "..\TestIEC104V\TestIEC104V.csproj", "{DFE63A49-19FD-44C3-A2B2-BB54A45D3BC4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +22,10 @@ Global
 		{D9DE1C1F-141B-49E6-BC11-8C53EA99AD75}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9DE1C1F-141B-49E6-BC11-8C53EA99AD75}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9DE1C1F-141B-49E6-BC11-8C53EA99AD75}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFE63A49-19FD-44C3-A2B2-BB54A45D3BC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFE63A49-19FD-44C3-A2B2-BB54A45D3BC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFE63A49-19FD-44C3-A2B2-BB54A45D3BC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFE63A49-19FD-44C3-A2B2-BB54A45D3BC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

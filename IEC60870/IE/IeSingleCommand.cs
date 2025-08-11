@@ -24,7 +24,7 @@ namespace IEC60870.IE
 
         public override string ToString()
         {
-            return "Single Command state on: " + IsCommandStateOn() + ", " + base.ToString();
+            return IsCommandStateOn().ToString();
         }
     }
 }

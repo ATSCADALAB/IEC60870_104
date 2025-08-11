@@ -22,12 +22,6 @@ namespace IEC60870Driver
             set => ParseDeviceID(value);
         }
 
-        public string Description
-        {
-            get => txtDescription.Text.Trim();
-            set => txtDescription.Text = value;
-        }
-
         public bool IsValid { get; private set; }
 
         #endregion
@@ -132,23 +126,14 @@ namespace IEC60870Driver
 
                 if (IsValid)
                 {
-                    Description = $"IEC60870-5-104 Device:\n" +
-                                 $"• IP: {txtIpAddress.Text}:{nudPort.Value}\n" +
-                                 $"• Common Address: {nudCommonAddress.Value}\n" +
-                                 $"• Originator Address: {nudOriginatorAddress.Value}\n" +
-                                 $"• COT Length: {GetSelectedValue(cbxCotFieldLength)} bytes\n" +
-                                 $"• CA Length: {GetSelectedValue(cbxCaFieldLength)} bytes\n" +
-                                 $"• IOA Length: {GetSelectedValue(cbxIoaFieldLength)} bytes\n" +
-                                 $"• Max IOA Range: 1 - {GetMaxIOARange()}";
                 }
                 else
                 {
-                    Description = "Please fill in all required fields correctly.";
+                    
                 }
             }
             catch (Exception ex)
             {
-                Description = $"Validation error: {ex.Message}";
                 IsValid = false;
                 btnOk.Enabled = false;
             }
@@ -181,23 +166,94 @@ namespace IEC60870Driver
         {
             try
             {
-                var parts = new[]
+                // Tạo DeviceSettings object với tất cả thông tin
+                var settings = new DeviceSettings
                 {
-                    txtIpAddress.Text.Trim(),
-                    nudPort.Value.ToString(),
-                    nudCommonAddress.Value.ToString(),
-                    nudOriginatorAddress.Value.ToString(),
-                    GetSelectedValue(cbxCotFieldLength).ToString(),
-                    GetSelectedValue(cbxCaFieldLength).ToString(),
-                    GetSelectedValue(cbxIoaFieldLength).ToString()
+                    IpAddress = txtIpAddress.Text.Trim(),
+                    Port = (int)nudPort.Value,
+                    CommonAddress = (int)nudCommonAddress.Value,
+                    OriginatorAddress = (int)nudOriginatorAddress.Value,
+                    CotFieldLength = GetSelectedValue(cbxCotFieldLength),
+                    CommonAddressFieldLength = GetSelectedValue(cbxCaFieldLength),
+                    IoaFieldLength = GetSelectedValue(cbxIoaFieldLength),
+                    MaxReadTimes = 1,
+                    BlockSettings = "",
+
+                    // THÊM: Timeout values từ UI (nếu có controls)
+                    ConnectionTimeout = GetTimeoutValue("Connection", 10000),
+                    // ReadTimeout hidden in UI and not included in DeviceID anymore
+                    InterrogationTimeout = GetTimeoutValue("Interrogation", 8000),
+                    PingTimeout = GetTimeoutValue("Ping", 3000),
+                    RetryDelay = GetTimeoutValue("RetryDelay", 500),
+
+                    // THÊM: Missing tag settings từ UI (nếu có controls)
+                    SkipMissingTags = GetBooleanValue("SkipMissingTags", true),
+                    MissingTagValue = GetStringValue("MissingTagValue", "BAD"),
+                   
                 };
 
-                return string.Join("|", parts);
+                return settings.GenerateDeviceID();
             }
             catch
             {
                 return string.Empty;
             }
+        }
+
+        // Helper methods để lấy giá trị từ UI controls
+        private int GetTimeoutValue(string controlName, int defaultValue)
+        {
+            try
+            {
+                switch (controlName)
+                {
+                    case "Connection": return (int)nudConnectionTimeout.Value;
+                    case "Interrogation": return 8000; // Default if hidden
+                    case "Ping": return 3000; // Default ping timeout
+                    case "RetryDelay": return 500; // Default retry delay
+                    default: return defaultValue;
+                }
+            }
+            catch
+            {
+                return defaultValue;
+            }
+        }
+
+        private bool GetBooleanValue(string controlName, bool defaultValue)
+        {
+            // Không còn boolean controls nào
+            return defaultValue;
+        }
+
+        private string GetStringValue(string controlName, string defaultValue)
+        {
+            // Không có string controls nào hiện tại
+            return defaultValue;
+        }
+
+        // Helper methods để set giá trị vào UI controls
+        private void SetTimeoutValue(string controlName, int value)
+        {
+            try
+            {
+                switch (controlName)
+                {
+                    case "Connection": nudConnectionTimeout.Value = Math.Max(nudConnectionTimeout.Minimum, Math.Min(nudConnectionTimeout.Maximum, value)); break;
+                    
+                }
+            }
+            catch { }
+        }
+
+        private void SetBooleanValue(string controlName, bool value)
+        {
+            // Không còn boolean controls nào
+        }
+
+        private void SetStringValue(string controlName, string value)
+        {
+            // Không có string controls nào hiện tại
         }
 
         private void ParseDeviceID(string deviceID)
@@ -206,18 +262,25 @@ namespace IEC60870Driver
             {
                 if (string.IsNullOrEmpty(deviceID)) return;
 
-                var parts = deviceID.Split('|');
-                if (parts.Length < 7) return;
+                // Sử dụng DeviceSettings.Initialize để parse
+                var settings = DeviceSettings.Initialize(deviceID);
+                if (settings == null) return;
 
-                txtIpAddress.Text = parts[0];
-                nudPort.Value = int.Parse(parts[1]);
-                nudCommonAddress.Value = int.Parse(parts[2]);
-                nudOriginatorAddress.Value = int.Parse(parts[3]);
+                // Basic settings
+                txtIpAddress.Text = settings.IpAddress;
+                nudPort.Value = settings.Port;
+                nudCommonAddress.Value = settings.CommonAddress;
+                nudOriginatorAddress.Value = settings.OriginatorAddress;
 
                 // Set combobox selections
-                SetComboBoxValue(cbxCotFieldLength, int.Parse(parts[4]));
-                SetComboBoxValue(cbxCaFieldLength, int.Parse(parts[5]));
-                SetComboBoxValue(cbxIoaFieldLength, int.Parse(parts[6]));
+                SetComboBoxValue(cbxCotFieldLength, settings.CotFieldLength);
+                SetComboBoxValue(cbxCaFieldLength, settings.CommonAddressFieldLength);
+                SetComboBoxValue(cbxIoaFieldLength, settings.IoaFieldLength);
+
+                // Set timeout và missing tag values từ settings
+                SetTimeoutValue("Connection", settings.ConnectionTimeout);
+                SetTimeoutValue("Read", settings.ReadTimeout);
+                SetTimeoutValue("MaxRetry", settings.MaxRetryCount);
             }
             catch { }
         }

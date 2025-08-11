@@ -29,14 +29,12 @@ namespace IEC60870ServerWinForm.Forms
             this.lblTypeId = new System.Windows.Forms.Label();
             this.cmbTypeId = new System.Windows.Forms.ComboBox();
             this.lblTagPath = new System.Windows.Forms.Label();
-            this.txtTagPath = new System.Windows.Forms.TextBox();
-            this.btnTestTag = new System.Windows.Forms.Button();
-            this.lblExample = new System.Windows.Forms.Label();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.grpBasicInfo = new System.Windows.Forms.GroupBox();
             this.grpDataMapping = new System.Windows.Forms.GroupBox();
             this.grpTagConfiguration = new System.Windows.Forms.GroupBox();
+            this.txtTagPath = new ATSCADAWebApp.ToolExtensions.TagCollection.SmartTagComboBox();
             this.grpBasicInfo.SuspendLayout();
             this.grpDataMapping.SuspendLayout();
             this.grpTagConfiguration.SuspendLayout();
@@ -47,7 +45,7 @@ namespace IEC60870ServerWinForm.Forms
             this.lblIOA.AutoSize = true;
             this.lblIOA.Location = new System.Drawing.Point(15, 25);
             this.lblIOA.Name = "lblIOA";
-            this.lblIOA.Size = new System.Drawing.Size(140, 13);
+            this.lblIOA.Size = new System.Drawing.Size(137, 13);
             this.lblIOA.TabIndex = 0;
             this.lblIOA.Text = "Information Object Address:";
             // 
@@ -97,7 +95,7 @@ namespace IEC60870ServerWinForm.Forms
             this.lblDataType.AutoSize = true;
             this.lblDataType.Location = new System.Drawing.Point(15, 25);
             this.lblDataType.Name = "lblDataType";
-            this.lblDataType.Size = new System.Drawing.Size(62, 13);
+            this.lblDataType.Size = new System.Drawing.Size(60, 13);
             this.lblDataType.TabIndex = 6;
             this.lblDataType.Text = "Data Type:";
             // 
@@ -105,7 +103,7 @@ namespace IEC60870ServerWinForm.Forms
             // 
             this.cmbDataType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbDataType.FormattingEnabled = true;
-            this.cmbDataType.Location = new System.Drawing.Point(120, 22);
+            this.cmbDataType.Location = new System.Drawing.Point(124, 22);
             this.cmbDataType.Name = "cmbDataType";
             this.cmbDataType.Size = new System.Drawing.Size(120, 21);
             this.cmbDataType.TabIndex = 7;
@@ -115,7 +113,7 @@ namespace IEC60870ServerWinForm.Forms
             this.lblTypeId.AutoSize = true;
             this.lblTypeId.Location = new System.Drawing.Point(15, 52);
             this.lblTypeId.Name = "lblTypeId";
-            this.lblTypeId.Size = new System.Drawing.Size(74, 13);
+            this.lblTypeId.Size = new System.Drawing.Size(84, 13);
             this.lblTypeId.TabIndex = 8;
             this.lblTypeId.Text = "IEC60870 Type:";
             // 
@@ -123,7 +121,7 @@ namespace IEC60870ServerWinForm.Forms
             // 
             this.cmbTypeId.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbTypeId.FormattingEnabled = true;
-            this.cmbTypeId.Location = new System.Drawing.Point(120, 49);
+            this.cmbTypeId.Location = new System.Drawing.Point(124, 49);
             this.cmbTypeId.Name = "cmbTypeId";
             this.cmbTypeId.Size = new System.Drawing.Size(160, 21);
             this.cmbTypeId.TabIndex = 9;
@@ -133,37 +131,9 @@ namespace IEC60870ServerWinForm.Forms
             this.lblTagPath.AutoSize = true;
             this.lblTagPath.Location = new System.Drawing.Point(15, 25);
             this.lblTagPath.Name = "lblTagPath";
-            this.lblTagPath.Size = new System.Drawing.Size(96, 13);
+            this.lblTagPath.Size = new System.Drawing.Size(109, 13);
             this.lblTagPath.TabIndex = 10;
             this.lblTagPath.Text = "Tag Path (Task.Tag):";
-            // 
-            // txtTagPath
-            // 
-            this.txtTagPath.Location = new System.Drawing.Point(120, 22);
-            this.txtTagPath.Name = "txtTagPath";
-            this.txtTagPath.Size = new System.Drawing.Size(180, 20);
-            this.txtTagPath.TabIndex = 11;
-            this.txtTagPath.Text = "";
-            // 
-            // btnTestTag
-            // 
-            this.btnTestTag.Location = new System.Drawing.Point(306, 20);
-            this.btnTestTag.Name = "btnTestTag";
-            this.btnTestTag.Size = new System.Drawing.Size(60, 23);
-            this.btnTestTag.TabIndex = 12;
-            this.btnTestTag.Text = "Test";
-            this.btnTestTag.UseVisualStyleBackColor = true;
-            this.btnTestTag.Click += new System.EventHandler(this.btnTestTag_Click);
-            // 
-            // lblExample
-            // 
-            this.lblExample.AutoSize = true;
-            this.lblExample.ForeColor = System.Drawing.Color.Gray;
-            this.lblExample.Location = new System.Drawing.Point(117, 48);
-            this.lblExample.Name = "lblExample";
-            this.lblExample.Size = new System.Drawing.Size(200, 13);
-            this.lblExample.TabIndex = 13;
-            this.lblExample.Text = "Example: PLC1.Motor1_Status";
             // 
             // btnOK
             // 
@@ -215,16 +185,23 @@ namespace IEC60870ServerWinForm.Forms
             // 
             // grpTagConfiguration
             // 
-            this.grpTagConfiguration.Controls.Add(this.lblTagPath);
             this.grpTagConfiguration.Controls.Add(this.txtTagPath);
-            this.grpTagConfiguration.Controls.Add(this.btnTestTag);
-            this.grpTagConfiguration.Controls.Add(this.lblExample);
+            this.grpTagConfiguration.Controls.Add(this.lblTagPath);
             this.grpTagConfiguration.Location = new System.Drawing.Point(12, 239);
             this.grpTagConfiguration.Name = "grpTagConfiguration";
             this.grpTagConfiguration.Size = new System.Drawing.Size(374, 75);
             this.grpTagConfiguration.TabIndex = 18;
             this.grpTagConfiguration.TabStop = false;
             this.grpTagConfiguration.Text = "SCADA Tag Configuration";
+            // 
+            // txtTagPath
+            // 
+            this.txtTagPath.InRuntime = false;
+            this.txtTagPath.Location = new System.Drawing.Point(124, 22);
+            this.txtTagPath.Name = "txtTagPath";
+            this.txtTagPath.Size = new System.Drawing.Size(240, 21);
+            this.txtTagPath.TabIndex = 19;
+            this.txtTagPath.TagName = "";
             // 
             // DataPointForm
             // 
@@ -268,13 +245,11 @@ namespace IEC60870ServerWinForm.Forms
         private System.Windows.Forms.Label lblTypeId;
         private System.Windows.Forms.ComboBox cmbTypeId;
         private System.Windows.Forms.Label lblTagPath;
-        private System.Windows.Forms.TextBox txtTagPath;
-        private System.Windows.Forms.Button btnTestTag;
-        private System.Windows.Forms.Label lblExample;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.GroupBox grpBasicInfo;
         private System.Windows.Forms.GroupBox grpDataMapping;
         private System.Windows.Forms.GroupBox grpTagConfiguration;
+        private ATSCADAWebApp.ToolExtensions.TagCollection.SmartTagComboBox txtTagPath;
     }
 }

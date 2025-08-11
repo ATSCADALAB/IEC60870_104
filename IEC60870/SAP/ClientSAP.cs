@@ -44,7 +44,7 @@ namespace IEC60870.SAP
         }
 
         public void Connect()
-        {            
+        {
             try
             {
                 var remoteEp = new IPEndPoint(_host, _port);
@@ -56,14 +56,27 @@ namespace IEC60870.SAP
                     NewASdu = NewASdu,
                     ConnectionClosed = ConnectionClosed
                 };
-                
+
                 _connection.StartDataTransfer();
             }
             catch (Exception e)
             {
                 throw new IOException(e.Message);
-            }            
-        }      
+            }
+        }
+
+        public void Disconnect()
+        {
+            try
+            {
+                _connection?.Close();
+            }
+            catch { }
+            finally
+            {
+                _connection = null;
+            }
+        }
 
         public void SendASdu(ASdu asdu)
         {

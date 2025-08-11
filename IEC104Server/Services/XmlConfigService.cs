@@ -45,17 +45,8 @@ namespace IEC104Server.Services
                         new XAttribute("Enabled", true)
                     );
 
-                    // Add optional attributes if available
-                    if (!string.IsNullOrEmpty(dataPoint.Value))
-                    {
-                        tagElement.Add(new XAttribute("LastValue", dataPoint.Value));
-                    }
-
-                    if (dataPoint.LastUpdated != DateTime.MinValue)
-                    {
-                        tagElement.Add(new XAttribute("LastUpdated", dataPoint.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss")));
-                    }
-
+                    // Do not persist runtime values (LastValue/LastUpdated)
+                    // Only persist structural/config attributes
                     tagsElement.Add(tagElement);
                 }
 
@@ -133,17 +124,13 @@ namespace IEC104Server.Services
 
                     // Optional attributes
                     dataPoint.Description = GetStringAttribute(tagElement, "Description");
-                    dataPoint.Value = GetStringAttribute(tagElement, "LastValue");
 
-                    // Parse LastUpdated
-                    var lastUpdatedStr = GetStringAttribute(tagElement, "LastUpdated");
-                    if (DateTime.TryParse(lastUpdatedStr, out var lastUpdated))
-                    {
-                        dataPoint.LastUpdated = lastUpdated;
-                    }
+                    // Do not import LastValue/LastUpdated from file; initialize defaults
+                    dataPoint.Value = "0"; // default 0 for bad/unknown state
+                    dataPoint.LastUpdated = DateTime.MinValue;
 
-                    // Initialize other properties
-                    dataPoint.IsValid = !string.IsNullOrEmpty(dataPoint.Value);
+                    // Set IsValid based on DataTagName presence only
+                    dataPoint.IsValid = !string.IsNullOrEmpty(dataPoint.DataTagName);
 
                     dataPoints.Add(dataPoint);
                 }

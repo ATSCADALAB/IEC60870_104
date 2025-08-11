@@ -52,11 +52,27 @@ namespace IEC60870Driver
         {
             try
             {
+                Console.WriteLine($"[INFO] Reading block {TypeId}: {From}-{To}");
+
                 // Send general interrogation for this type range
                 clientAdapter.Client.SendInterrogation(commonAddress);
 
-                // Wait a bit for response
-                Thread.Sleep(1000);
+                // Wait for response - sử dụng InterrogationTimeout nếu có
+                // Lấy timeout từ clientAdapter (nếu có DeviceSettings)
+                int waitTime = 1000; // default
+                try
+                {
+                    // Thử lấy timeout từ clientAdapter thông qua reflection hoặc public property
+                    // Tạm thời dùng default, có thể cải thiện sau
+                    Thread.Sleep(waitTime);
+                }
+                catch
+                {
+                    Thread.Sleep(waitTime);
+                }
+
+                int successCount = 0;
+                int totalCount = To - From + 1;
 
                 // Get values from client buffer
                 for (int ioa = From; ioa <= To; ioa++)
@@ -64,10 +80,16 @@ namespace IEC60870Driver
                     if (clientAdapter.Client.GetValue(ioa, out object value))
                     {
                         Buffer[ioa] = value;
+                        successCount++;
                     }
                 }
+
+                Console.WriteLine($"[SUCCESS] Block {TypeId}: {successCount}/{totalCount} values read");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] ReadBlock {TypeId}: {ex.Message}");
+            }
         }
 
         public string GetValue(int ioa)

@@ -126,9 +126,6 @@ namespace IEC60870ServerWinForm.Forms
                     example = "Examples: any text value";
                     break;
             }
-
-            if (lblExample != null)
-                lblExample.Text = example;
         }
 
         private void LoadDataPoint()
@@ -136,7 +133,7 @@ namespace IEC60870ServerWinForm.Forms
             txtIOA.Text = DataPoint.IOA.ToString();
             txtName.Text = DataPoint.Name;
             txtDescription.Text = DataPoint.Description;
-            txtTagPath.Text = DataPoint.DataTagName;
+            txtTagPath.TagName = DataPoint.DataTagName;
 
             //  Load DataType và TypeId
             cmbDataType.SelectedItem = DataPoint.DataType;
@@ -180,9 +177,9 @@ namespace IEC60870ServerWinForm.Forms
             }
 
             // Validate Tag Path
-            if (string.IsNullOrWhiteSpace(txtTagPath.Text))
+            if (string.IsNullOrWhiteSpace(txtTagPath.TagName))
             {
-                MessageBox.Show("Tag Path is required.", "Validation Error",
+                MessageBox.Show("Tag is required.", "Validation Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 txtTagPath.Focus();
                 return false;
@@ -205,7 +202,7 @@ namespace IEC60870ServerWinForm.Forms
             DataPoint.IOA = int.Parse(txtIOA.Text);
             DataPoint.Name = txtName.Text.Trim();
             DataPoint.Description = txtDescription.Text.Trim();
-            DataPoint.DataTagName = txtTagPath.Text.Trim();
+            DataPoint.DataTagName = txtTagPath.TagName.Trim();
 
             //  QUAN TRỌNG: Sử dụng SetDataType thay vì gán trực tiếp
             if (cmbDataType.SelectedItem is DataType selectedDataType)

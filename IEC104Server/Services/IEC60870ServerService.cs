@@ -14,6 +14,8 @@ namespace IEC60870ServerWinForm.Services
         private readonly object _serverLock = new object();
 
         public bool IsRunning { get; private set; }
+        public event Action OnClientReady;
+
 
         public event Action<string> OnLogMessage;
         public event Action<ASdu> OnAsduReceived;
@@ -34,9 +36,10 @@ namespace IEC60870ServerWinForm.Services
                 }
 
                 try
+
                 {
                     _server = new ServerSAP(config.IPAddress, config.Port);
-
+                    _server.ClientReady += () => { try { OnClientReady?.Invoke(); } catch { } };
                     // Cấu hình các tham số server
                     _server.SetCotFieldLength((byte)config.CotFieldLength);
                     _server.SetCommonAddressFieldLength((byte)config.CaFieldLength);
@@ -99,6 +102,9 @@ namespace IEC60870ServerWinForm.Services
             {
                 if (!IsRunning)
                 {
+                        try { _dataSendTimer?.Stop(); } catch { }
+                        try { _tagScanTimer?.Stop(); } catch { }
+
                     Log("Stop command ignored: Server is not running.");
                     return;
                 }
@@ -109,9 +115,12 @@ namespace IEC60870ServerWinForm.Services
                     if (_server != null)
                     {
                         _server.NewASdu -= OnNewAsduReceivedHandler;
+                        // Stop listening socket to free the port
+                        _server.Stop();
+
                         if (_server is IDisposable disposable)
                         {
-                            disposable.Dispose(); // Gây ra exception trong luồng server để nó thoát ra
+                            disposable.Dispose(); // Ensure resources are released
                         }
                     }
 
